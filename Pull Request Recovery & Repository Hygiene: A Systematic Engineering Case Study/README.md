@@ -1,4 +1,4 @@
-# ⚙️ Pull Request Recovery & Repository Hygiene: A Systematic Engineering Case Study
+# 📄 Pull Request Recovery & Repository Hygiene: A Systematic Engineering Case Study
 
 # Phase 1 — Problem Context
 
