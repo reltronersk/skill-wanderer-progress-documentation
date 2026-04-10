@@ -1,6 +1,6 @@
 # 📘 MASTER ENGINEERING DOCUMENTATION
 
-## Lyra + Course System (Phase 0 → Phase 11)
+## LMS-FE + Course System (Phase 0 → Phase 11)
 
 ---
 
