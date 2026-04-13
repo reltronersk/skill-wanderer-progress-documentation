@@ -400,17 +400,6 @@ Deterministic behavior ✔
 
 ---
 
-# 🚀 Next Phase (Optional)
-
-## Phase 8 — Production Hardening
-
-* Schema validation (Zod)
-* Runtime guards
-* Content validation pipeline
-* CMS-ready architecture
-
----
-
 # 🏆 Conclusion
 
 Phase 7 represents a critical transition:
