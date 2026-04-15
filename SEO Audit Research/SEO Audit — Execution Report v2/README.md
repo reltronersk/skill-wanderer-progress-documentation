@@ -17,7 +17,7 @@
 | Gate 1 | ✅ PASS | All code validations passed — ready to merge |
 | Execution | ✅ Completed | All in-scope engineering gaps resolved |
 | Regression Risk | 🟢 LOW | No regression detected across 6 tested scenarios |
-| Blockers | ⚠️ YES | 2 design assets pending — do not block merge |
+| Blockers | ⚠️ YES | 2 design assets pending — do not block merge (public/og-image.png, public/logo.png) |
 | Next Step | 🚀 Deploy | Merge PR #81 → `dev` → Cloudflare Pages |
 
 ---
