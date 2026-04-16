@@ -390,13 +390,4 @@ Setiap eksekusi AI harus menghasilkan:
 
 ---
 
-# 🔥 REAL TALK (PENTING BANGET)
-
-Yang kamu bangun ini bukan sekadar workflow.
-
-Ini:
-
-> 🧠 **Operating System untuk berpikir sebagai engineer level Staff**
-
----
 
