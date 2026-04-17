@@ -506,3 +506,104 @@ Create `server/api/contact.post.ts` and `server/api/guild-application.post.ts`. 
 ---
 
 *This document is for engineering investigation purposes only. No production code was modified. Do not include in PR.*
+
+---
+
+---
+
+## Business Impact Summary
+
+- **Every lead submitted through the contact form may be lost.** There is no alert, email, or notification sent to the business owner when someone fills out the "Hire the Guild" or "Join the Guild" form. A prospective client can submit a project inquiry and receive no response — not because it was ignored, but because no one knew it arrived.
+- **The business has no visibility into whether the contact form is working.** If the system breaks — due to a network issue, Firebase outage, or configuration error — it fails silently. There is no alarm, no log, no alert. The failure could persist for days or weeks with revenue implications.
+- **The website's project credential keys have been committed to version control.** Anyone with access to the repository can see the Firebase project ID and API key. This exposes the database to potential unauthorized access and abuse.
+- **A single automated bot can make the system unusable for real leads.** There is no spam protection. A bot flooding the form could exhaust the free-tier write quota in under 30 minutes, causing all legitimate submissions — from real clients — to fail with the same generic error message.
+- **The system creates a false sense of reliability.** Users who submit the form see a success message and believe their message was received. In reality, there is no confirmation email, no follow-up mechanism, and no guarantee the submission was ever reviewed.
+
+---
+
+## Execution Priority
+
+### P0 — Immediate (Today)
+
+These are active risks that should be resolved before the next business day.
+
+- **Rotate the exposed Firebase API key.** The current key is committed to source control and visible to anyone with repository access. Log into the Firebase console, generate a new API key, restrict it to the production domain (`skill-wanderer.com`), and update the environment variables in Cloudflare Pages.
+- **Remove hardcoded Firebase fallback credentials from `nuxt.config.ts`.** Replace all `|| 'hardcoded-value'` fallbacks with empty strings. This prevents the production Firebase project from being used in uncontrolled environments.
+- **Verify Firestore security rules.** Confirm that the `contact-messages` and `guild-applications` collections have rules that restrict writes to authenticated or server-only access. If rules are open (`allow write: if true`), lock them down immediately.
+
+### P1 — This Week
+
+These are high-severity gaps with direct revenue impact.
+
+- **Implement email notifications for new form submissions.** Every submission to `contact-messages` and `guild-applications` must trigger an alert to `quan.nguyen@skill-wanderer.com`. Use Solution 1 (Formspree) for the fastest path or Solution 4 (Nuxt server route + Resend) for the production-grade path.
+- **Add basic spam protection.** At minimum, implement a honeypot hidden field. Any submission that fills the honeypot field is a bot and should be rejected silently.
+- **Test the forms end-to-end in production.** Submit a real test entry for both "Hire the Guild" and "Join the Guild" and verify the document appears in Firestore and the business owner receives a notification.
+
+### P2 — Next Phase
+
+These are important improvements that reduce long-term risk and operational cost.
+
+- **Migrate to a server-side API route** (`server/api/contact.post.ts`) to move Firebase credentials fully off the client, add rate limiting, server-side validation, and input sanitization.
+- **Add per-IP rate limiting** to protect against high-volume abuse.
+- **Implement a confirmation email to the submitter** so they know their message was received and when to expect a response.
+- **Add error observability** (e.g., Cloudflare Workers log alerts or Sentry integration) so production failures are visible to the developer.
+
+---
+
+## Cost & Effort Estimation
+
+| Solution | Effort | Time | Cost | Complexity |
+|---|---|---|---|---|
+| **Current (do nothing)** | None | 0 days | Free (until abused) | None — but active risk |
+| **Solution 1 — Formspree** | Low | 1–2 days | Free (≤50 submissions/mo) / $10/mo beyond | Simple |
+| **Solution 2 — Nuxt Server API + Resend** | Medium | 3–5 days | Free (Resend: 3K emails/mo free) | Moderate |
+| **Solution 3 — Firebase Cloud Functions** | Medium | 3–5 days | $ (Blaze plan required ~$5–20/mo) | Moderate |
+| **Solution 4 — Hybrid Server Route + Firestore + Resend** | High | 5–8 days | Free (Resend free tier) | Complex |
+| **P0 Credential Rotation (standalone)** | Low | 1–2 hours | Free | Simple |
+
+> All time estimates assume one developer working full-time. Resend free tier: 3,000 emails/month. Firebase Blaze pricing is usage-based and starts near zero for low volume but has no free Cloud Functions tier.
+
+---
+
+## Recommended Decision (Forced Choice)
+
+### Option A — Quick Fix (Immediate)
+
+**Solution 1: Formspree**
+
+Replace the Firebase write in `handleSubmit()` and `handleGuildSubmit()` with a POST to a Formspree endpoint. Takes 1–2 days. Immediately delivers email notifications, basic spam filtering, and a submission dashboard. No server code required.
+
+### Option B — Long-Term Solution
+
+**Solution 4: Nuxt Server Route + Firestore REST API + Resend**
+
+Build `server/api/contact.post.ts` and `server/api/guild-application.post.ts` as the single entry point for all form submissions. Server handles validation, rate limiting, honeypot checks, Firestore writes (via service account), and Resend email delivery. Firebase credentials never leave the server.
+
+### Decision:
+
+We will:
+
+1. **Today:** Rotate the exposed Firebase credentials and remove all hardcoded fallback values from source control.
+2. **This week:** Deploy Solution 1 (Formspree) to immediately restore lead notification capability with zero engineering risk.
+3. **Next phase:** Migrate to Solution 4 (Nuxt server route) to own the data, eliminate third-party dependency, and harden the system for production scale.
+
+---
+
+## Final Decision (Recommended)
+
+We will:
+
+1. **Immediately implement Solution 1 (Formspree) within 2 business days** as an operational fix to ensure no further leads are lost silently and the business owner is notified of every inquiry.
+2. **Plan migration to Solution 4 (Nuxt Server Route + Resend) in the next development phase** as the permanent, production-grade replacement that keeps all data in Skill-Wanderer's infrastructure with full security and observability.
+
+**Reason:**
+
+- **Business reason:** Every day without email notification is a day where a prospective client or guild applicant may receive no response. At current traffic levels, even a single missed enterprise inquiry represents a disproportionate revenue loss for a services business.
+- **Engineering reason:** Solution 4 aligns with the existing stack (Nuxt 3 + Cloudflare Pages), requires no new infrastructure, eliminates all client-side credential exposure, and provides a foundation for future CRM integration, lead scoring, and webhook delivery.
+- **Risk mitigation reason:** The credential exposure (P0) must be addressed independently and immediately regardless of which form solution is chosen. It is a precondition, not a step that can be bundled into a longer migration.
+
+---
+
+> **Document status:** Decision-ready. This report is intended for owner review and sign-off.  
+> **Next action:** Owner confirms Option A (Formspree) as the immediate fix and approves Option B (Solution 4) for the next sprint.  
+> **No production code was modified during this investigation. Do not include in PR.**
