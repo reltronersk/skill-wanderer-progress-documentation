@@ -607,3 +607,200 @@ We will:
 > **Document status:** Decision-ready. This report is intended for owner review and sign-off.  
 > **Next action:** Owner confirms Option A (Formspree) as the immediate fix and approves Option B (Solution 4) for the next sprint.  
 > **No production code was modified during this investigation. Do not include in PR.**
+
+---
+
+## Strategic Solution Analysis (Operational Focus Only)
+
+This section evaluates solution approaches purely from an **operational, scalability, and business workflow perspective**, excluding security and validation concerns.
+
+---
+
+### 1. Third-Party Managed Solution
+
+**Examples:** Formspree, Web3Forms
+
+### Workflow
+
+```txt
+User → Form → Third-party service → Email + Dashboard
+```
+
+### Operational Characteristics
+
+* Submission handling fully externalized
+* Built-in delivery (email + dashboard)
+* No infrastructure dependency on internal system
+
+### Strengths
+
+* **Fastest time-to-value** — can be deployed in hours
+* **Zero operational overhead** — no backend to maintain
+* **Reliable notification delivery** — handled by provider SLA
+* **Simple mental model** — minimal system complexity
+
+### Limitations
+
+* **Limited customization** — workflow tied to provider capability
+* **Vendor dependency** — operational continuity depends on third-party
+* **Data fragmentation** — data stored outside primary system
+* **Scaling tied to pricing tiers**
+
+---
+
+### 2. Independent Engineering (In-House System)
+
+**Examples:** Nuxt Server API + Firestore + Email service
+
+### Workflow
+
+```txt
+User → Internal API → Storage + Email system
+```
+
+### Operational Characteristics
+
+* Full control over submission lifecycle
+* Internal ownership of data and workflow
+* Customizable pipeline
+
+### Strengths
+
+* **Full workflow control** — can adapt to any business need
+* **Unified data system** — integrates with internal database
+* **Extensible** — CRM, analytics, automation ready
+* **No vendor dependency**
+
+### Limitations
+
+* **Higher initial engineering cost**
+* **Requires ongoing maintenance**
+* **Longer time-to-deploy**
+* **Operational responsibility shifts to team**
+
+---
+
+### 3. Hybrid Strategy (Phased System)
+
+**Approach:**
+Use third-party for immediate operation, then migrate to internal system.
+
+### Workflow
+
+```txt
+Phase 1:
+User → Third-party → Email
+
+Phase 2:
+User → Internal API → Storage + Email
+```
+
+### Operational Characteristics
+
+* Combines speed and control
+* Enables staged system evolution
+
+### Strengths
+
+* **Immediate operational recovery**
+* **Reduced time pressure on engineering**
+* **Allows iterative system design**
+* **Minimizes business downtime risk**
+
+### Limitations
+
+* **Temporary dual-system complexity**
+* **Migration overhead**
+* **Data continuity considerations**
+
+---
+
+# 🧠 COMPARATIVE ANALYSIS
+
+## Operational Decision Matrix
+
+| Dimension             | Third-Party         | Independent   | Hybrid             |
+| --------------------- | ------------------- | ------------- | ------------------ |
+| Time to Deploy        | 🔥 Immediate        | ❌ Slow        | ✅ Fast → Gradual   |
+| Operational Ownership | ❌ External          | 🔥 Full       | ⚠️ Transition      |
+| Flexibility           | ⚠️ Limited          | 🔥 High       | 🔥 High (eventual) |
+| Complexity            | ✅ Low               | ⚠️ Medium     | ⚠️ Medium          |
+| Scalability Control   | ❌ Vendor-based      | 🔥 Internal   | 🔥 Internal        |
+| Maintenance Effort    | ✅ Minimal           | ❌ Required    | ⚠️ Gradual         |
+| Business Continuity   | ⚠️ Vendor-dependent | 🔥 Controlled | 🔥 Controlled      |
+
+---
+
+# 🧠 STRATEGIC INTERPRETATION
+
+## Core Insight
+
+This is not a technical choice — it is an **operational strategy decision**:
+
+> **Speed vs Control vs Transition**
+
+---
+
+## When to Choose Each
+
+### Choose Third-Party if:
+
+* Immediate deployment is critical
+* Engineering bandwidth is limited
+* Custom workflow is not required
+
+---
+
+### Choose Independent if:
+
+* System is part of core business pipeline
+* Long-term scalability is required
+* Integration with internal systems is needed
+
+---
+
+### Choose Hybrid if:
+
+* Immediate fix is required **AND**
+* Long-term system ownership is planned
+
+---
+
+# 🧠 RECOMMENDED STRATEGY (OPERATIONAL)
+
+Based on current system condition:
+
+```txt
+Phase 1 → Stabilize operations (Third-party)
+Phase 2 → Reclaim system ownership (Independent)
+```
+
+---
+
+## Why Hybrid Wins
+
+* Eliminates immediate operational risk (lost leads)
+* Avoids rushed engineering decisions
+* Provides time to design correct long-term system
+* Maintains business continuity during transition
+
+---
+
+# 🏁 STRATEGIC CONCLUSION
+
+```md
+This decision is not about choosing a tool.
+
+It is about choosing a system evolution strategy:
+
+1. Restore operational reliability immediately
+2. Gradually transition to a controlled internal system
+
+The hybrid approach ensures that:
+- Business operations are not blocked
+- Engineering quality is not compromised
+- System ownership is achieved over time
+```
+
+---
+
