@@ -18,24 +18,46 @@ This approach is particularly relevant when current submission volume is moderat
 
 ## 5W1H Breakdown
 
-- What: A managed form-processing platform receives submissions directly from the Nuxt.js frontend, stores them in its own dashboard, filters low-quality traffic, and notifies the business through email or configured integrations.
-- Why: It provides the fastest path to an operationally usable system with minimal custom engineering, minimal support burden, and immediate visibility into inbound leads.
-- Who: The frontend team integrates the form endpoint, the business owner or operations lead monitors the vendor dashboard and notifications, and the vendor operates the submission infrastructure, availability, and core workflow tooling.
-- When: Best used when the immediate need is rapid stabilization, when lead volume is still relatively low to moderate, or when the organization is not yet ready to absorb backend ownership and operational maintenance.
-- Where: Submission handling occurs in the vendor platform, while the public-facing form remains on the Nuxt.js site. Day-to-day review happens in the vendor dashboard, email inboxes, and any connected downstream tools such as Slack, CRM, or helpdesk systems.
-- How: The frontend posts form data to a vendor-provided HTTPS endpoint, the vendor processes and stores the submission, applies built-in anti-spam and formatting rules, triggers notifications or automations, and returns a success or failure response that the UI uses to render user feedback.
+| Category | Detail |
+|----------|--------|
+| What | A managed form-processing platform receives submissions directly from the Nuxt.js frontend and externalizes intake operations to a vendor-operated service.<br><br>- The website remains responsible for capture, user messaging, and light integration logic.<br>- The vendor owns hosted intake, hosted submission storage, dashboard review primitives, and basic automation surfaces.<br>- In practice, this turns the contact form from a custom-built intake flow into a configurable software service with predefined operating patterns. |
+| Why | It provides the fastest path to a usable and observable operating model without forcing the organization to build and run a backend submission platform immediately.<br><br>- It reduces coordination cost across engineering, operations, and ownership roles.<br>- It gives the business immediate visibility into inbound leads through a managed dashboard and notification stack.<br>- It is most valuable when the business problem is continuity and responsiveness, not bespoke workflow design. |
+| Who | The frontend team or a single implementation engineer handles endpoint integration, business owners or operations coordinators monitor the vendor dashboard and alert channels, and the vendor operates the submission infrastructure and workflow tooling.<br><br>- Ownership of intake reliability shifts outward to the vendor.<br>- Ownership of response discipline remains internal, especially around queue review, triage, and follow-up timing.<br>- This model often works well for lean teams where one person spans site maintenance and operational oversight. |
+| When | Best used when the immediate need is rapid stabilization, when lead volume is still low to moderate, or when the organization is not ready to absorb backend maintenance and service ownership.<br><br>- It fits early-stage or transition-stage operations.<br>- It is also effective during launch windows, campaigns, or periods where the team needs fast deployment more than architectural control.<br>- It becomes less optimal once workflow specialization outpaces vendor configuration options. |
+| Where | Submission handling occurs in the vendor platform, while the public-facing form remains on the Nuxt.js site.<br><br>- Operational review usually happens in the vendor dashboard, email inboxes, and optionally connected tools such as Slack, Zapier, CRM systems, or helpdesk queues.<br>- Business process state often becomes split between the vendor dashboard and whatever internal tracking system the team already uses for follow-up. |
+| How | The frontend posts form data to a vendor-provided HTTPS endpoint, the vendor processes and stores the submission, applies its filtering and routing rules, triggers notifications or downstream automations, and returns a status response that the UI uses to render success or retry feedback.<br><br>- Low-friction deployment usually means configuration rather than software design.<br>- Real-world usage often expands from email alerts to lightweight routing, tagging, and webhook forwarding as the business matures. |
+| Operational Characteristics | Lifecycle: A user submits through the Nuxt.js form, the vendor accepts and normalizes the payload, the submission lands in a hosted dashboard or queue, notifications are dispatched, and an internal operator reviews and advances the inquiry into follow-up work.<br><br>Scaling behavior: At low traffic, the model is highly efficient because it removes nearly all operational overhead; at higher traffic, throughput usually scales through vendor capacity and plan upgrades, but process sophistication often hits limits before raw traffic does.<br><br>Failure handling behavior: If the vendor endpoint or notification pipeline degrades, the practical fallback is manual dashboard review, vendor-managed retry behavior, and support escalation; operational recovery depends more on vendor transparency and the team's review discipline than on internal engineering intervention.<br><br>System ownership implications: Infrastructure, uptime, dashboard behavior, and standard workflow primitives are vendor-owned; the internal team owns integration configuration, business response rules, and reconciliation across downstream systems.<br><br>Evolution capability: The model evolves well for standardized workflows, light automation, and simple multi-channel routing, but future growth eventually pushes against vendor-defined abstractions for reporting, routing, and domain-specific process control. |
+| Strengths | - Fastest deployment path because most of the operating system already exists and only needs integration and configuration.<br>- Minimal internal operational burden because there is no custom backend, queue service, or workflow runtime to maintain.<br>- Built-in workflow primitives such as dashboards, notifications, and submission history create immediate intake visibility instead of leaving the business with raw data only.<br>- Predictable early-stage support model because troubleshooting usually stays within endpoint configuration, vendor settings, and operator review behavior rather than multi-service debugging.<br>- Strong fit for lean teams because a single engineer can often deliver the integration without creating a long-term platform maintenance commitment.<br>- Faster business continuity improvement because the business can begin receiving and processing inquiries consistently with very little lead time. |
+| Limitations | - Vendor-defined workflow ceiling means routing, enrichment, lifecycle state management, and reporting can only become as sophisticated as the platform allows.<br>- Pricing scales with growth, which means operational simplicity is purchased commercially rather than engineered internally.<br>- Limited control over retry semantics, retention behavior, dashboard structure, and export ergonomics can create friction once operations become more specialized.<br>- Business process state can become externalized into the vendor dashboard rather than remaining in systems the team considers canonical.<br>- Migration effort accumulates because historical submissions, routing rules, tags, and operator habits become embedded in the platform over time.<br>- Observability is convenient but usually shallow, which is acceptable early but restrictive once the team needs domain-specific metrics or workflow analytics. |
+| Operational Risks (Non-Security) | - Vendor downtime can pause or degrade intake, leaving the business dependent on external incident timelines and support responsiveness.<br>- Pricing changes can alter cost structure materially as traffic, routing rules, or team usage grow.<br>- Platform limits can become binding during campaigns, launches, or seasonal spikes if plan thresholds are undersized.<br>- Vendor lock-in can make later migration operationally expensive because both data and working habits accumulate in the platform.<br>- Notification delivery drift can create blind spots if the team depends on alerts but does not also review the dashboard or queue regularly.<br>- Integration drift can appear when downstream tools change schemas or workflows and the vendor configuration is not actively maintained.<br>- Reporting fragmentation can emerge if intake lives in the vendor system while follow-up state lives elsewhere. |
+| Best-Fit Scenarios | - The business needs to stabilize contact intake quickly and cannot justify immediate backend ownership.<br>- Engineering bandwidth is limited and the operational priority is reliable intake plus prompt notification, not deep customization.<br>- Form volume is still modest and routing logic remains mostly linear and easy to configure.<br>- Leadership wants a ready-made operating console for review, tagging, and basic routing rather than a custom service layer.<br>- The organization is in a short-term stabilization phase where learning how inquiries are handled is more important than designing a permanent internal platform immediately.<br>- Real-world usage patterns are still forming, making a managed service a practical way to gather operational evidence without overbuilding. |
 
 ## Workflow
 
 ```text
-User fills form in Nuxt.js frontend
-	-> Frontend POSTs submission to vendor endpoint
-	-> Vendor validates request shape for platform compatibility
-	-> Vendor applies spam filtering and submission rules
-	-> Vendor stores submission in hosted dashboard
-	-> Vendor sends notification to business owner or team inbox
-	-> Vendor optionally forwards submission to Slack, Zapier, CRM, or webhook target
-	-> Frontend receives response and shows success or retry message
+User
+	|
+	v
+Nuxt.js Frontend
+	|
+	v
+Vendor Intake Endpoint
+	|
+	v
+Vendor Processing Layer
+	|
+	+--> Filtering / routing / notification rules
+	|
+	v
+Hosted Submission Store / Dashboard
+	|
+	+--> Email / Slack / CRM notifications
+	|
+	v
+Business Review Queue
+	|
+	v
+Follow-Up Workflow and Owner Response
 ```
 
 In a refined operating model, the workflow does not stop at notification. The business owner or coordinator receives the alert, reviews the submission in the vendor dashboard, tags or categorizes the lead, and moves it into the next business process such as discovery scheduling, applicant review, or CRM entry. This is important because the main operational advantage of a third-party tool is not simply message delivery; it is the introduction of a manageable review queue with lightweight process support.
@@ -44,51 +66,23 @@ For team-scale operations, this workflow can be extended with rule-based routing
 
 ## Operational Characteristics
 
-The defining characteristic of this option is outsourced operational ownership. Infrastructure uptime, submission storage, dashboard availability, notification dispatch, and much of the workflow tooling are handled by the vendor. This sharply reduces the internal requirement for backend monitoring, deployment coordination, and incident response.
-
-From a scalability perspective, this model scales well for low-to-mid complexity operations. If submission volume increases gradually, most managed form platforms can absorb the traffic without requiring architectural changes by the internal team. Operational scaling is largely commercial rather than engineering-based: the business upgrades plans, expands limits, or enables more advanced workflow features.
-
-The platform also centralizes observability at the workflow layer. Instead of assembling logs, mail queues, and persistence dashboards across multiple services, the team gets a single operational surface for reviewing submissions, failure states, retry status, and often basic analytics. This is especially valuable for a small organization that needs operational clarity more than platform depth.
-
-However, the operational model is constrained by vendor-defined abstractions. Routing rules, retention behavior, export formats, dashboard semantics, and rate policies are all shaped by the vendor product. That means the solution scales in throughput more easily than it scales in process sophistication. Once the business wants custom lead scoring, specialized queues, or deep internal workflows, the vendor operating model may begin to feel too rigid.
+The lifecycle, scaling behavior, degraded-mode handling, ownership boundaries, and evolution profile for this solution are consolidated in the decision table above. The core operating trade-off is outsourced intake management in exchange for lower internal maintenance effort.
 
 ## Strengths
 
-- Fastest deployment path. The organization can move from unstable intake handling to a functioning workflow in a very short window because most of the operating system already exists.
-- Minimal internal operational burden. There is little or no backend to run, no custom queue to maintain, and no separate service lifecycle to monitor.
-- Built-in workflow primitives. Dashboards, notifications, submission history, and simple routing are already available, which gives the business an immediate operating console instead of a raw data store.
-- Predictable early-stage support model. Troubleshooting is usually limited to endpoint integration, account configuration, and vendor dashboard checks rather than multi-service debugging.
-- Good fit for lean teams. A single frontend engineer can often integrate the system without creating a cross-functional backend maintenance obligation.
-- Faster business continuity improvement. The business can begin receiving and reviewing inquiries consistently without waiting for a broader internal platform effort.
-
-Each of these strengths matters operationally because they reduce coordination cost. The biggest early-stage failure mode in lead intake systems is not lack of architecture sophistication; it is lack of follow-through, monitoring, and maintained ownership. Managed platforms reduce that risk by packaging the operating model with the form handler itself.
+The detailed strength profile is consolidated in the table above. The central advantage is that operational readiness arrives quickly because the platform, dashboard, and notification model already exist.
 
 ## Limitations
 
-- Vendor-defined workflow ceiling. The business can only shape intake processing as far as the vendor product allows, which can become restrictive once routing, enrichment, or lifecycle rules become more specialized.
-- Pricing scales with growth. Operational simplicity is purchased through recurring cost, and that cost usually increases as submissions, team members, storage, or automation needs increase.
-- Limited control over operational semantics. Retry behavior, dashboard organization, retention tooling, export ergonomics, and integration depth may not align exactly with internal workflows.
-- Externalized business process state. Submission status may live primarily in the vendor dashboard rather than in systems the team already considers canonical.
-- Migration effort accumulates over time. The longer the business depends on vendor-specific dashboards, tags, and routing logic, the more organizational friction exists when moving away later.
-- Observability is convenient but shallow. Vendor dashboards are usually strong for submission tracking but weaker for domain-specific metrics, custom reporting, and organization-specific operational insights.
-
-These limitations are not merely technical trade-offs. They translate into real workflow implications: process definitions may become shaped by the tool rather than the business, cross-system reporting may stay manual longer than desired, and scale may become a purchasing conversation before it becomes a product-design conversation.
+The detailed limitation profile is consolidated in the table above. The practical constraint is not raw intake throughput first; it is the ceiling imposed by vendor-governed workflow semantics and reporting depth.
 
 ## Operational Risks (NON-SECURITY)
 
-- Vendor downtime can pause or degrade submission intake, leaving the internal team dependent on external incident resolution timelines.
-- Pricing changes can materially alter operating cost once traffic or automation usage grows.
-- Platform limits can become binding during campaign spikes, launches, or seasonal bursts if the selected plan is undersized.
-- Vendor lock-in can make later migration operationally expensive because historical submissions, workflow rules, and team habits accumulate in the platform.
-- Notification delivery quality may vary by provider and configuration, which can create operational blind spots if the team relies only on email alerts instead of dashboard checks.
-- Integration drift can appear over time if downstream tools change schemas or webhooks and the vendor configuration is not actively maintained.
-- Reporting fragmentation can emerge if the vendor dashboard becomes one source of truth while the business tracks follow-up status elsewhere.
+The detailed non-security risk profile is consolidated in the table above. The main exposure is dependency on an external operating surface for availability, queue visibility, and future workflow portability.
 
 ## Best-Fit Scenarios
 
-This solution fits best when the business needs to stabilize contact intake quickly, internal engineering time is limited, and the immediate objective is operational reliability rather than deep system ownership. It is also well suited when form volume is still modest, lead-routing logic is straightforward, and the organization benefits more from a ready-made operations dashboard than from a custom backend.
-
-It is especially effective for a phase where the business needs consistent notification, a manageable review queue, and enough observability to confirm that submissions are arriving and being processed. It becomes less ideal once the business wants tighter coupling with internal workflows, richer analytics, or more nuanced orchestration across multiple operating systems.
+The detailed best-fit scenarios are consolidated in the table above. This option is strongest when the business needs immediate continuity, lean operations, and a lightweight queueing model more than it needs ownership of workflow logic.
 
 ---
 
@@ -104,12 +98,19 @@ Operationally, this is the highest-control option. It enables the organization t
 
 ## 5W1H Breakdown
 
-- What: A custom submission system where the Nuxt.js frontend sends form data to a NestJS API that persists submissions, coordinates email dispatch or workflow events, and exposes a fully owned operational backbone.
-- Why: It provides maximum control over process design, scalability behavior, observability, and integration strategy, allowing the intake system to evolve with the business instead of being bounded by a vendor product.
-- Who: Frontend engineers manage the Nuxt.js form experience, backend engineers or full-stack engineers maintain the NestJS API and supporting services, and business or operations stakeholders consume reports, notifications, and possibly internal dashboards generated from owned systems.
-- When: Best used when submission volume is expected to grow, workflows are likely to become more specialized, or the organization wants long-term ownership of operational behavior and business process data.
-- Where: User interaction remains in the Nuxt.js application; operational orchestration happens in the NestJS service layer; storage, email delivery, and observability live in infrastructure chosen and maintained by the organization.
-- How: The frontend submits data to NestJS endpoints, the backend applies business workflow rules, writes records to storage, triggers notifications or downstream integrations, records operational events, and returns structured status information to the frontend and monitoring surfaces.
+| Category | Detail |
+|----------|--------|
+| What | A custom submission platform in which the Nuxt.js frontend sends form data to a NestJS backend API that persists submissions, coordinates notifications, and provides a fully owned operational control plane.<br><br>- The public website remains the capture surface only.<br>- NestJS becomes the intake boundary for routing, persistence, workflow state, and business process orchestration.<br>- The resulting system can behave as a true operational service rather than a simple contact form endpoint. |
+| Why | It provides maximum control over process design, scaling behavior, observability, and integration strategy so the intake system can evolve with the business instead of being constrained by vendor capabilities.<br><br>- It is the strongest choice when submissions are expected to feed reporting, routing, internal tooling, or downstream automations.<br>- It allows the organization to align system behavior tightly to its operating model rather than adapting internal processes to an external platform. |
+| Who | Frontend engineers manage the Nuxt.js capture experience, backend or platform engineers maintain the NestJS API and supporting infrastructure, and business or operations stakeholders consume alerts, reports, and workflow state through owned systems.<br><br>- Ownership becomes explicitly internal across implementation, incident response, monitoring, and process refinement.<br>- As the system matures, product, operations, analytics, and delivery leads can all become stakeholders in the intake workflow. |
+| When | Best used when traffic is expected to grow, workflows are becoming more specialized, or the organization wants long-term ownership of operational behavior and business process data.<br><br>- It is especially appropriate once simple inbox-style intake becomes insufficient.<br>- It also makes sense when the business anticipates multi-path routing, richer reporting, or tighter coupling with internal operating systems. |
+| Where | User interaction remains in the Nuxt.js application, while operational orchestration happens in the NestJS service layer and supporting infrastructure chosen by the organization.<br><br>- Storage can live in relational, document, or workflow-oriented systems depending on reporting needs.<br>- Notifications and operational telemetry can be delivered through owned services, external email providers, and internal dashboards without ceding the workflow control plane. |
+| How | The frontend submits form data to NestJS endpoints, the backend classifies the request, applies business workflow rules, writes records to storage, triggers notifications or asynchronous jobs, records operational events, and returns structured status to the frontend and monitoring surfaces.<br><br>- Real-world implementations often start synchronously and then move toward queued or staged processing as volume and workflow complexity rise.<br>- This model supports deliberate design of back-office review flows instead of inheriting them from a vendor dashboard. |
+| Operational Characteristics | Lifecycle: A user submits through Nuxt.js, NestJS accepts the request, maps it to a domain-specific intake flow, persists the record, triggers notifications or queue events, and hands the submission into owned review and follow-up processes.<br><br>Scaling behavior: At low traffic, the model can run simply with synchronous persistence and notification steps; at higher traffic, the same architecture can add queues, worker services, partitioned routing, richer telemetry, and deliberate capacity controls without changing the public intake contract.<br><br>Failure handling behavior: The system can be designed to persist first, notify second, retry downstream actions, surface degraded-but-recoverable states, and support replay or manual recovery from owned records, giving the team far more control over operational continuity than a managed platform provides.<br><br>System ownership implications: The organization owns deployment, runbooks, dashboards, support expectations, service reliability, and change coordination across frontend and backend teams.<br><br>Evolution capability: This model has the strongest growth potential because it can expand into internal review queues, CRM synchronization, analytics enrichment, operational dashboards, and multi-step process orchestration without re-platforming the intake boundary. |
+| Strengths | - Maximum workflow flexibility because routing, persistence, notification timing, and lifecycle states can be defined to match the business rather than a vendor product.<br>- Strong scalability control because the team can make explicit decisions about API topology, queueing, storage, and fan-out behavior based on observed demand.<br>- First-class observability because the system can capture workflow-specific metrics such as intake latency, review backlog, and conversion-to-response timing.<br>- Better long-term process alignment because internal systems can reflect how the organization actually works instead of forcing the business into a vendor-defined operational model.<br>- Easier future integration because NestJS can become the hub for CRM sync, analytics pipelines, internal tools, and automation rules.<br>- Clear ownership boundary because the API becomes the formal contract between the website and the business workflow system. |
+| Limitations | - Higher initial engineering effort because the team must design not just an endpoint, but a reliable operating model around persistence, monitoring, notifications, and support ownership.<br>- Longer time to deploy because dependable operations require implementation, testing, telemetry, runbooks, and release readiness across multiple surfaces.<br>- Ongoing maintenance obligation because the organization must operate the service, manage upgrades, handle incidents, and coordinate workflow changes over time.<br>- More cross-functional coordination because frontend, backend, and business process owners all influence the intake lifecycle.<br>- Greater risk of underbuilt operations if implementation focuses only on code delivery and not on dashboards, alerting, and recoverability.<br>- Internal documentation requirement because system ownership loses value quickly when process knowledge remains implicit or concentrated in one person. |
+| Operational Risks (Non-Security) | - Delivery timelines can slip if architecture scope expands during implementation or if supporting concerns such as observability are deferred too long.<br>- Operational gaps can persist if dashboards, runbooks, and alerting are treated as optional follow-on work instead of part of the initial service boundary.<br>- Team dependency risk increases if critical knowledge about NestJS workflows, storage patterns, or incident handling sits with too few engineers.<br>- Infrastructure and service costs can become less predictable if growth outpaces capacity planning or if background processing is added without clear operational targets.<br>- Process fragmentation can emerge if API behavior, storage models, notifications, and downstream review workflows evolve separately.<br>- Regression risk rises when workflow logic changes frequently but release discipline and integration testing do not mature at the same pace.<br>- Business continuity is now an internal commitment, so outages or degraded flows require the team to diagnose, communicate, and remediate directly. |
+| Best-Fit Scenarios | - Contact intake is becoming a strategic business workflow instead of a lightweight website feature.<br>- Submission types need distinct treatment, richer routing, or growing connections to internal reporting and operational systems.<br>- Leadership expects traffic to grow materially and wants scaling decisions to remain under internal control.<br>- The team needs richer operational insight than a vendor dashboard can typically provide.<br>- The organization is prepared to treat the intake layer as an owned product with maintenance, observability, and documented operating procedures.<br>- Future growth is likely to include CRM integration, internal dashboards, workflow automation, or broader process orchestration. |
 
 ## Architecture Overview
 
@@ -120,14 +121,28 @@ In a mature implementation, the NestJS API becomes the system boundary for all c
 ## Workflow
 
 ```text
-User fills form in Nuxt.js frontend
-	-> Frontend POSTs submission to NestJS API
-	-> NestJS maps request to domain-specific intake flow
-	-> Submission is persisted to primary storage
-	-> Notification or workflow event is triggered
-	-> Operational metadata is recorded for monitoring and reporting
-	-> API returns structured response to frontend
-	-> Business team reviews submission in owned dashboard, inbox, CRM, or internal queue
+User
+	|
+	v
+Nuxt.js Frontend
+	|
+	v
+NestJS API
+	|
+	v
+Intake / Routing Layer
+	|
+	+--> Primary Storage
+	|
+	+--> Notification / Job Dispatch
+	|
+	+--> Operational Telemetry / Reporting Events
+	|
+	v
+Business Review Queue / Dashboard / CRM
+	|
+	v
+Owned Follow-Up Workflow and Process Iteration
 ```
 
 This workflow can be expanded into multiple lanes without changing the public form surface. For example, client inquiries, guild applications, partnership requests, and general contact messages can all enter through a shared API boundary and then branch into different operational paths. That is one of the main practical advantages of a NestJS-based system: the backend can express domain boundaries cleanly and remain maintainable as workflows diversify.
@@ -136,51 +151,23 @@ For larger operating volume, the workflow can also shift from synchronous proces
 
 ## Operational Characteristics
 
-The key characteristic here is full operational ownership. The organization controls system design, release cadence, instrumentation, escalation paths, data models, and integration surfaces. This improves flexibility and long-term fit, but it also means the team is responsible for reliability engineering, service maintenance, deployment hygiene, and operational documentation.
-
-From a scalability standpoint, this is the strongest option because the organization can control the main scaling levers directly: API architecture, storage strategy, queue design, notification fan-out, retention policies, and reporting pipelines. If traffic grows or workflows become more segmented, the system can evolve structurally rather than being constrained to plan upgrades or platform feature requests.
-
-Observability is also more powerful in this model. The team can instrument not only successful and failed submissions but also end-to-end workflow stages: intake latency, queue lag, email dispatch timing, review backlog, conversion-to-response time, and source-channel performance. That matters because operational maturity is built on measuring the system as a process, not simply knowing whether a request was accepted.
-
-The cost of that control is higher maintenance effort. The organization must handle service lifecycle management, failure analysis, storage administration, operational runbooks, dependency upgrades, and coordination between frontend and backend changes. This is manageable if the business expects sustained growth, but it is often excessive if the current need is only to restore reliable notifications quickly.
+The lifecycle, scaling behavior, degraded-mode handling, ownership boundaries, and evolution profile for this solution are consolidated in the decision table above. The core operating trade-off is maximum control in exchange for a real service ownership obligation.
 
 ## Strengths
 
-- Maximum workflow flexibility. The business can define exact routing logic, persistence rules, notification behavior, and lifecycle states without vendor-imposed limitations.
-- Strong scalability control. Scaling decisions can be made at the API, queue, and storage layers based on actual operational patterns instead of subscription tiers.
-- First-class observability. The team can measure business-relevant operational metrics, not just submission counts.
-- Better long-term process alignment. Internal systems can reflect how the organization actually works instead of forcing the organization to adapt to a third-party dashboard model.
-- Easier integration strategy over time. NestJS can act as the central hub for CRM sync, analytics enrichment, internal tooling, and future automation workflows.
-- Clear ownership boundary. The API becomes the explicit operational contract between the website and the business workflow system.
-
-These strengths matter most when the form is expected to become part of a broader operating system. If the organization wants contact submissions to feed reporting, triage, internal review queues, and downstream automation with minimal manual glue, an owned backend creates the right foundation.
+The detailed strength profile is consolidated in the table above. The central advantage is that the organization can shape the intake system as a durable operational capability rather than merely consume a fixed workflow product.
 
 ## Limitations
 
-- Higher initial engineering effort. Building a reliable operational platform requires more than endpoint creation; it requires decisions about persistence, monitoring, notification behavior, and support ownership.
-- Longer time to deploy. Compared with a managed solution, an in-house system takes more design, development, testing, and operational readiness work before it is dependable.
-- Ongoing maintenance obligation. The team must support runtime operations, upgrades, instrumentation, incident response, and workflow changes continuously.
-- More cross-functional coordination. Frontend, backend, and business processes must stay aligned as the system evolves.
-- Greater risk of underbuilt operations if rushed. A custom system can technically exist before it is operationally mature, which creates a trap where the team owns more surface area without yet realizing the full benefits of ownership.
-- Internal documentation requirement. The value of ownership degrades quickly if runbooks, dashboards, and responsibilities are not clearly defined.
-
-These limitations are primarily about organizational readiness. A custom platform is only strategically better if the team is prepared to operate it as a product, not just deploy it as code.
+The detailed limitation profile is consolidated in the table above. The practical constraint is not technology fit; it is whether the organization is ready to operate the intake layer with production-grade discipline.
 
 ## Operational Risks (NON-SECURITY)
 
-- Delivery timelines can slip if architecture and workflow requirements expand during implementation.
-- Operational gaps can persist if monitoring, alerting, dashboards, and support playbooks are treated as secondary work instead of core scope.
-- Team dependency risk increases if system knowledge concentrates in one engineer or a small subset of the team.
-- Infrastructure and service costs can become less predictable if the system grows without clear capacity planning.
-- Process fragmentation can occur if the API, storage, email tooling, and downstream business workflows evolve independently without a shared operational model.
-- Regression risk rises when workflow changes are frequent but integration testing and release discipline are weak.
-- Business continuity becomes an internal responsibility, meaning outages or degraded flows must be handled by the team rather than a vendor support organization.
+The detailed non-security risk profile is consolidated in the table above. The main exposure is that operational maturity must be built intentionally; it does not come bundled with the platform.
 
 ## Best-Fit Scenarios
 
-This option fits best when the contact workflow is expected to become strategically important, when the organization wants ownership of operating data and process behavior, and when submission handling is likely to expand into routing, reporting, automation, and integration-heavy operations.
-
-It is also the strongest fit when traffic is expected to grow materially, when different submission types need distinct treatment, or when the business wants to avoid shaping future operations around third-party product constraints. It is less suitable as the immediate first move if the primary need is a rapid operational stabilizer and engineering bandwidth is currently thin.
+The detailed best-fit scenarios are consolidated in the table above. This option is strongest when leadership wants the intake workflow to scale as an owned system with long-term reporting, routing, and orchestration flexibility.
 
 ---
 
@@ -196,29 +183,66 @@ In practice, the hybrid model reduces the risk of building the wrong internal sy
 
 ## 5W1H Breakdown
 
-- What: A phased approach where the organization first deploys a third-party managed solution for rapid stabilization, then migrates the intake flow to a Nuxt.js plus NestJS owned system after operational requirements are better understood.
-- Why: It balances short-term speed with long-term control, allowing the business to protect lead intake now without locking itself into permanent vendor dependence.
-- Who: In Phase 1, the frontend team and business stakeholders operate mostly through the vendor platform; in Phase 2, backend ownership shifts increasingly to the internal engineering team while business stakeholders transition to owned reporting and workflow tools.
-- When: Best used when the immediate state requires fast operational improvement but the long-term direction still favors internal ownership and customization.
-- Where: Early operational activity happens in the vendor dashboard and notification channels; later operational activity moves into systems powered by the NestJS API, owned storage, and internal reporting or workflow destinations.
-- How: The business first routes submissions to a vendor-managed service, observes traffic and workflow needs, documents what works and what does not, then uses those learnings to implement and migrate to a NestJS-based intake platform with a better-defined operating model.
+| Category | Detail |
+|----------|--------|
+| What | A phased strategy in which the organization first deploys a third-party managed service for rapid stabilization and then migrates the intake flow to an owned Nuxt.js plus NestJS system once operational requirements are clearer.<br><br>- Phase 1 is intentionally used as a stabilization and learning period.<br>- Phase 2 converts those learnings into an owned platform with better long-term fit.<br>- The goal is not compromise for its own sake, but sequencing: speed first, ownership second. |
+| Why | It balances short-term speed with long-term control, allowing the business to protect lead intake immediately without prematurely locking itself into either permanent vendor dependence or premature platform engineering.<br><br>- It lowers the risk of building the wrong internal system too early.<br>- It improves decision quality by grounding platform design in observed workflow behavior rather than assumptions. |
+| Who | In Phase 1, the frontend team and business stakeholders operate primarily through the vendor platform; in Phase 2, backend ownership shifts to the internal engineering team while business stakeholders transition to owned reporting and workflow surfaces.<br><br>- This model distributes responsibility by maturity stage rather than forcing full ownership on day one.<br>- It also gives operations stakeholders time to refine how they actually want intake reviewed and escalated. |
+| When | Best used when the immediate state requires fast operational improvement but the long-term direction still favors internal ownership, workflow depth, and customization.<br><br>- It is especially suitable when current workflows are still forming and the team wants to avoid premature architectural commitment.<br>- It is also a strong fit when leadership needs an executable roadmap rather than a single-step decision. |
+| Where | Early operational activity happens in the vendor dashboard, inboxes, and notification channels; later operational activity moves into systems powered by the NestJS API, owned storage, and internal reporting or workflow destinations.<br><br>- During transition, observability and process state may temporarily span both environments.<br>- That makes migration planning and data normalization important parts of the strategy. |
+| How | The business first routes submissions to a vendor-managed service, observes traffic and workflow needs, records what works and what creates friction, and then uses those findings to build and migrate toward a NestJS-based intake platform with a better-defined operating model.<br><br>- The quality of this approach depends on explicit phase goals and clear migration triggers.<br>- In practice, the handoff is strongest when the team treats Phase 1 as discovery for operations, not just as a stopgap integration. |
+| Operational Characteristics | Lifecycle: Phase 1 handles intake, notification, and review through the vendor while the team documents real operating behavior; Phase 2 moves intake, workflow state, reporting, and downstream orchestration into the owned NestJS platform.<br><br>Scaling behavior: Early scaling is absorbed by the vendor, which is efficient while the organization needs time; later scaling is reclaimed by the internal team once traffic, routing complexity, and reporting needs justify deeper control.<br><br>Failure handling behavior: Phase 1 relies on vendor recovery patterns and disciplined manual queue review, while Phase 2 allows the organization to introduce owned persistence, retries, replay behavior, and richer operational telemetry; the migration window itself requires careful cutover planning so no submissions disappear into split workflows.<br><br>System ownership implications: Ownership is transferred in stages, which reduces near-term load but requires clarity about who owns reliability, dashboards, and process changes in each phase.<br><br>Evolution capability: This model offers the best decision quality because the long-term system is informed by actual traffic patterns, review habits, routing needs, and reporting questions collected during stabilization. |
+| Strengths | - Balances urgency and long-term direction by delivering an immediate operational fix without abandoning the strategic goal of ownership.<br>- Lowers decision risk because real workflow data from Phase 1 shapes a more accurate Phase 2 architecture.<br>- Reduces premature complexity because the team avoids inventing abstractions before it knows which abstractions matter.<br>- Improves change management because business stakeholders can adapt to structured intake processes gradually rather than all at once.<br>- Supports better investment timing because internal engineering effort is committed when the value of customization is clearer.<br>- Creates a cleaner migration narrative because each phase has a distinct business purpose: stabilize first, internalize second. |
+| Limitations | - Two-step delivery path means the team integrates once for the managed service and then migrates again for the internal platform.<br>- Temporary duplication of concepts can appear because routing categories, reporting views, and operator habits may exist in both environments during transition.<br>- Migration planning is required because history, dashboards, and team processes must be moved deliberately rather than assumed to transfer cleanly.<br>- Risk of phase drift exists if the organization stays in Phase 1 too long or starts Phase 2 without enough operational evidence.<br>- Some lessons collected in Phase 1 may reflect vendor workflow constraints as much as pure business needs.<br>- Transitional observability can be fragmented while metrics and workflow state span vendor and owned systems. |
+| Operational Risks (Non-Security) | - Migration fatigue can delay Phase 2 if the organization underestimates the effort required to move people, habits, and reporting off the vendor platform.<br>- Phase ambiguity can create confusion about ownership, support expectations, and priority-setting if responsibilities are not explicit at each stage.<br>- Historical reporting continuity can suffer if Phase 1 and Phase 2 data are not normalized or exported in a comparable form.<br>- Tooling overlap can confuse stakeholders when alerts, dashboards, and follow-up steps exist in multiple places during the handoff period.<br>- Budget creep can occur if the vendor plan remains active longer than intended while the internal platform is also being built and operated.<br>- Decision inertia can turn the temporary phase into accidental permanence if migration triggers are not defined up front. |
+| Best-Fit Scenarios | - The business needs immediate stabilization now but still expects the intake system to become an owned strategic workflow later.<br>- Current review habits, routing logic, and reporting expectations are not yet mature enough to justify a full internal platform immediately.<br>- Leadership wants a roadmap that is both executable in the short term and credible in the long term.<br>- Engineering bandwidth is constrained today, but the organization expects future volume or process complexity to justify ownership later.<br>- The team wants to gather real operational evidence before locking in a backend design.<br>- The organization values risk reduction in decision-making as much as speed of initial deployment. |
 
 ## Workflow (Phase-based)
 
 ```text
 Phase 1: Stabilization
-User fills form in Nuxt.js frontend
-	-> Frontend sends submission to managed vendor endpoint
-	-> Vendor stores submission and sends notifications
-	-> Business team reviews leads in vendor dashboard and inbox
-	-> Team records workflow learnings and operational pain points
+User
+	|
+	v
+Nuxt.js Frontend
+	|
+	v
+Managed Vendor Endpoint
+	|
+	v
+Vendor Processing Layer
+	|
+	+--> Vendor Dashboard / Hosted Queue
+	|
+	+--> Email / Slack / CRM Notifications
+	|
+	v
+Business Review and Stabilization Workflow
+	|
+	v
+Operational Learnings / Migration Inputs
 
 Phase 2: Internalization
-User fills form in Nuxt.js frontend
-	-> Frontend sends submission to NestJS API
-	-> NestJS persists submission, emits notifications, and records workflow events
-	-> Business team reviews leads through owned systems and internal reporting
-	-> Team iterates on routing, automation, and operational metrics
+User
+	|
+	v
+Nuxt.js Frontend
+	|
+	v
+NestJS API
+	|
+	v
+Owned Intake / Routing Layer
+	|
+	+--> Owned Storage
+	|
+	+--> Notifications / Jobs / Reporting Events
+	|
+	v
+Internal Review Queue / Dashboard / CRM
+	|
+	v
+Continuous Optimization of Routing, Metrics, and Workflow
 ```
 
 The key to making this strategy work is explicit phase discipline. Phase 1 is not a permanent default hidden behind temporary language. It is a bounded stabilization period with clear learning goals: understand intake volume, confirm notification expectations, observe review behavior, identify required categories, and capture the reporting questions the business actually asks.
@@ -227,50 +251,23 @@ Phase 2 then turns those learnings into system design. Instead of guessing what 
 
 ## Operational Characteristics
 
-The hybrid strategy is defined by staged ownership transfer. The vendor absorbs operational load early, then the internal team gradually takes over once process maturity and business confidence improve. This creates a smoother operational curve than jumping directly from a fragile website-integrated flow to a fully custom platform.
-
-Scalability is handled in two modes. Early-stage scaling is absorbed by the vendor, which is efficient when the organization needs time. Later-stage scaling is reclaimed by the internal team, which is valuable once custom throughput management, richer reporting, or more sophisticated workflow branching becomes necessary.
-
-This model also improves decision quality. By spending time with a managed solution first, the business can observe actual operating behavior rather than designing solely from assumptions. Common examples include realizing which fields truly matter, which notifications are noisy, how quickly leads are reviewed, and whether submissions need queues, tags, assignment, or CRM sync.
-
-Its main operational challenge is migration discipline. If Phase 1 is allowed to continue indefinitely without a migration trigger, the business may drift into accidental long-term vendor dependency. Conversely, if Phase 2 starts too early, the organization can lose the benefits of phased learning and still take on backend ownership before it is ready.
+The lifecycle, scaling behavior, degraded-mode handling, ownership boundaries, and evolution profile for this solution are consolidated in the decision table above. The core operating trade-off is staged transfer of ownership in exchange for better sequencing of risk and investment.
 
 ## Strengths
 
-- Balances urgency and long-term direction. The business gets an immediate operational fix without abandoning the strategic goal of system ownership.
-- Lowers decision risk. Real workflow data from Phase 1 helps shape a more accurate Phase 2 architecture.
-- Reduces premature complexity. The team avoids building backend abstractions before it knows which abstractions actually matter.
-- Improves change management. Business stakeholders can adapt to structured intake workflows gradually rather than all at once.
-- Supports better investment timing. Engineering effort is committed when the value of customization becomes clearer.
-- Creates a cleaner migration narrative. The organization can explain why each phase exists and what business outcome each phase is meant to achieve.
-
-These strengths make the hybrid strategy particularly robust for organizations in transition: mature enough to need better operations, but not yet ready to justify immediate full backend ownership.
+The detailed strength profile is consolidated in the table above. The central advantage is not compromise but better sequencing: stabilize immediately, then internalize with evidence.
 
 ## Limitations
 
-- Two-step delivery path. The team must integrate once for the managed service and then migrate again for the internal platform.
-- Temporary duplication of operational concepts. Submission categories, routing rules, and reporting structures may exist in both vendor and internal systems during transition.
-- Migration planning is required. Historical submissions, dashboard usage, and team habits must be accounted for when moving off the vendor.
-- Risk of phase drift. Without clear checkpoints, the organization may stay too long in Phase 1 or rush Phase 2 without enough operational evidence.
-- Some learning will be tool-shaped. Observations collected in a vendor platform may partially reflect vendor workflow design rather than pure business needs.
-- Transitional observability can be split. Metrics and status views may live across vendor tools and internal systems during the handoff period.
-
-These are manageable limitations, but only if the phased approach is treated as a deliberate program with entry and exit criteria rather than a vague intention.
+The detailed limitation profile is consolidated in the table above. The practical constraint is that phased strategy only works well when migration criteria, data handling, and ownership transitions are explicit.
 
 ## Operational Risks (NON-SECURITY)
 
-- Migration fatigue can delay Phase 2 if the organization underestimates the effort to move people and process off the vendor platform.
-- Phase ambiguity can create conflicting expectations about ownership, support responsibilities, and improvement priorities.
-- Historical reporting continuity can suffer if Phase 1 and Phase 2 data are not normalized or exported in a comparable way.
-- Tooling overlap can confuse stakeholders if alerts, dashboards, and follow-up processes exist in multiple places during transition.
-- Budget creep can occur if the vendor plan remains active longer than intended while the internal platform is simultaneously built.
-- Decision inertia can lock the organization into the temporary state if migration triggers are not defined up front.
+The detailed non-security risk profile is consolidated in the table above. The main exposure is not technical infeasibility; it is loss of phase discipline during transition.
 
 ## Best-Fit Scenarios
 
-This strategy fits best when the business needs immediate operational stabilization but still expects the contact workflow to become a more important owned business system over time. It is especially appropriate when current workflows are not yet fully understood, submission volume is likely to grow, and engineering leadership wants to avoid either extreme: indefinite vendor dependence or premature platform engineering.
-
-It is also a strong choice when leadership wants a defensible roadmap that aligns short-term practicality with long-term control. In that sense, it is often the best executive option because it provides both immediate operational relief and a credible evolution path.
+The detailed best-fit scenarios are consolidated in the table above. This option is strongest when leadership needs immediate operational relief and a credible path to ownership, but wants the long-term platform shaped by observed workflow reality rather than guesswork.
 
 ---
 
