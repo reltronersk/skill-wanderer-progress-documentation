@@ -65,13 +65,220 @@ Formspree is the best-balanced Phase 1 option when the business needs a managed 
 
 #### Workflow (Visual Diagram)
 
+##### High-Level Flow (Simple View)
+
 ```text
-User
-  -> Nuxt /contact
-  -> Formspree form endpoint
-  -> Formspree Inbox
-  -> Email / integrations
-  -> Owner review and follow-up
+User (Client)
+  -> Nuxt Frontend (Client)
+  -> Formspree Endpoint (Vendor System)
+  -> Notification Layer (Vendor System)
+  -> Review Layer (Business Layer)
+```
+
+##### Detailed System Flow (Production View)
+
+```text
+User (Client)
+  |
+  v
+Nuxt /contact Page (Client)
+  |
+  +--> Hire the Guild Tab
+  |      +--> name / email / topic / message / valuesQuality
+  |
+  +--> Join the Guild Tab
+  |      +--> name / email / skill / experience / portfolio / message
+  |
+  v
+Submission Handler (Client)
+  |
+  +--> UI state handling
+  |      +--> loading
+  |      +--> success message
+  |      +--> retryable error message
+  |
+  +--> Payload shaping
+  |      +--> form_type=hire or join
+  |      +--> source=/contact
+  |      +--> business-readable field names
+  |
+  v
+Formspree Endpoint over HTTPS (Vendor System)
+  |
+  v
+Formspree Intake Layer (Vendor System)
+  |
+  +--> Vendor validation / filtering
+  |      +--> field checks
+  |      +--> vendor-side spam controls
+  |
+  +--> Routing Decision
+  |      |
+  |      +--> hire-the-guild form
+  |      +--> join-the-guild form
+  |
+  +--> Notification Layer
+  |      |
+  |      +--> Email notification to owner inbox
+  |      +--> Slack / webhook integration (if enabled)
+  |      +--> Autoresponse to submitter (optional)
+  |
+  v
+Formspree Storage / Inbox (Vendor System)
+  |
+  +--> Submission archive
+  +--> Search / export / analytics
+  +--> Queue separated by form or tag
+  |
+  v
+Business Review Layer (Business Layer)
+  |
+  +--> Who reviews
+  |      +--> business owner
+  |      +--> optional backup reviewer
+  |
+  +--> Where review happens
+  |      +--> Formspree Inbox
+  |      +--> notification email inbox
+  |
+  +--> How decisions are made
+  |      +--> project lead
+  |      +--> partnership discussion
+  |      +--> guild applicant
+  |      +--> duplicate / low-priority archive
+  |
+  +--> Failure handling branch
+  |      +--> if notification delayed -> open Formspree Inbox directly
+  |      +--> if inbox backlog grows -> run manual dashboard sweep
+  |
+  v
+Business Action Layer (Business Layer)
+  |
+  +--> Reply email
+  +--> Calendar scheduling / proposal follow-up
+  +--> CRM or tracker entry
+  +--> Internal routing to delivery / recruiting workflow
+  |
+  v
+Feedback Loop (Business Layer + Vendor System)
+  |
+  +--> mark handled / tagged in vendor inbox
+  +--> refine notification rules and labels
+  +--> use export data to inform Phase 2 design
+```
+
+##### Phase 1 Workflow (Vendor-based)
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  +--> Hire form submission
+  +--> Join form submission
+  |
+  v
+Formspree Forms A and B (Vendor System)
+  |
+  +--> Notification Layer
+  |      +--> Email
+  |      +--> Slack / webhook (optional)
+  |
+  +--> Formspree Inbox / archive
+  |
+  v
+Owner Review Loop (Business Layer)
+  |
+  +--> review in dashboard first
+  +--> confirm via email notification
+  +--> decide next business action
+  |
+  v
+Follow-up / response / tracker update (Business Layer)
+```
+
+##### Phase 2 Workflow (NestJS-based)
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  v
+Submission API / BFF (Internal System)
+  |
+  v
+NestJS Intake Controller (Internal System)
+  |
+  +--> validation / classification
+  +--> route to inquiry type
+  |
+  v
+Primary Storage (Internal System)
+  |
+  +--> inquiry records
+  +--> application records
+  |
+  v
+Queue / Worker Layer (Internal System)
+  |
+  +--> Email notification
+  +--> Slack / webhook
+  +--> CRM sync
+  |
+  +--> if notification delayed -> queue retry + internal review fallback
+  |
+  v
+Internal Review Surface (Business Layer)
+  |
+  +--> dashboard / CRM / internal admin
+  +--> manual review and categorization
+  |
+  v
+Business Action Layer (Business Layer)
+  |
+  +--> reply
+  +--> assign owner
+  +--> move to delivery or recruiting flow
+```
+
+##### Transition Workflow
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  +--> Primary Path: Formspree (Vendor System)
+  |      +--> live production intake
+  |      +--> owner continues review in Formspree Inbox
+  |
+  +--> Secondary Path: NestJS shadow or limited rollout (Internal System)
+  |      +--> mirrored or sampled submissions
+  |      +--> internal storage and notification testing
+  |
+  v
+Cutover Decision Point (Business Layer + Internal System)
+  |
+  +--> if parity confirmed
+  |      +--> promote NestJS to primary intake
+  |      +--> keep Formspree available for rollback and export
+  |
+  +--> if operational gaps remain
+         +--> keep Formspree primary
+         +--> continue transition testing
+
+Temporary coexistence:
+  Formspree = operational safety net
+  NestJS = emerging internal control plane
+
+Fallback path:
+  if cutover disrupts notifications or review visibility
+    -> route traffic back to Formspree
+    -> continue business review from vendor inbox
 ```
 
 #### Operational Characteristics Table
@@ -104,13 +311,201 @@ Web3Forms is the simplest and lowest-cost operational option. It is especially s
 
 #### Workflow (Visual Diagram)
 
+##### High-Level Flow (Simple View)
+
 ```text
-User
-  -> Nuxt /contact
-  -> Web3Forms API
-  -> Email delivery + submission history
-  -> Owner inbox review
-  -> Follow-up and manual tracking
+User (Client)
+  -> Nuxt Frontend (Client)
+  -> Web3Forms API (Vendor System)
+  -> Notification Layer (Vendor System)
+  -> Review Layer (Business Layer)
+```
+
+##### Detailed System Flow (Production View)
+
+```text
+User (Client)
+  |
+  v
+Nuxt /contact Page (Client)
+  |
+  +--> Hire the Guild submission
+  +--> Join the Guild submission
+  |
+  v
+Submission Handler (Client)
+  |
+  +--> prepares payload
+  |      +--> access_key
+  |      +--> form_type
+  |      +--> business fields
+  |
+  +--> manages UI state
+  |      +--> sending
+  |      +--> success
+  |      +--> retry message
+  |
+  v
+Web3Forms API over HTTPS (Vendor System)
+  |
+  v
+Web3Forms Intake Layer (Vendor System)
+  |
+  +--> basic validation / required field handling
+  +--> vendor-side spam filtering / honeypot support
+  +--> submission acceptance decision
+  |
+  +--> Notification Layer
+  |      |
+  |      +--> Email notification (primary path)
+  |      +--> Slack / webhook / external integration (if configured)
+  |      +--> Autoresponder (paid tiers)
+  |
+  v
+Web3Forms Submission History (Vendor System)
+  |
+  +--> limited hosted history
+  +--> export / lookup fallback
+  |
+  v
+Business Review Layer (Business Layer)
+  |
+  +--> Who reviews
+  |      +--> owner as primary reviewer
+  |      +--> optional backup reviewer for overflow
+  |
+  +--> Where review happens
+  |      +--> primary: email inbox
+  |      +--> fallback: Web3Forms submission history
+  |
+  +--> How decisions are made
+  |      +--> urgent lead -> immediate reply
+  |      +--> guild application -> scheduled review
+  |      +--> low-fit inquiry -> archive or defer
+  |
+  +--> Failure handling branch
+  |      +--> if notification delayed -> check submission history directly
+  |      +--> if inbox becomes noisy -> export and track manually
+  |
+  v
+Business Action Layer (Business Layer)
+  |
+  +--> reply email
+  +--> spreadsheet / CRM entry
+  +--> internal handoff to delivery or guild review
+  |
+  v
+Feedback Loop (Business Layer)
+  |
+  +--> refine field labels / redirect behavior
+  +--> tighten owner review cadence
+  +--> use observed workflow pain to justify Phase 2 timing
+```
+
+##### Phase 1 Workflow (Vendor-based)
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  v
+Web3Forms API (Vendor System)
+  |
+  +--> Email notification to owner
+  +--> Optional webhook / Slack path
+  +--> Submission history fallback
+  |
+  v
+Owner Review Loop (Business Layer)
+  |
+  +--> primary review in inbox
+  +--> fallback review in submission history
+  +--> manual decision on follow-up and tracking
+  |
+  v
+Business Action Layer (Business Layer)
+  |
+  +--> reply
+  +--> log in tracker
+  +--> continue manual workflow
+```
+
+##### Phase 2 Workflow (NestJS-based)
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  v
+Submission API / BFF (Internal System)
+  |
+  v
+NestJS Intake Controller (Internal System)
+  |
+  +--> classify inquiry type
+  +--> persist request
+  |
+  v
+Storage + Queue Layer (Internal System)
+  |
+  +--> primary records
+  +--> notification jobs
+  +--> webhook / CRM jobs
+  |
+  +--> if notification delay occurs -> queue retry + dashboard fallback
+  |
+  v
+Internal Review Surface (Business Layer)
+  |
+  +--> structured queue
+  +--> explicit handled states
+  |
+  v
+Business Action Layer (Business Layer)
+  |
+  +--> response
+  +--> ownership assignment
+  +--> reporting and workflow iteration
+```
+
+##### Transition Workflow
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  +--> Current production path: Web3Forms (Vendor System)
+  |      +--> email-first operational flow remains active
+  |
+  +--> Transition path: NestJS shadow or feature-flag rollout (Internal System)
+  |      +--> mirrored submission testing
+  |      +--> internal notification and queue validation
+  |
+  v
+Cutover Decision Point (Business Layer + Internal System)
+  |
+  +--> if internal review is reliable
+  |      +--> move primary traffic to NestJS
+  |      +--> retain Web3Forms briefly for rollback
+  |
+  +--> if review confidence is low
+         +--> keep Web3Forms primary
+         +--> continue transition testing
+
+Temporary coexistence:
+  Web3Forms inbox/email path = business continuity
+  NestJS queue = future-state operating model
+
+Fallback path:
+  if NestJS cutover causes review confusion
+    -> revert routing to Web3Forms
+    -> continue owner review through inbox + submission history
 ```
 
 #### Operational Characteristics Table
@@ -143,13 +538,205 @@ Getform now resolves to FormInit, which positions itself as a headless form back
 
 #### Workflow (Visual Diagram)
 
+##### High-Level Flow (Simple View)
+
 ```text
-User
-  -> Nuxt /contact
-  -> FormInit endpoint
-  -> Central inbox + logs + analytics
-  -> Email / Slack / webhook notification
-  -> Owner or team review
+User (Client)
+  -> Nuxt Frontend (Client)
+  -> FormInit Endpoint (Vendor System)
+  -> Notification Layer (Vendor System)
+  -> Review Layer (Business Layer)
+```
+
+##### Detailed System Flow (Production View)
+
+```text
+User (Client)
+  |
+  v
+Nuxt /contact Page (Client)
+  |
+  +--> Hire the Guild submission
+  +--> Join the Guild submission
+  |
+  v
+Submission Handler (Client)
+  |
+  +--> prepares structured payload
+  |      +--> sender identity fields
+  |      +--> inquiry / application fields
+  |      +--> form_type and source tags
+  |
+  +--> drives UI state
+  |      +--> loading
+  |      +--> success
+  |      +--> recoverable failure notice
+  |
+  v
+FormInit Endpoint over HTTPS (Vendor System)
+  |
+  v
+FormInit Intake Layer (Vendor System)
+  |
+  +--> built-in validations
+  +--> vendor spam filtering
+  +--> submission normalization
+  +--> UTM / metadata capture where configured
+  |
+  +--> Routing Decision
+  |      |
+  |      +--> inbox / workspace queue
+  |      +--> email notification
+  |      +--> Slack / Discord / webhook
+  |
+  v
+FormInit Storage / Inbox / Logs / Analytics (Vendor System)
+  |
+  +--> centralized submission store
+  +--> logs and delivery history
+  +--> analytics and export surface
+  +--> workspace-style visibility for multiple reviewers
+  |
+  v
+Business Review Layer (Business Layer)
+  |
+  +--> Who reviews
+  |      +--> owner
+  |      +--> optional recruiter / delivery lead
+  |
+  +--> Where review happens
+  |      +--> FormInit inbox
+  |      +--> notification channels
+  |
+  +--> How decisions are made
+  |      +--> respond now
+  |      +--> tag and defer
+  |      +--> assign internally
+  |
+  +--> Failure handling branch
+  |      +--> if notification is delayed -> review centralized inbox
+  |      +--> if queue ownership is unclear -> use logs to reconcile recent submissions
+  |
+  v
+Business Action Layer (Business Layer)
+  |
+  +--> reply email
+  +--> CRM / sheet / internal tracker update
+  +--> assign recruiting or project follow-up owner
+  |
+  v
+Feedback Loop (Business Layer + Vendor System)
+  |
+  +--> tune form layout and routing tags
+  +--> refine workspace ownership
+  +--> use logs and analytics to inform Phase 2 requirements
+```
+
+##### Phase 1 Workflow (Vendor-based)
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  v
+FormInit Forms / Workspace (Vendor System)
+  |
+  +--> Central inbox
+  +--> Notification layer
+  |      +--> Email
+  |      +--> Slack / webhook / Discord
+  +--> Logs and analytics
+  |
+  v
+Owner / Team Review Loop (Business Layer)
+  |
+  +--> review in shared inbox
+  +--> tag or assign if needed
+  +--> decide business action
+  |
+  v
+Follow-up / handoff / status tracking (Business Layer)
+```
+
+##### Phase 2 Workflow (NestJS-based)
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  v
+Submission API / BFF (Internal System)
+  |
+  v
+NestJS Intake Controller (Internal System)
+  |
+  +--> validation / classification / ownership rules
+  |
+  v
+Storage + Queue Layer (Internal System)
+  |
+  +--> canonical submission records
+  +--> worker queue for notifications and integrations
+  |
+  +--> Notification Layer
+  |      +--> Email
+  |      +--> Slack / webhook
+  |      +--> CRM integration
+  |
+  +--> if notification delay occurs -> queue retry + internal review queue fallback
+  |
+  v
+Internal Review Surface (Business Layer)
+  |
+  +--> owner and team review
+  +--> assignment and categorization
+  |
+  v
+Business Action Layer (Business Layer)
+  |
+  +--> follow-up
+  +--> internal process launch
+  +--> reporting loop
+```
+
+##### Transition Workflow
+
+```text
+User (Client)
+  |
+  v
+Nuxt Frontend (Client)
+  |
+  +--> Current path: FormInit workspace flow (Vendor System)
+  |      +--> inbox / logs / analytics remain primary
+  |
+  +--> Transition path: NestJS pilot flow (Internal System)
+  |      +--> dual flow or selective traffic cutover
+  |      +--> internal storage, queue, and review validation
+  |
+  v
+Cutover Decision Point (Business Layer + Internal System)
+  |
+  +--> if team review works cleanly in internal system
+  |      +--> move primary intake to NestJS
+  |      +--> keep FormInit for rollback and historical export
+  |
+  +--> if process ownership is still unclear
+         +--> keep FormInit primary
+         +--> continue coexistence until review flow stabilizes
+
+Temporary coexistence:
+  FormInit = proven review console
+  NestJS = emerging internal system of record
+
+Fallback path:
+  if transition creates notification or assignment gaps
+    -> route production back to FormInit
+    -> resume owner review from inbox and logs
 ```
 
 #### Operational Characteristics Table
