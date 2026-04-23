@@ -94,10 +94,36 @@ Decision: keep the browser simple, keep secrets and tokens on the server, and ma
 ### 5.1 High-Level Flow
 
 ```text
-User -> Client Portal Frontend -> Portal API and Middleware -> Keycloak Authentication -> Session Store and Protected Data
+User (Client)
+  -> Browser (Client Environment)
+  -> Client Portal Frontend (Next.js UI Layer)
+  -> Auth Routes (Server Entry Point)
+  -> Middleware Enforcement Layer
+  -> Keycloak Identity Provider
+  -> Token Exchange Layer (Server-side)
+  -> Session Store (Server-side)
+  -> Protected Resource Layer
 ```
 
-In practical terms, the user interacts with the portal UI, the portal handles authentication and session control, Keycloak provides identity, and the browser receives only an opaque session cookie rather than security tokens.
+This flow is layered on purpose so each part of the system has one clear job and one clear risk boundary.
+
+| Layer | What It Does | Why It Exists | Risk It Removes |
+| --- | --- | --- | --- |
+| User (Client) | Initiates login, views the dashboard, and signs out. | The portal must support a simple and safe client experience. | Removes the need for clients to use scattered channels such as email or shared drives for protected access. |
+| Browser (Client Environment) | Displays the portal and sends requests to the application. | The browser is the user's access point, but not the place where trust decisions should live. | Removes the risk of turning the client device into the holder of reusable auth tokens. |
+| Client Portal Frontend (Next.js UI Layer) | Presents login, dashboard, navigation, and user-facing messages. | The portal needs a single branded interface that clients can understand immediately. | Removes fragmented user journeys and inconsistent access paths. |
+| Auth Routes (Server Entry Point) | Start login, handle callback, and execute logout. | The authentication journey needs controlled server-side entry points. | Removes the risk of exposing the client secret or leaving auth steps to browser code. |
+| Middleware Enforcement Layer | Checks whether a request is allowed before protected content is shown. | Access control must happen before the user reaches protected pages. | Removes the risk of protected content loading before auth is validated. |
+| Keycloak Identity Provider | Verifies identity and issues auth tokens to the server-side flow. | Identity needs to remain centralized instead of being rebuilt inside the portal. | Removes the risk of creating a custom identity system with inconsistent security behavior. |
+| Token Exchange Layer (Server-side) | Exchanges the authorization code for tokens and refreshes tokens when needed. | The confidential client model requires server-side secret handling. | Removes the risk of placing sensitive token exchange logic in the browser. |
+| Session Store (Server-side) | Stores tokens, expiry times, and user context behind an opaque session ID. | The portal needs durable session control without exposing auth data to the browser. | Removes the risk of token leakage through browser storage or readable cookies. |
+| Protected Resource Layer | Serves dashboard and protected portal experiences only after session validation passes. | Business information must remain reachable only after successful authentication. | Removes the risk of unauthorized access to protected client information. |
+
+The important operating rule is unchanged: the browser receives only an opaque session cookie, while identity validation, token handling, refresh, and revocation stay on the server.
+
+### Business Interpretation
+
+In plain terms, the client sees a simple portal, but the trust decisions happen behind the scenes in controlled layers. That matters because it lets the business offer a professional, secure login experience without asking the client's browser to hold sensitive credentials or tokens. Each layer exists to keep the client experience simple while keeping access control strict.
 
 ### 5.2 Detailed System Flow
 
@@ -181,22 +207,104 @@ Why this matters: the document must tell the team exactly what to do next and in
 
 Decision: execute in one controlled branch with ordered pull requests so auth foundation is merged before dependent behavior.
 
-| Step | Action | Owner | Output |
-| --- | --- | --- | --- |
-| 1 | Create a dedicated feature branch from `main` for the client portal auth delivery. | Application Engineer | Isolated implementation branch with a single approved scope. |
-| 2 | Provision the Keycloak instance at a known URL. | Platform / Infrastructure | Reachable Keycloak environment. |
-| 3 | Create the `client-portal` realm. | Identity Admin | Realm available for portal configuration. |
-| 4 | Create the `client-portal-fe` confidential client and generate the client secret. | Identity Admin | Client ID and secret ready for server-side use. |
-| 5 | Apply Keycloak client settings, redirect URIs, logout URIs, token TTLs, and create a test user. | Identity Admin | Identity configuration matches the blueprint and is ready for verification. |
-| 6 | Add the required environment variables to the Next.js application. | Application Engineer | Runtime configuration resolves correctly in the portal. |
-| 7 | Open PR 1 for the auth foundation: `lib/auth/keycloak.ts`, `lib/auth/session.ts`, and related configuration support. | Application Engineer + Reviewer | Reusable auth foundation merged first. |
-| 8 | Open PR 2 for the auth routes: `/api/auth/login`, `/api/auth/callback`, and `/api/auth/logout`. | Application Engineer + Reviewer | End-to-end login, callback, and logout behavior available. |
-| 9 | Open PR 3 for enforcement and UI integration: `middleware.ts`, login error display, dashboard protection, and navigation or logout integration. | Application Engineer + Reviewer | Protected portal experience wired into the UI. |
-| 10 | Validate the full login flow in the browser and confirm session creation, cookie behavior, and redirect destinations. | Application Engineer / QA | Working authenticated portal entry. |
-| 11 | Validate failure cases: expired session, tampered state, token exchange failure, and logout. | Application Engineer / QA | Auth error handling and cleanup confirmed. |
-| 12 | Merge in order: PR 1 -> PR 2 -> PR 3, then complete release-readiness review. | Tech Lead / Product Owner | Controlled rollout with clear evidence that the implementation matches the blueprint. |
+### Execution Timeline
+
+| Phase | Timeline | Outcome |
+| --- | --- | --- |
+| Phase 1 - Foundation | Start of execution | Identity environment, branch strategy, and runtime configuration are ready. |
+| Phase 2 - Auth Implementation | After foundation is complete | Secure login, callback, logout, and session creation work end to end. |
+| Phase 3 - Enforcement & UI | After auth implementation is stable | Protected routes, login messaging, dashboard access, and navigation behavior are fully connected. |
+| Phase 4 - Validation | Final execution window before approval | The owner has clear evidence that the portal works securely in normal and failure scenarios. |
+
+### Phase 1 - Foundation
+
+| Step | Action | Owner | Output | Business Impact | Why It Matters |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Create a dedicated feature branch from `main` for the client portal auth delivery. | Application Engineer | Isolated implementation branch with a single approved scope. | Protects delivery quality by keeping the portal work controlled and reviewable. | The owner should care because execution stays traceable and low-risk instead of mixing with unrelated changes. |
+| 2 | Provision the Keycloak instance at a known URL. | Platform / Infrastructure | Reachable Keycloak environment. | Enables the identity system that all client access depends on. | Without this, the portal cannot authenticate users and cannot function as a secure client-facing system. |
+| 3 | Create the `client-portal` realm. | Identity Admin | Realm available for portal configuration. | Creates the business boundary that separates portal identity from other systems. | The owner should care because this establishes the controlled access space clients will actually use. |
+| 4 | Create the `client-portal-fe` confidential client and generate the client secret. | Identity Admin | Client ID and secret ready for server-side use. | Unlocks secure server-side authentication for the portal. | Without this step, the application cannot safely complete login or token exchange. |
+| 5 | Apply Keycloak client settings, redirect URIs, logout URIs, token TTLs, and create a test user. | Identity Admin | Identity configuration matches the blueprint and is ready for verification. | Ensures the login flow behaves predictably and can be tested before go-live. | The owner should care because correct identity configuration prevents broken sign-in, broken logout, and avoidable support incidents. |
+| 6 | Add the required environment variables to the Next.js application. | Application Engineer | Runtime configuration resolves correctly in the portal. | Connects the application to the approved identity environment. | Without correct configuration, the portal cannot reach the right auth endpoints and cannot be validated. |
+
+### Phase 2 - Auth Implementation
+
+| Step | Action | Owner | Output | Business Impact | Why It Matters |
+| --- | --- | --- | --- | --- | --- |
+| 7 | Open PR 1 for the auth foundation: `lib/auth/keycloak.ts`, `lib/auth/session.ts`, and related configuration support. | Application Engineer + Reviewer | Reusable auth foundation merged first. | Establishes the security core that every later portal action depends on. | The owner should care because this is the point where the portal gains a stable and repeatable auth backbone instead of one-off logic. |
+| 8 | Open PR 2 for the auth routes: `/api/auth/login`, `/api/auth/callback`, and `/api/auth/logout`. | Application Engineer + Reviewer | End-to-end login, callback, and logout behavior available. | Unlocks the actual sign-in and sign-out experience the client will use. | This matters because the portal is not usable until the full login journey works from start to finish. |
+
+### Phase 3 - Enforcement & UI
+
+| Step | Action | Owner | Output | Business Impact | Why It Matters |
+| --- | --- | --- | --- | --- | --- |
+| 9 | Open PR 3 for enforcement and UI integration: `middleware.ts`, login error display, dashboard protection, and navigation or logout integration. | Application Engineer + Reviewer | Protected portal experience wired into the UI. | Turns the auth system into a usable and controlled client experience. | The owner should care because this is where secure access becomes visible in the product, not just in backend logic. |
+
+### Phase 4 - Validation
+
+| Step | Action | Owner | Output | Business Impact | Why It Matters |
+| --- | --- | --- | --- | --- | --- |
+| 10 | Validate the full login flow in the browser and confirm session creation, cookie behavior, and redirect destinations. | Application Engineer / QA | Working authenticated portal entry. | Proves that a real client can sign in and reach the portal successfully. | This matters because go-live confidence requires evidence, not assumptions, that the main user path works. |
+| 11 | Validate failure cases: expired session, tampered state, token exchange failure, and logout. | Application Engineer / QA | Auth error handling and cleanup confirmed. | Confirms the system behaves safely when something goes wrong. | The owner should care because secure failure handling protects trust, reduces support risk, and prevents partial or confusing login states. |
+| 12 | Merge in order: PR 1 -> PR 2 -> PR 3, then complete release-readiness review. | Tech Lead / Product Owner | Controlled rollout with clear evidence that the implementation matches the blueprint. | Converts completed work into a release decision with visible controls and accountability. | This matters because the owner needs a clean approval point before client-facing rollout. |
 
 The integration order is fixed. Foundation merges before routes, routes merge before middleware and UI enforcement, and validation happens before release approval.
+
+---
+
+## Success Criteria
+
+Why this matters: the owner needs a simple definition of what “done” looks like from the outside.
+
+Decision: treat the portal as successful only when the client-facing auth experience works cleanly in normal use.
+
+- A user can log in successfully and reach the dashboard.
+- A secure session is created and persists correctly during normal use.
+- Protected routes are inaccessible without authentication.
+- Logout fully destroys the session and returns the user to a signed-out state.
+- No authentication errors appear during the normal login-to-logout flow.
+
+### Interpretation
+
+The owner can verify success without reading code. Using a test account, the user should be able to sign in, stay signed in while navigating normal protected pages, be blocked from protected pages when signed out, and fully lose access again after logout. If those visible outcomes are true and the normal flow shows no auth errors, the blueprint has been delivered successfully.
+
+---
+
+## Operational Checklist
+
+Why this matters: go-live readiness should be checked by a repeatable list, not by memory or verbal confirmation.
+
+Decision: use one operational checklist for QA validation and release readiness.
+
+- [ ] Keycloak reachable
+- [ ] Environment variables correct
+- [ ] Login flow verified
+- [ ] Session creation verified
+- [ ] Token refresh verified
+- [ ] Logout verified
+- [ ] Error scenarios tested
+
+### Usage
+
+This checklist is used for go-live readiness and QA validation. It provides a simple release control so the team can confirm that identity, configuration, user flow, session behavior, refresh behavior, logout, and failure handling have all been proven before approval.
+
+---
+
+## Execution Priority
+
+Why this matters: the owner needs to know what is mandatory now, what comes next, and what can wait.
+
+Decision: sequence work by business dependency, not by technical preference.
+
+| Priority | Scope | Description |
+| --- | --- | --- |
+| P0 | Auth system | Mandatory work that blocks everything else: identity setup, auth routes, token exchange, session creation, logout, and middleware enforcement. |
+| P1 | UI integration | Required work that makes the secure system usable for clients: login messaging, dashboard protection, navigation behavior, and sign-out entry points. |
+| P2 | Enhancements / scaling | Follow-on work after the core portal is working, such as broader portal expansion and production scaling refinements already anticipated by the design. |
+
+### Interpretation
+
+In business terms, P0 is the gate to having a functioning portal at all. P1 is what turns that secure core into a product clients can actually use with confidence. P2 matters, but it does not block initial approval or first release. This sequencing protects the business from spending effort on polish or expansion before secure access is proven.
 
 ---
 
@@ -293,6 +401,14 @@ This blueprint is intentionally not a multi-realm or multi-provider platform des
 Why this matters: this section states the approval decision in plain language and closes off ambiguous alternatives.
 
 Decision: proceed with the Client Portal as a Next.js application that serves both the client experience and the server-side auth boundary, with Keycloak as the identity provider and server-controlled sessions as the access model.
+
+### Decision Framing
+
+This is not only a technical implementation choice. It is an operational and security boundary decision about how the business allows clients to enter a protected environment.
+
+It defines where trust lives, where identity is verified, where sessions are controlled, and where access can be revoked. In practical business terms, it defines how clients access the business in a secure, professional, and auditable way.
+
+Choosing this model means the company is deliberately deciding that client access must be governed by server-side controls rather than browser convenience. That is the correct boundary because the portal is not just a website. It is the front door to protected client relationships, project visibility, and document access.
 
 ### Why This Approach
 
