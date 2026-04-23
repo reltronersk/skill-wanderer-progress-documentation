@@ -1,997 +1,381 @@
-# Contact Form Vendor Evaluation & Execution Plan
+# Strategic Solution Analysis (Operational Focus Only)
+
+## 1. Introduction (5W1H Overview)
+
+This analysis focuses exclusively on operational strategy, scalability, and workflow design for the contact form system. It evaluates how each solution affects deployment speed, day-to-day ownership, service continuity, observability, process maturity, and long-term evolution. It concentrates on how the business can receive, process, monitor, and scale submissions reliably as demand grows.
+
+| Dimension | Explanation |
+|----------|------------|
+| What | This document analyzes three operational models for contact intake: a third-party managed solution, an independent system built with Nuxt as the frontend and NestJS as the backend, and a hybrid phased strategy that uses both in sequence.<br><br>- The scope is system evolution, workflow behavior, and operating model design.<br>- The intent is not to describe code implementation details in isolation, but to define how the contact workflow functions as a business-facing intake system. |
+| Why | The business needs a decision-grade comparison that explains not only which model exists, but why each model matters operationally and how each one affects speed, control, continuity, and future growth.<br><br>- Leadership needs a defendable basis for choosing a near-term and long-term operating path.<br>- Engineering needs a structure that makes the trade-offs between vendor convenience and internal ownership explicit. |
+| Who | The document is written for business owners, operations coordinators, frontend engineers, backend or platform engineers, and decision-makers responsible for workflow maturity and growth planning.<br><br>- Owners need clarity on response continuity and business impact.<br>- Engineers need clarity on runtime boundaries, system ownership, and evolution strategy.<br>- Operations stakeholders need clarity on who reviews submissions, where work is queued, and how handoffs behave. |
+| When | This document should be used when selecting the immediate stabilization path, planning the transition to a longer-term platform, or defending investment in a NestJS-based internal system once workflow evidence exists.<br><br>- It is especially relevant when the contact flow is becoming more operationally important.<br>- It is also relevant when traffic, routing needs, or reporting expectations are growing faster than the current operating model. |
+| Where | The analysis spans the full operating surface of the contact workflow: the Nuxt frontend, third-party intake platforms, the NestJS backend, storage and notification systems, review queues, dashboards, and downstream business processes.<br><br>- It covers both externally hosted workflow surfaces and internally owned workflow control planes.<br>- It also covers the transition space where both may coexist temporarily. |
+| How | The document is organized as a deterministic 5W1H structure: each solution is presented through an overview, a 5W1H core table, a visual workflow, and an operational deep dive. The hybrid model then extends that structure with phase breakdown, transition logic, and execution timeline analysis.<br><br>- Comparative analysis follows after the solution models.<br>- Strategic interpretation, decision framework, recommendation, and conclusion then turn the structural analysis into an executable decision path. |
 
 ---
 
-## Executive Summary
+## 2. Solution Models
 
-| Area | Summary |
-|------|--------|
-| Problem | Current contact workflow lacks visibility, structured review, and reliable notification handling |
-| Business Impact | Risk of missed leads, delayed responses, and lack of intake tracking |
-| Decision | Use Formspree as Phase 1 stabilization solution |
-| Timeline | Go live within 1 week |
-| Effort | Low engineering effort (1-2 days integration) |
-| Next Step | Transition to NestJS internal system after workflow validation |
-
-### One-Line Decision
-
-We will implement Formspree this week to stabilize intake operations and prepare for a future internal system.
-
-## 1. Objective
-
-Skill-Wanderer needs a vendor comparison because the current `/contact` page already runs two real intake workflows from the Nuxt frontend:
-
-- `Hire the Guild` for project and partnership inquiries
-- `Join the Guild` for guild applications
-
-Today, those workflows are handled directly in `pages/contact.vue` with client-side writes to Firebase. That keeps the UI simple, but it does not give the business owner a strong review console, notification workflow, or low-friction operating model for day-to-day intake handling.
-
-Phase 1 is not about building the final long-term intake platform. Its role is to stabilize submission handling quickly with a managed vendor so the owner can reliably receive, review, and act on inquiries without waiting for a NestJS backend program.
-
-This document supports one immediate decision:
-
-- Which third-party form vendor should Skill-Wanderer use for Phase 1 stabilization?
-- How should that vendor be implemented in the current Nuxt codebase with minimal confusion for both the owner and engineers?
-
-## Business Impact Summary
-
-### Current Risks
-
-- Silent lead loss due to lack of structured intake visibility
-- Delayed response time due to missing notification discipline
-- No centralized review queue -> inconsistent follow-up
-- Operational ambiguity -> owner cannot confidently track inquiries
-
-### Business Consequences
-
-- Direct revenue loss from missed project inquiries
-- Reduced conversion from slow or inconsistent responses
-- Lower trust in contact channel reliability
-- Increased manual overhead and cognitive load for the owner
-
-### Phase 1 Impact (After Implementation)
-
-- Immediate visibility of all incoming submissions
-- Reliable notification system with backup channels
-- Structured review workflow with clear ownership
-- Faster response time and improved lead handling discipline
-
----
-
-## 2. Vendors Evaluated
-
-- **Formspree**
-- **Web3Forms**
-- **Getform / FormInit**
-
-Note: `getform.io` currently redirects to `forminit.com`. For evaluation purposes, this document treats that option as **Getform / FormInit**, because that is the live product a buyer would actually configure today.
-
----
-
-## 3. Vendor Comparison (High-Level)
-
-| Dimension | Formspree | Web3Forms | Getform / FormInit |
-|----------|----------|-----------|--------------------|
-| Setup complexity | Low. Create a project and two forms, then swap Nuxt handlers to vendor endpoints. | Very low. Generate an access key and post to one API endpoint. | Low to medium. Create a workspace and form objects, then map review and notification settings. |
-| Dashboard availability | Strong. Inbox, analytics, search, export, project-level management. | Basic. Submission history exists, but the operating model is still primarily email-first. | Strong. Central inbox, analytics, logs, and workspace-style administration. |
-| Notification options | Email notifications, autoresponses, multiple recipients on paid tiers, direct integrations, webhooks. | Direct email delivery, autoresponders on paid tiers, multiple recipients on paid tiers, webhooks and app integrations. | Email notifications, autoresponders, Slack, Discord, webhooks, Zapier, custom sender on higher tier. |
-| Integration flexibility | High. HTML, JavaScript, API-style integration, direct integrations, webhooks, rules on higher tier. | Medium. Works with any frontend and is extremely simple, but has fewer workflow primitives. | High. Headless endpoint, TypeScript SDK, REST API, webhooks, workspace-oriented operations. |
-| Pricing model | Free: 50 submissions/month. Paid tiers start at $10/month and scale by submissions and workflow features. | Free: 250 submissions/month. Paid tiers are low-cost yearly plans with clear submission limits. | Free: 1 form and 50 submissions/month. Paid tiers start higher but include richer operator tooling. |
-| Vendor maturity | High. Established platform, extensive help docs, status page, large public customer base. | Medium. Well-suited for static sites, lower-friction product, lighter operating surface. | Medium to high. Long-running product lineage, stronger operator features, but current branding transition adds some procurement ambiguity. |
-| Workflow capability | Strong for Phase 1. Good inbox, analytics, exports, and upgrade path into richer routing. | Adequate for simple owner inbox workflows. Best when email is the main review surface. | Strong. Good fit when the owner wants a centralized queue plus logs and team-oriented review surfaces. |
-
-## Effort & Cost Overview
-
-### Vendor Comparison (Effort vs Cost)
-
-| Vendor | Engineering Effort | Time to Implement | Cost (Estimated) | Operational Complexity |
-|--------|------------------|------------------|------------------|------------------------|
-| Formspree | Low | 1-2 days | Free -> ~$10/month | Low |
-| Web3Forms | Very Low | <1 day | Free -> Low-cost | Low |
-| FormInit | Medium | 1-2 days | Paid earlier | Medium |
-
-### Phase Effort Overview
-
-| Phase | Effort Level | Time | Description |
-|------|------------|------|-------------|
-| Phase 1 | Low | 2-5 days | Vendor integration and workflow stabilization |
-| Phase 2 | Medium-High | 4-8 weeks | Internal NestJS system development and migration |
-
-### Interpretation
-
-- Phase 1 is low-cost, low-risk, and fast to deploy
-- Phase 2 is higher investment but enables long-term control
-- Choosing Formspree minimizes initial effort while preserving future flexibility
-
----
-
-## 4. Deep Comparison (Operational)
-
-### 4.1 Formspree
+### 2.1 Third-Party Managed Solution
 
 #### Overview
 
-Formspree is the best-balanced Phase 1 option when the business needs a managed inbox, reliable notifications, and a low-effort Nuxt integration without immediately building custom backend workflow. For this repo, it maps cleanly to two separate form endpoints: one for `Hire the Guild` and one for `Join the Guild`.
+The third-party managed solution replaces direct internal submission handling with a specialized form platform such as Formspree or Web3Forms. Instead of building and operating backend submission infrastructure, the Nuxt frontend posts form payloads to a vendor-managed endpoint. The vendor then handles submission intake, spam filtering, delivery workflows, dashboard storage, and notification routing.
 
-#### 5W1H Table
+Operationally, this is the lowest-friction path to convert the current contact flow into a managed service workflow. It minimizes engineering coordination, shortens time to deploy, and gives the business an immediately usable operating console for form traffic. It also creates a clear separation between the marketing site and the submission-processing system, which can be useful when the primary goal is to stabilize intake quickly rather than to build a deeply customized lead operations platform.
 
-| Dimension | Detail |
-|----------|--------|
-| What | A managed form backend with hosted form endpoints, owner-facing inbox, analytics, export, and integration options. |
-| Why | It gives Skill-Wanderer the fastest path to a business-usable intake workflow instead of only storing submissions behind the scenes. |
-| Who | An engineer configures the two forms and integrates the endpoints. The business owner reviews submissions in Formspree and responds from email or downstream tools. |
-| When | Best for immediate Phase 1 stabilization when the goal is to go live quickly this week and reduce lead-handling ambiguity. |
-| Where | User interaction stays in Nuxt. Submission storage, notifications, and owner review happen in Formspree's inbox and connected channels. |
-| How | Create a Formspree project, create two forms, store the form IDs in Nuxt runtime configuration, and replace the current Firebase write logic with `fetch` or native form POSTs. |
+This approach is particularly relevant when current submission volume is moderate, internal engineering bandwidth is constrained, and the business needs reliable alerts and basic workflow tooling faster than it needs bespoke logic. In that context, the main operational value is not technical sophistication but reduction of internal load.
+
+#### 5W1H Core Table
+
+| Dimension | Explanation |
+|----------|------------|
+| What | A managed form-processing platform receives submissions directly from the Nuxt frontend and externalizes intake operations to a vendor-operated service.<br><br>- The website remains responsible for capture, user messaging, and light integration logic.<br>- The vendor owns hosted intake, hosted submission storage, dashboard review primitives, and basic automation surfaces.<br>- In practice, this turns the contact form from a custom-built intake flow into a configurable software service with predefined operating patterns. |
+| Why | It provides the fastest path to a usable and observable operating model without forcing the organization to build and run a backend submission platform immediately.<br><br>- It reduces coordination cost across engineering, operations, and ownership roles.<br>- It gives the business immediate visibility into inbound leads through a managed dashboard and notification stack.<br>- It is most valuable when the business problem is continuity and responsiveness, not bespoke workflow design. |
+| Who | The frontend team or a single implementation engineer handles endpoint integration, business owners or operations coordinators monitor the vendor dashboard and alert channels, and the vendor operates the submission infrastructure and workflow tooling.<br><br>- Ownership of intake reliability shifts outward to the vendor.<br>- Ownership of response discipline remains internal, especially around queue review, triage, and follow-up timing.<br>- This model often works well for lean teams where one person spans site maintenance and operational oversight. |
+| When | Best used when the immediate need is rapid stabilization, when lead volume is still low to moderate, or when the organization is not ready to absorb backend maintenance and service ownership.<br><br>- It fits early-stage or transition-stage operations.<br>- It is also effective during launch windows, campaigns, or periods where the team needs fast deployment more than architectural control.<br>- It becomes less optimal once workflow specialization outpaces vendor configuration options. |
+| Where | Submission handling occurs in the vendor platform, while the public-facing form remains on the Nuxt site.<br><br>- Operational review usually happens in the vendor dashboard, email inboxes, and optionally connected tools such as Slack, Zapier, CRM systems, or helpdesk queues.<br>- Business process state often becomes split between the vendor dashboard and whatever internal tracking system the team already uses for follow-up. |
+| How | The frontend posts form data to a vendor-provided HTTPS endpoint, the vendor processes and stores the submission, applies its filtering and routing rules, triggers notifications or downstream automations, and returns a status response that the UI uses to render success or retry feedback.<br><br>- Low-friction deployment usually means configuration rather than software design.<br>- Real-world usage often expands from email alerts to lightweight routing, tagging, and webhook forwarding as the business matures. |
 
 #### Workflow (Visual Diagram)
 
-##### High-Level Flow (Simple View)
-
 ```text
-User (Client)
-  -> Nuxt Frontend (Client)
-  -> Formspree Endpoint (Vendor System)
-  -> Notification Layer (Vendor System)
-  -> Review Layer (Business Layer)
+User
+  |
+  v
+Nuxt Frontend
+  |
+  v
+Vendor Intake Endpoint
+  |
+  v
+Vendor Processing Layer
+  |
+  +--> Filtering / routing / notification rules
+  |
+  v
+Hosted Submission Store / Dashboard
+  |
+  +--> Email / Slack / CRM notifications
+  |
+  v
+Business Review Queue
+  |
+  v
+Follow-Up Workflow and Owner Response
 ```
 
-##### Detailed System Flow (Production View)
+In a refined operating model, the workflow does not stop at notification. The business owner or coordinator receives the alert, reviews the submission in the vendor dashboard, tags or categorizes the lead, and moves it into the next business process such as discovery scheduling, applicant review, or CRM entry. This is important because the main operational advantage of a third-party tool is not simply message delivery; it is the introduction of a manageable review queue with lightweight process support.
 
-```text
-User (Client)
-  |
-  v
-Nuxt /contact Page (Client)
-  |
-  +--> Hire the Guild Tab
-  |      +--> name / email / topic / message / valuesQuality
-  |
-  +--> Join the Guild Tab
-  |      +--> name / email / skill / experience / portfolio / message
-  |
-  v
-Submission Handler (Client)
-  |
-  +--> UI state handling
-  |      +--> loading
-  |      +--> success message
-  |      +--> retryable error message
-  |
-  +--> Payload shaping
-  |      +--> form_type=hire or join
-  |      +--> source=/contact
-  |      +--> business-readable field names
-  |
-  v
-Formspree Endpoint over HTTPS (Vendor System)
-  |
-  v
-Formspree Intake Layer (Vendor System)
-  |
-  +--> Vendor validation / filtering
-  |      +--> field checks
-  |      +--> vendor-side spam controls
-  |
-  +--> Routing Decision
-  |      |
-  |      +--> hire-the-guild form
-  |      +--> join-the-guild form
-  |
-  +--> Notification Layer
-  |      |
-  |      +--> Email notification to owner inbox
-  |      +--> Slack / webhook integration (if enabled)
-  |      +--> Autoresponse to submitter (optional)
-  |
-  v
-Formspree Storage / Inbox (Vendor System)
-  |
-  +--> Submission archive
-  +--> Search / export / analytics
-  +--> Queue separated by form or tag
-  |
-  v
-Business Review Layer (Business Layer)
-  |
-  +--> Who reviews
-  |      +--> business owner
-  |      +--> optional backup reviewer
-  |
-  +--> Where review happens
-  |      +--> Formspree Inbox
-  |      +--> notification email inbox
-  |
-  +--> How decisions are made
-  |      +--> project lead
-  |      +--> partnership discussion
-  |      +--> guild applicant
-  |      +--> duplicate / low-priority archive
-  |
-  +--> Failure handling branch
-  |      +--> if notification delayed -> open Formspree Inbox directly
-  |      +--> if inbox backlog grows -> run manual dashboard sweep
-  |
-  v
-Business Action Layer (Business Layer)
-  |
-  +--> Reply email
-  +--> Calendar scheduling / proposal follow-up
-  +--> CRM or tracker entry
-  +--> Internal routing to delivery / recruiting workflow
-  |
-  v
-Feedback Loop (Business Layer + Vendor System)
-  |
-  +--> mark handled / tagged in vendor inbox
-  +--> refine notification rules and labels
-  +--> use export data to inform Phase 2 design
-```
+For team-scale operations, this workflow can be extended with rule-based routing. For example, service inquiries can be forwarded to an owner inbox, contributor applications can go to a recruiting alias, and selected fields can populate downstream systems. That makes the solution viable beyond the earliest stage, as long as business workflows remain relatively linear.
 
-##### Phase 1 Workflow (Vendor-based)
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  +--> Hire form submission
-  +--> Join form submission
-  |
-  v
-Formspree Forms A and B (Vendor System)
-  |
-  +--> Notification Layer
-  |      +--> Email
-  |      +--> Slack / webhook (optional)
-  |
-  +--> Formspree Inbox / archive
-  |
-  v
-Owner Review Loop (Business Layer)
-  |
-  +--> review in dashboard first
-  +--> confirm via email notification
-  +--> decide next business action
-  |
-  v
-Follow-up / response / tracker update (Business Layer)
-```
-
-##### Phase 2 Workflow (NestJS-based)
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  v
-Submission API / BFF (Internal System)
-  |
-  v
-NestJS Intake Controller (Internal System)
-  |
-  +--> validation / classification
-  +--> route to inquiry type
-  |
-  v
-Primary Storage (Internal System)
-  |
-  +--> inquiry records
-  +--> application records
-  |
-  v
-Queue / Worker Layer (Internal System)
-  |
-  +--> Email notification
-  +--> Slack / webhook
-  +--> CRM sync
-  |
-  +--> if notification delayed -> queue retry + internal review fallback
-  |
-  v
-Internal Review Surface (Business Layer)
-  |
-  +--> dashboard / CRM / internal admin
-  +--> manual review and categorization
-  |
-  v
-Business Action Layer (Business Layer)
-  |
-  +--> reply
-  +--> assign owner
-  +--> move to delivery or recruiting flow
-```
-
-##### Transition Workflow
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  +--> Primary Path: Formspree (Vendor System)
-  |      +--> live production intake
-  |      +--> owner continues review in Formspree Inbox
-  |
-  +--> Secondary Path: NestJS shadow or limited rollout (Internal System)
-  |      +--> mirrored or sampled submissions
-  |      +--> internal storage and notification testing
-  |
-  v
-Cutover Decision Point (Business Layer + Internal System)
-  |
-  +--> if parity confirmed
-  |      +--> promote NestJS to primary intake
-  |      +--> keep Formspree available for rollback and export
-  |
-  +--> if operational gaps remain
-         +--> keep Formspree primary
-         +--> continue transition testing
-
-Temporary coexistence:
-  Formspree = operational safety net
-  NestJS = emerging internal control plane
-
-Fallback path:
-  if cutover disrupts notifications or review visibility
-    -> route traffic back to Formspree
-    -> continue business review from vendor inbox
-```
-
-#### Operational Characteristics Table
+#### Operational Deep Dive Table
 
 | Category | Detail |
 |----------|--------|
-| Operational Characteristics | - Operates as a managed intake layer with clear separation between the public Nuxt form experience and the vendor-managed submission workflow.<br>- Daily usage pattern is dashboard-first: submissions land in a central inbox, notifications are dispatched, and the owner can review or export from one place instead of relying only on raw email threads.<br>- Supports a clean Phase 1 operating model for this repo because `Hire the Guild` and `Join the Guild` can be modeled as separate forms with separate routing and review paths.<br>- Gives the business an immediate operating console for intake visibility, which is materially better than silent storage with no structured review queue.<br>- System evolution is moderate to strong: the business can start with inbox + email, then add tags, exports, autoresponses, and integrations before committing to an internal NestJS control plane. |
-| Strengths | - Fast deployment in practical terms: a single engineer can usually configure the account, create two forms, and integrate the frontend in hours to a day.<br>- Strong owner usability: inbox, search, archive, and export reduce the risk that an inquiry is technically received but operationally missed.<br>- Flexible workflow surface for a small services business: multiple notification routes, integrations, and later upgrade options support gradual maturity without immediate backend work.<br>- Clear business impact: improves lead handling discipline quickly by making intake visible, reviewable, and auditable from a business-owner perspective.<br>- Better decision support than an email-only tool because historical submissions remain accessible in a structured queue. |
-| Limitations | - Business process state still lives primarily in a vendor tool, so the canonical review experience is external to Skill-Wanderer's own systems.<br>- Costs can rise as monthly submission volume, automation needs, or team coordination needs increase, especially if the owner wants richer routing or more advanced workflow behavior.<br>- Once the team starts relying on tags, inbox habits, exports, and vendor integrations, migration becomes more operationally involved even if technically feasible.<br>- Good for structured intake, but not ideal as a permanent system of record if the business later wants custom states, internal notes, or deeper operational analytics tied to delivery workflows. |
-| Operational Risks (Non-Security) | - Vendor lock-in risk is moderate: exports exist, but the owner's operating habits may become anchored to the Formspree inbox rather than an internal system.<br>- Pricing predictability is acceptable at low volume, but can become less comfortable if campaigns or content growth increase submissions and require higher tiers.<br>- Visibility gaps can still happen if the owner treats email as the only control plane and stops reviewing the dashboard regularly.<br>- Dependency risk is real: if Formspree changes plan features, routing behavior, or integration availability, the operational model must adapt around a third-party roadmap rather than an internal one.<br>- Follow-up drift can emerge if dashboard review, inbox replies, and downstream CRM or spreadsheet tracking are not kept aligned. |
-| Best-Fit Scenarios | - Startup landing page or service-business site where owner visibility and fast deployment matter more than deep backend customization.<br>- Portfolio or consultancy site that needs submissions captured reliably and reviewed from a clean inbox rather than from ad hoc email forwarding logic.<br>- Low-to-mid volume growth-stage site with multiple inquiry types, especially where project leads and applicant flows should be separated cleanly.<br>- Less ideal for a high-volume SaaS or internal enterprise tool where submissions are expected to feed custom lifecycle states, internal approval flows, or system-of-record reporting from day one. |
-| Scalability Behavior | - **Low traffic (0-50 submissions/day):** excellent fit; low operational overhead, strong cost efficiency, and the inbox remains easy for one owner to manage without additional process layers.<br>- **Medium traffic (50-500/day):** still viable, but costs, inbox discipline, and routing expectations become more important; the business may need stronger tagging, multiple reviewers, or downstream integrations to avoid backlog buildup.<br>- **High traffic (500+/day):** platform can still receive submissions, but business operations become the bottleneck; queue triage, cost growth, and demand for custom routing/reporting make a managed inbox less comfortable as the primary operating model.<br>- Operational implication: Formspree scales better as a small-team intake platform than as a long-term high-throughput workflow engine. |
-| Failure Behavior | - If the vendor has downtime, the frontend can remain visually available while submission handling degrades, so the owner must be ready to fall back to direct email visibility and vendor status checks.<br>- If notifications are delayed, the main fallback is dashboard-first review: the owner should check the Formspree inbox directly rather than assuming that no email means no submission.<br>- Submission-loss scenarios are more likely to appear as operational blind spots than as obvious user-facing incidents, for example when an inquiry lands in the inbox but nobody reviews it promptly.<br>- Recovery behavior is mostly vendor-dependent, while business continuity depends on having a review routine that includes inbox checks, not only notifications. |
-| System Ownership | - Formspree owns the intake infrastructure, hosted storage layer, notification mechanics, and dashboard behavior.<br>- Skill-Wanderer owns the public form UX, field design, review discipline, follow-up process, and any downstream business handling after a submission is received.<br>- Data flow is vendor-controlled once the Nuxt client posts to the endpoint; the business can export and integrate, but it does not control the runtime path or internal vendor processing behavior.<br>- Responsibility for business failure is shared but asymmetrical: vendor issues affect delivery mechanics, while missed reviews, slow replies, and process confusion remain the responsibility of the owner and internal operators.<br>- Dependency level is moderate: Formspree is a strong Phase 1 operating partner, but not the final ownership model if Skill-Wanderer wants a fully internal control plane later. |
+| Operational Characteristics | Lifecycle: A user submits through the Nuxt form, the vendor accepts and normalizes the payload, the submission lands in a hosted dashboard or queue, notifications are dispatched, and an internal operator reviews and advances the inquiry into follow-up work.<br><br>Observability sits mainly at the workflow layer through the vendor dashboard rather than inside an internally owned service boundary.<br><br>Evolution capability: The model evolves well for standardized workflows, light automation, and simple multi-channel routing, but future growth eventually pushes against vendor-defined abstractions for reporting, routing, and domain-specific process control. |
+| Strengths | - Fastest deployment path because most of the operating system already exists and only needs integration and configuration.<br>- Minimal internal operational burden because there is no custom backend, queue service, or workflow runtime to maintain.<br>- Built-in workflow primitives such as dashboards, notifications, and submission history create immediate intake visibility instead of leaving the business with raw data only.<br>- Predictable early-stage support model because troubleshooting usually stays within endpoint configuration, vendor settings, and operator review behavior rather than multi-service debugging.<br>- Strong fit for lean teams because a single engineer can often deliver the integration without creating a long-term platform maintenance commitment.<br>- Faster business continuity improvement because the business can begin receiving and processing inquiries consistently with very little lead time. |
+| Limitations | - Vendor-defined workflow ceiling means routing, enrichment, lifecycle state management, and reporting can only become as sophisticated as the platform allows.<br>- Pricing scales with growth, which means operational simplicity is purchased commercially rather than engineered internally.<br>- Limited control over retry semantics, retention behavior, dashboard structure, and export ergonomics can create friction once operations become more specialized.<br>- Business process state can become externalized into the vendor dashboard rather than remaining in systems the team considers canonical.<br>- Migration effort accumulates because historical submissions, routing rules, tags, and operator habits become embedded in the platform over time.<br>- Observability is convenient but usually shallow, which is acceptable early but restrictive once the team needs domain-specific metrics or workflow analytics. |
+| Operational Risks (Non-Security) | - Vendor downtime can pause or degrade intake, leaving the business dependent on external incident timelines and support responsiveness.<br>- Pricing changes can alter cost structure materially as traffic, routing rules, or team usage grow.<br>- Platform limits can become binding during campaigns, launches, or seasonal spikes if plan thresholds are undersized.<br>- Vendor lock-in can make later migration operationally expensive because both data and working habits accumulate in the platform.<br>- Notification delivery drift can create blind spots if the team depends on alerts but does not also review the dashboard or queue regularly.<br>- Integration drift can appear when downstream tools change schemas or workflows and the vendor configuration is not actively maintained.<br>- Reporting fragmentation can emerge if intake lives in the vendor system while follow-up state lives elsewhere. |
+| Best-Fit Scenarios | - The business needs to stabilize contact intake quickly and cannot justify immediate backend ownership.<br>- Engineering bandwidth is limited and the operational priority is reliable intake plus prompt notification, not deep customization.<br>- Form volume is still modest and routing logic remains mostly linear and easy to configure.<br>- Leadership wants a ready-made operating console for review, tagging, and basic routing rather than a custom service layer.<br>- The organization is in a short-term stabilization phase where learning how inquiries are handled is more important than designing a permanent internal platform immediately.<br>- Real-world usage patterns are still forming, making a managed service a practical way to gather operational evidence without overbuilding. |
+| Scalability Behavior | At low traffic, the model is highly efficient because it removes nearly all operational overhead and lets the business run intake with minimal engineering participation.<br><br>At moderate traffic, throughput usually scales through vendor capacity and plan upgrades while the dashboard and notification model remain workable.<br><br>At higher traffic, raw intake volume may still be manageable, but process sophistication, analytics depth, and vendor-shaped workflow semantics often become the tighter constraint before traffic throughput itself does. |
+| Failure Behavior | If the vendor endpoint or notification pipeline degrades, the practical fallback is manual dashboard review, vendor-managed retry behavior, and support escalation.<br><br>Operational recovery depends more on vendor transparency and the team's review discipline than on internal engineering intervention.<br><br>The main risk is not only downtime; it is the possibility that queue visibility or notification quality becomes inconsistent enough to slow the owner's response loop. |
+| System Ownership | Infrastructure, uptime, dashboard behavior, and standard workflow primitives are vendor-owned.<br><br>The internal team owns integration configuration, business response rules, queue review discipline, and reconciliation across downstream systems.<br><br>This creates short-term leverage, but it also means the control plane for intake behavior lives outside the organization for as long as this model remains primary. |
 
-### 4.2 Web3Forms
+### 2.2 Independent Engineering (NestJS + Nuxt)
 
 #### Overview
 
-Web3Forms is the simplest and lowest-cost operational option. It is especially strong when the business owner's preferred workflow is direct email intake and the engineering team wants the fastest possible replacement for the current Firebase submission path.
+The independent engineering option establishes a fully owned submission platform using Nuxt for the frontend and NestJS for the backend API. In this model, the public website remains responsible only for user interaction, while the backend becomes the operational control plane for receiving, persisting, routing, observing, and evolving submission workflows.
 
-#### 5W1H Table
+This approach treats the contact form not as a simple website component but as a business workflow entry point. That distinction matters. Once a form is viewed as an intake service rather than a page widget, it becomes reasonable to design it around queue visibility, lifecycle state, reporting, retry behavior, ownership boundaries, and downstream integration patterns.
 
-| Dimension | Detail |
-|----------|--------|
-| What | A lightweight API-style form backend that routes submissions to email and stores them in a basic hosted history. |
-| Why | It minimizes setup time and cost while still replacing the current hidden intake flow with a vendor-managed delivery path. |
-| Who | An engineer wires the Nuxt handlers to the Web3Forms endpoint. The business owner mainly operates through email, with occasional use of the hosted submission history. |
-| When | Best when Phase 1 must be fast and low-cost, and the owner is comfortable running intake primarily from their inbox. |
-| Where | Form capture remains on the Nuxt page. Submission delivery happens through the Web3Forms API, email inboxes, and limited hosted history/export. |
-| How | Create an access key, configure one endpoint per flow or add a `form_type` field, post the payload from Nuxt, and route alerts to the owner's inbox and backup channel. |
+Operationally, this is the highest-control option. It enables the organization to define exactly how submissions move through the system, where records live, what operational metrics exist, how alerts are emitted, and how future workflows are layered in. The trade-off is straightforward: the team must own the platform it builds. Architecture baseline: Nuxt (frontend) -> NestJS API -> Storage + Email. In a mature implementation, the NestJS API becomes the system boundary for all contact-related workflows. Storage can be relational, document-based, or event-oriented depending on reporting needs. Email can be handled synchronously for simple flows or via queued jobs for higher resilience at scale. Observability is attached at the API and workflow level rather than inferred only from the website layer.
+
+#### 5W1H Core Table
+
+| Dimension | Explanation |
+|----------|------------|
+| What | A custom submission platform in which the Nuxt frontend sends form data to a NestJS backend API that persists submissions, coordinates notifications, and provides a fully owned operational control plane.<br><br>- The public website remains the capture surface only.<br>- NestJS becomes the intake boundary for routing, persistence, workflow state, and business process orchestration.<br>- The resulting system can behave as a true operational service rather than a simple contact form endpoint. |
+| Why | It provides maximum control over process design, scaling behavior, observability, and integration strategy so the intake system can evolve with the business instead of being constrained by vendor capabilities.<br><br>- It is the strongest choice when submissions are expected to feed reporting, routing, internal tooling, or downstream automations.<br>- It allows the organization to align system behavior tightly to its operating model rather than adapting internal processes to an external platform. |
+| Who | Frontend engineers manage the Nuxt capture experience, backend or platform engineers maintain the NestJS API and supporting infrastructure, and business or operations stakeholders consume alerts, reports, and workflow state through owned systems.<br><br>- Ownership becomes explicitly internal across implementation, incident response, monitoring, and process refinement.<br>- As the system matures, product, operations, analytics, and delivery leads can all become stakeholders in the intake workflow. |
+| When | Best used when traffic is expected to grow, workflows are becoming more specialized, or the organization wants long-term ownership of operational behavior and business process data.<br><br>- It is especially appropriate once simple inbox-style intake becomes insufficient.<br>- It also makes sense when the business anticipates multi-path routing, richer reporting, or tighter coupling with internal operating systems. |
+| Where | User interaction remains in the Nuxt application, while operational orchestration happens in the NestJS service layer and supporting infrastructure chosen by the organization.<br><br>- Storage can live in relational, document, or workflow-oriented systems depending on reporting needs.<br>- Notifications and operational telemetry can be delivered through owned services, external email providers, and internal dashboards without ceding the workflow control plane. |
+| How | The frontend submits form data to NestJS endpoints, the backend classifies the request, applies business workflow rules, writes records to storage, triggers notifications or asynchronous jobs, records operational events, and returns structured status to the frontend and monitoring surfaces.<br><br>- Real-world implementations often start synchronously and then move toward queued or staged processing as volume and workflow complexity rise.<br>- This model supports deliberate design of back-office review flows instead of inheriting them from a vendor dashboard. |
 
 #### Workflow (Visual Diagram)
 
-##### High-Level Flow (Simple View)
-
 ```text
-User (Client)
-  -> Nuxt Frontend (Client)
-  -> Web3Forms API (Vendor System)
-  -> Notification Layer (Vendor System)
-  -> Review Layer (Business Layer)
+User
+  |
+  v
+Nuxt Frontend
+  |
+  v
+NestJS API
+  |
+  v
+Intake / Routing Layer
+  |
+  +--> Primary Storage
+  |
+  +--> Notification / Job Dispatch
+  |
+  +--> Operational Telemetry / Reporting Events
+  |
+  v
+Business Review Queue / Dashboard / CRM
+  |
+  v
+Owned Follow-Up Workflow and Process Iteration
 ```
 
-##### Detailed System Flow (Production View)
+This workflow can be expanded into multiple lanes without changing the public form surface. For example, client inquiries, guild applications, partnership requests, and general contact messages can all enter through a shared API boundary and then branch into different operational paths. That is one of the main practical advantages of a NestJS-based system: the backend can express domain boundaries cleanly and remain maintainable as workflows diversify.
 
-```text
-User (Client)
-  |
-  v
-Nuxt /contact Page (Client)
-  |
-  +--> Hire the Guild submission
-  +--> Join the Guild submission
-  |
-  v
-Submission Handler (Client)
-  |
-  +--> prepares payload
-  |      +--> access_key
-  |      +--> form_type
-  |      +--> business fields
-  |
-  +--> manages UI state
-  |      +--> sending
-  |      +--> success
-  |      +--> retry message
-  |
-  v
-Web3Forms API over HTTPS (Vendor System)
-  |
-  v
-Web3Forms Intake Layer (Vendor System)
-  |
-  +--> basic validation / required field handling
-  +--> vendor-side spam filtering / honeypot support
-  +--> submission acceptance decision
-  |
-  +--> Notification Layer
-  |      |
-  |      +--> Email notification (primary path)
-  |      +--> Slack / webhook / external integration (if configured)
-  |      +--> Autoresponder (paid tiers)
-  |
-  v
-Web3Forms Submission History (Vendor System)
-  |
-  +--> limited hosted history
-  +--> export / lookup fallback
-  |
-  v
-Business Review Layer (Business Layer)
-  |
-  +--> Who reviews
-  |      +--> owner as primary reviewer
-  |      +--> optional backup reviewer for overflow
-  |
-  +--> Where review happens
-  |      +--> primary: email inbox
-  |      +--> fallback: Web3Forms submission history
-  |
-  +--> How decisions are made
-  |      +--> urgent lead -> immediate reply
-  |      +--> guild application -> scheduled review
-  |      +--> low-fit inquiry -> archive or defer
-  |
-  +--> Failure handling branch
-  |      +--> if notification delayed -> check submission history directly
-  |      +--> if inbox becomes noisy -> export and track manually
-  |
-  v
-Business Action Layer (Business Layer)
-  |
-  +--> reply email
-  +--> spreadsheet / CRM entry
-  +--> internal handoff to delivery or guild review
-  |
-  v
-Feedback Loop (Business Layer)
-  |
-  +--> refine field labels / redirect behavior
-  +--> tighten owner review cadence
-  +--> use observed workflow pain to justify Phase 2 timing
-```
+For larger operating volume, the workflow can also shift from synchronous processing to staged processing. The API can acknowledge receipt quickly, persist the record, enqueue notifications, trigger downstream automations, and update workflow state asynchronously. That allows the organization to protect frontend responsiveness while scaling intake complexity behind the scenes.
 
-##### Phase 1 Workflow (Vendor-based)
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  v
-Web3Forms API (Vendor System)
-  |
-  +--> Email notification to owner
-  +--> Optional webhook / Slack path
-  +--> Submission history fallback
-  |
-  v
-Owner Review Loop (Business Layer)
-  |
-  +--> primary review in inbox
-  +--> fallback review in submission history
-  +--> manual decision on follow-up and tracking
-  |
-  v
-Business Action Layer (Business Layer)
-  |
-  +--> reply
-  +--> log in tracker
-  +--> continue manual workflow
-```
-
-##### Phase 2 Workflow (NestJS-based)
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  v
-Submission API / BFF (Internal System)
-  |
-  v
-NestJS Intake Controller (Internal System)
-  |
-  +--> classify inquiry type
-  +--> persist request
-  |
-  v
-Storage + Queue Layer (Internal System)
-  |
-  +--> primary records
-  +--> notification jobs
-  +--> webhook / CRM jobs
-  |
-  +--> if notification delay occurs -> queue retry + dashboard fallback
-  |
-  v
-Internal Review Surface (Business Layer)
-  |
-  +--> structured queue
-  +--> explicit handled states
-  |
-  v
-Business Action Layer (Business Layer)
-  |
-  +--> response
-  +--> ownership assignment
-  +--> reporting and workflow iteration
-```
-
-##### Transition Workflow
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  +--> Current production path: Web3Forms (Vendor System)
-  |      +--> email-first operational flow remains active
-  |
-  +--> Transition path: NestJS shadow or feature-flag rollout (Internal System)
-  |      +--> mirrored submission testing
-  |      +--> internal notification and queue validation
-  |
-  v
-Cutover Decision Point (Business Layer + Internal System)
-  |
-  +--> if internal review is reliable
-  |      +--> move primary traffic to NestJS
-  |      +--> retain Web3Forms briefly for rollback
-  |
-  +--> if review confidence is low
-         +--> keep Web3Forms primary
-         +--> continue transition testing
-
-Temporary coexistence:
-  Web3Forms inbox/email path = business continuity
-  NestJS queue = future-state operating model
-
-Fallback path:
-  if NestJS cutover causes review confusion
-    -> revert routing to Web3Forms
-    -> continue owner review through inbox + submission history
-```
-
-#### Operational Characteristics Table
+#### Operational Deep Dive Table
 
 | Category | Detail |
 |----------|--------|
-| Operational Characteristics | - Operates as a lightweight API backend where the primary operational experience is email delivery first and hosted history second.<br>- Fits teams that want minimum setup friction and do not need a rich vendor-side operating console from the start.<br>- For this repo, it can stabilize both contact workflows quickly, but it does so with a more manual owner review pattern than Formspree because email remains the practical center of operations.<br>- Works best when the business is intentionally keeping the workflow simple: receive, read, reply, then manually log or categorize if needed.<br>- System evolution capability is moderate: easy to wire in, but operational sophistication usually grows by adding external tools rather than by expanding the native vendor workflow. |
-| Strengths | - Fastest path to go live operationally; a developer can usually connect the frontend with minimal platform setup and very little coordination overhead.<br>- Strong cost efficiency for an early-stage site because the free tier is generous relative to common low-volume contact traffic.<br>- Good fit for a single-owner business where the inbox is already the de facto operating queue and the team does not want to manage another dashboard daily.<br>- Low business friction: simple endpoint, low ceremony, and predictable behavior are useful when the primary goal is immediate stabilization rather than workflow redesign.<br>- Can cover the essential Phase 1 job well if the team treats it as an email-routing solution rather than a structured operations platform. |
-| Limitations | - Review workflow is less mature than Formspree or FormInit because the business process tends to live in the owner's inbox instead of a strong queue-oriented dashboard.<br>- Hosted submission history exists, but it is not as naturally positioned to be the daily operating surface for multi-step review, tagging, or team collaboration.<br>- As submission volume or variety grows, manual reconciliation between inbox, submission history, and follow-up tracker becomes more likely.<br>- Less suitable when the business wants to separate response states, coordinate among multiple reviewers, or build strong intake analytics before Phase 2. |
-| Operational Risks (Non-Security) | - Vendor lock-in is lower at the data-model level than inbox-centric tools with heavier workflow features, but operational lock-in can still happen if the owner's inbox becomes the only real queue.<br>- Pricing is predictable at low volume, but add-on features and plan upgrades can become a discussion once the team wants more recipients, richer integrations, or file-heavy workflows.<br>- Operational visibility gaps are the main risk: a delayed email or crowded inbox can make a valid submission effectively invisible to the business for too long.<br>- Dependency risk is concentrated in email operations; when the inbox is the workflow, any noise, filtering, or review lapse becomes a business-process issue rather than just a tool issue.<br>- Manual triage can become inconsistent because the platform does not naturally enforce structured handling states. |
-| Best-Fit Scenarios | - Startup landing page that mainly needs quick contact capture and a low monthly cost ceiling.<br>- Portfolio site or personal consultancy site where one owner handles nearly all inquiries from email and only occasionally checks vendor history.<br>- Small campaign or brochure site that wants a low-lift Phase 1 path without committing to a richer vendor operating surface.<br>- Less ideal for a high-volume SaaS business, multi-reviewer operations team, or internal enterprise tool where queue structure, visibility, and explicit ownership states matter more than raw simplicity. |
-| Scalability Behavior | - **Low traffic (0-50 submissions/day):** strong fit; low cost, low ceremony, and manageable inbox-based review for one owner or one small team.<br>- **Medium traffic (50-500/day):** technically still workable, but inbox overload becomes the central scaling problem; the team usually needs a separate tracker, automation, or internal process discipline to avoid losing responsiveness.<br>- **High traffic (500+/day):** the platform can still accept submissions, but business operations become fragile because human review, categorization, and reporting depend too heavily on inbox behavior and manual process overlays.<br>- Cost implication: the raw platform cost may still look attractive, but the hidden cost is increased manual handling and reduced operational visibility at higher volume. |
-| Failure Behavior | - If the vendor is down, the site may still render normally while the submission path fails, leaving the owner dependent on status awareness and post-incident reconciliation.<br>- If notifications are delayed, the practical fallback is to inspect the hosted submission history directly, but that requires discipline because email remains the default operating habit.<br>- Submission loss scenarios are more likely to look like review failure than obvious system failure, such as an email landing late or being buried while the submission technically exists in vendor history.<br>- Fallback behavior is operationally weaker than dashboard-first tools because recovery depends on the owner consciously switching from inbox review to vendor-history review. |
-| System Ownership | - Web3Forms owns the backend intake service, hosted submission storage window, and notification dispatch infrastructure.<br>- Skill-Wanderer owns the public form behavior, field design, review routine, and any manual or semi-manual downstream tracking after an inquiry is received.<br>- Data flow control is vendor-mediated at submission time, while practical business control remains with the owner's inbox and any side systems used for follow-up.<br>- Responsibility for missed business outcomes sits mostly with the internal team because the major operational failure mode is not just delivery failure, but weak review discipline in an email-first model.<br>- Dependency level is moderate: vendor dependency is present, but the deeper operational dependency is actually on internal inbox habits staying disciplined as volume grows. |
+| Operational Characteristics | Lifecycle: A user submits through Nuxt, NestJS accepts the request, maps it to a domain-specific intake flow, persists the record, triggers notifications or queue events, and hands the submission into owned review and follow-up processes.<br><br>Observability can cover the full workflow surface, including intake latency, queue health, review timing, and downstream processing signals.<br><br>Evolution capability: This model has the strongest growth potential because it can expand into internal review queues, CRM synchronization, analytics enrichment, operational dashboards, and multi-step process orchestration without re-platforming the intake boundary. |
+| Strengths | - Maximum workflow flexibility because routing, persistence, notification timing, and lifecycle states can be defined to match the business rather than a vendor product.<br>- Strong scalability control because the team can make explicit decisions about API topology, queueing, storage, and fan-out behavior based on observed demand.<br>- First-class observability because the system can capture workflow-specific metrics such as intake latency, review backlog, and conversion-to-response timing.<br>- Better long-term process alignment because internal systems can reflect how the organization actually works instead of forcing the business into a vendor-defined operational model.<br>- Easier future integration because NestJS can become the hub for CRM sync, analytics pipelines, internal tools, and automation rules.<br>- Clear ownership boundary because the API becomes the formal contract between the website and the business workflow system. |
+| Limitations | - Higher initial engineering effort because the team must design not just an endpoint, but a reliable operating model around persistence, monitoring, notifications, and support ownership.<br>- Longer time to deploy because dependable operations require implementation, testing, telemetry, runbooks, and release readiness across multiple surfaces.<br>- Ongoing maintenance obligation because the organization must operate the service, manage upgrades, handle incidents, and coordinate workflow changes over time.<br>- More cross-functional coordination because frontend, backend, and business process owners all influence the intake lifecycle.<br>- Greater risk of underbuilt operations if implementation focuses only on code delivery and not on dashboards, alerting, and recoverability.<br>- Internal documentation requirement because system ownership loses value quickly when process knowledge remains implicit or concentrated in one person. |
+| Operational Risks (Non-Security) | - Delivery timelines can slip if architecture scope expands during implementation or if supporting concerns such as observability are deferred too long.<br>- Operational gaps can persist if dashboards, runbooks, and alerting are treated as optional follow-on work instead of part of the initial service boundary.<br>- Team dependency risk increases if critical knowledge about NestJS workflows, storage patterns, or incident handling sits with too few engineers.<br>- Infrastructure and service costs can become less predictable if growth outpaces capacity planning or if background processing is added without clear operational targets.<br>- Process fragmentation can emerge if API behavior, storage models, notifications, and downstream review workflows evolve separately.<br>- Regression risk rises when workflow logic changes frequently but release discipline and integration testing do not mature at the same pace.<br>- Business continuity is now an internal commitment, so outages or degraded flows require the team to diagnose, communicate, and remediate directly. |
+| Best-Fit Scenarios | - Contact intake is becoming a strategic business workflow instead of a lightweight website feature.<br>- Submission types need distinct treatment, richer routing, or growing connections to internal reporting and operational systems.<br>- Leadership expects traffic to grow materially and wants scaling decisions to remain under internal control.<br>- The team needs richer operational insight than a vendor dashboard can typically provide.<br>- The organization is prepared to treat the intake layer as an owned product with maintenance, observability, and documented operating procedures.<br>- Future growth is likely to include CRM integration, internal dashboards, workflow automation, or broader process orchestration. |
+| Scalability Behavior | At low traffic, the model can run simply with synchronous persistence and notification steps while still preserving high-quality operational data and ownership of workflow state.<br><br>At moderate traffic, the same architecture can add richer workflow state, clearer internal routing, and better reporting without changing the public intake contract.<br><br>At higher traffic, the architecture can add queues, worker services, partitioned routing, richer telemetry, and deliberate capacity controls so throughput and process sophistication scale together rather than forcing a platform change. |
+| Failure Behavior | The system can be designed to persist first, notify second, retry downstream actions, surface degraded-but-recoverable states, and support replay or manual recovery from owned records.<br><br>If downstream notifications slow or fail, the owned system can still preserve the submission record and allow manual follow-up or replay.<br><br>The main difference from a managed platform is that recovery becomes more controllable, but also more clearly the team's responsibility. |
+| System Ownership | The organization owns deployment, runbooks, dashboards, support expectations, service reliability, and change coordination across frontend and backend teams.<br><br>External delivery services can still exist, but the workflow control plane and submission state remain internally governed.<br><br>The practical constraint is not technology fit first; it is whether the organization is prepared to operate the intake layer with production-grade discipline over time. |
 
-### 4.3 Getform / FormInit
+### 2.3 Hybrid Strategy (Phased Approach)
 
 #### Overview
 
-Getform now resolves to FormInit, which positions itself as a headless form backend with a stronger operations console: centralized inbox, analytics, logs, workspace features, and richer notification options. It is operationally compelling, but its free tier is less favorable for this repo because the current `/contact` page has two separate intake flows.
+The hybrid strategy deliberately separates short-term stabilization from long-term ownership. Phase 1 uses a third-party managed form platform to restore reliable intake operations quickly. Phase 2 introduces a NestJS-based internal backend behind the Nuxt frontend once the business has clearer workflow requirements, operational lessons, and capacity to own the system.
 
-#### 5W1H Table
+This is not merely a compromise between two options. It is an operational sequencing strategy. The idea is to solve the immediate continuity problem with low effort while avoiding premature backend investment before the organization has validated real intake patterns, routing needs, reporting expectations, and team operating habits.
 
-| Dimension | Detail |
-|----------|--------|
-| What | A headless form backend with centralized submission management, analytics, logs, notifications, and team-oriented workspaces. |
-| Why | It gives the business a more review-centric operating surface than a simple email-only form service. |
-| Who | Engineering sets up the form endpoints and field mapping. The business owner or small ops team uses the inbox, logs, and analytics for daily review. |
-| When | Best when the team wants a richer operator console than Web3Forms and is comfortable moving to a paid tier earlier than with Formspree. |
-| Where | Capture remains in Nuxt. Submission operations move into the FormInit inbox, notifications, workspace, and export/API surfaces. |
-| How | Create a FormInit workspace, define the forms, wire the Nuxt handlers to the form endpoints, and configure owner notifications plus any Slack or webhook handoff needed. |
+In practice, the hybrid model reduces the risk of building the wrong internal system too early. Managed tooling becomes a temporary operational scaffold. It provides visibility, volume patterns, and workflow insight that can later inform a better NestJS service design.
+
+#### 5W1H Core Table
+
+| Dimension | Explanation |
+|----------|------------|
+| What | A phased strategy in which the organization first deploys a third-party managed service for rapid stabilization and then migrates the intake flow to an owned Nuxt plus NestJS system once operational requirements are clearer.<br><br>- Phase 1 is intentionally used as a stabilization and learning period.<br>- Phase 2 converts those learnings into an owned platform with better long-term fit.<br>- The goal is not compromise for its own sake, but sequencing: speed first, ownership second. |
+| Why | It balances short-term speed with long-term control, allowing the business to protect lead intake immediately without prematurely locking itself into either permanent vendor dependence or premature platform engineering.<br><br>- It lowers the risk of building the wrong internal system too early.<br>- It improves decision quality by grounding platform design in observed workflow behavior rather than assumptions. |
+| Who | In Phase 1, the frontend team and business stakeholders operate primarily through the vendor platform; in Phase 2, backend ownership shifts to the internal engineering team while business stakeholders transition to owned reporting and workflow surfaces.<br><br>- This model distributes responsibility by maturity stage rather than forcing full ownership on day one.<br>- It also gives operations stakeholders time to refine how they actually want intake reviewed and escalated. |
+| When | Best used when the immediate state requires fast operational improvement but the long-term direction still favors internal ownership, workflow depth, and customization.<br><br>- It is especially suitable when current workflows are still forming and the team wants to avoid premature architectural commitment.<br>- It is also a strong fit when leadership needs an executable roadmap rather than a single-step decision. |
+| Where | Early operational activity happens in the vendor dashboard, inboxes, and notification channels; later operational activity moves into systems powered by the NestJS API, owned storage, and internal reporting or workflow destinations.<br><br>- During transition, observability and process state may temporarily span both environments.<br>- That makes migration planning and data normalization important parts of the strategy. |
+| How | The business first routes submissions to a vendor-managed service, observes traffic and workflow needs, records what works and what creates friction, and then uses those findings to build and migrate toward a NestJS-based intake platform with a better-defined operating model.<br><br>- The quality of this approach depends on explicit phase goals and clear migration triggers.<br>- In practice, the handoff is strongest when the team treats Phase 1 as discovery for operations, not just as a stopgap integration. |
 
 #### Workflow (Visual Diagram)
 
-##### High-Level Flow (Simple View)
-
 ```text
-User (Client)
-  -> Nuxt Frontend (Client)
-  -> FormInit Endpoint (Vendor System)
-  -> Notification Layer (Vendor System)
-  -> Review Layer (Business Layer)
+Phase 1: Stabilization
+User
+  |
+  v
+Nuxt Frontend
+  |
+  v
+Managed Vendor Endpoint
+  |
+  v
+Vendor Processing Layer
+  |
+  +--> Vendor Dashboard / Hosted Queue
+  |
+  +--> Email / Slack / CRM Notifications
+  |
+  v
+Business Review and Stabilization Workflow
+  |
+  v
+Operational Learnings / Migration Inputs
+
+Phase 2: Internalization
+User
+  |
+  v
+Nuxt Frontend
+  |
+  v
+NestJS API
+  |
+  v
+Owned Intake / Routing Layer
+  |
+  +--> Owned Storage
+  |
+  +--> Notifications / Jobs / Reporting Events
+  |
+  v
+Internal Review Queue / Dashboard / CRM
+  |
+  v
+Continuous Optimization of Routing, Metrics, and Workflow
 ```
 
-##### Detailed System Flow (Production View)
+The key to making this strategy work is explicit phase discipline. Phase 1 is not a permanent default hidden behind temporary language. It is a bounded stabilization period with clear learning goals: understand intake volume, confirm notification expectations, observe review behavior, identify required categories, and capture the reporting questions the business actually asks.
 
-```text
-User (Client)
-  |
-  v
-Nuxt /contact Page (Client)
-  |
-  +--> Hire the Guild submission
-  +--> Join the Guild submission
-  |
-  v
-Submission Handler (Client)
-  |
-  +--> prepares structured payload
-  |      +--> sender identity fields
-  |      +--> inquiry / application fields
-  |      +--> form_type and source tags
-  |
-  +--> drives UI state
-  |      +--> loading
-  |      +--> success
-  |      +--> recoverable failure notice
-  |
-  v
-FormInit Endpoint over HTTPS (Vendor System)
-  |
-  v
-FormInit Intake Layer (Vendor System)
-  |
-  +--> built-in validations
-  +--> vendor spam filtering
-  +--> submission normalization
-  +--> UTM / metadata capture where configured
-  |
-  +--> Routing Decision
-  |      |
-  |      +--> inbox / workspace queue
-  |      +--> email notification
-  |      +--> Slack / Discord / webhook
-  |
-  v
-FormInit Storage / Inbox / Logs / Analytics (Vendor System)
-  |
-  +--> centralized submission store
-  +--> logs and delivery history
-  +--> analytics and export surface
-  +--> workspace-style visibility for multiple reviewers
-  |
-  v
-Business Review Layer (Business Layer)
-  |
-  +--> Who reviews
-  |      +--> owner
-  |      +--> optional recruiter / delivery lead
-  |
-  +--> Where review happens
-  |      +--> FormInit inbox
-  |      +--> notification channels
-  |
-  +--> How decisions are made
-  |      +--> respond now
-  |      +--> tag and defer
-  |      +--> assign internally
-  |
-  +--> Failure handling branch
-  |      +--> if notification is delayed -> review centralized inbox
-  |      +--> if queue ownership is unclear -> use logs to reconcile recent submissions
-  |
-  v
-Business Action Layer (Business Layer)
-  |
-  +--> reply email
-  +--> CRM / sheet / internal tracker update
-  +--> assign recruiting or project follow-up owner
-  |
-  v
-Feedback Loop (Business Layer + Vendor System)
-  |
-  +--> tune form layout and routing tags
-  +--> refine workspace ownership
-  +--> use logs and analytics to inform Phase 2 requirements
-```
+Phase 2 then turns those learnings into system design. Instead of guessing what the NestJS platform should do, the team builds around proven workflow needs. That sharply improves the chance that the internal system will be both leaner and more useful.
 
-##### Phase 1 Workflow (Vendor-based)
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  v
-FormInit Forms / Workspace (Vendor System)
-  |
-  +--> Central inbox
-  +--> Notification layer
-  |      +--> Email
-  |      +--> Slack / webhook / Discord
-  +--> Logs and analytics
-  |
-  v
-Owner / Team Review Loop (Business Layer)
-  |
-  +--> review in shared inbox
-  +--> tag or assign if needed
-  +--> decide business action
-  |
-  v
-Follow-up / handoff / status tracking (Business Layer)
-```
-
-##### Phase 2 Workflow (NestJS-based)
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  v
-Submission API / BFF (Internal System)
-  |
-  v
-NestJS Intake Controller (Internal System)
-  |
-  +--> validation / classification / ownership rules
-  |
-  v
-Storage + Queue Layer (Internal System)
-  |
-  +--> canonical submission records
-  +--> worker queue for notifications and integrations
-  |
-  +--> Notification Layer
-  |      +--> Email
-  |      +--> Slack / webhook
-  |      +--> CRM integration
-  |
-  +--> if notification delay occurs -> queue retry + internal review queue fallback
-  |
-  v
-Internal Review Surface (Business Layer)
-  |
-  +--> owner and team review
-  +--> assignment and categorization
-  |
-  v
-Business Action Layer (Business Layer)
-  |
-  +--> follow-up
-  +--> internal process launch
-  +--> reporting loop
-```
-
-##### Transition Workflow
-
-```text
-User (Client)
-  |
-  v
-Nuxt Frontend (Client)
-  |
-  +--> Current path: FormInit workspace flow (Vendor System)
-  |      +--> inbox / logs / analytics remain primary
-  |
-  +--> Transition path: NestJS pilot flow (Internal System)
-  |      +--> dual flow or selective traffic cutover
-  |      +--> internal storage, queue, and review validation
-  |
-  v
-Cutover Decision Point (Business Layer + Internal System)
-  |
-  +--> if team review works cleanly in internal system
-  |      +--> move primary intake to NestJS
-  |      +--> keep FormInit for rollback and historical export
-  |
-  +--> if process ownership is still unclear
-         +--> keep FormInit primary
-         +--> continue coexistence until review flow stabilizes
-
-Temporary coexistence:
-  FormInit = proven review console
-  NestJS = emerging internal system of record
-
-Fallback path:
-  if transition creates notification or assignment gaps
-    -> route production back to FormInit
-    -> resume owner review from inbox and logs
-```
-
-#### Operational Characteristics Table
+#### Operational Deep Dive Table
 
 | Category | Detail |
 |----------|--------|
-| Operational Characteristics | - Operates as a more fully featured headless form backend with a stronger operational center of gravity in its inbox, logs, analytics, and workspace model.<br>- For Skill-Wanderer, it behaves more like a lightweight intake operations platform than a simple submission relay, which is useful if the owner wants better review visibility from day one.<br>- Daily usage pattern is queue-oriented rather than purely inbox-oriented: submissions are reviewed in a central console, with logs and analytics supporting reconciliation and follow-up discipline.<br>- Better suited than Web3Forms for multi-person review or business stakeholders who want operational visibility beyond basic email notifications.<br>- System evolution capability is strong for Phase 1 and early Phase 1.5, but still ultimately vendor-bound if the business later wants a truly owned lifecycle model in NestJS. |
-| Strengths | - Strongest operator-facing surface among the evaluated vendors for centralized intake review, with inbox, logs, analytics, and workspace features all reinforcing daily operations.<br>- Better fit for teams that want explicit review visibility rather than relying on email as the only source of operational truth.<br>- Notification options and integration paths support a more mature business process, including shared review, webhooks, and communication handoffs.<br>- Logs and analytics add real business value by helping reconcile what was submitted, what was delivered, and what still needs action.<br>- Good choice when the business wants Phase 1 stabilization to feel closer to a managed queueing tool than to a simple form relay. |
-| Limitations | - The free tier is structurally awkward for this repo because the current `/contact` page already has two distinct workflows, which means a paid plan may become necessary earlier than expected.<br>- Higher baseline cost than Web3Forms for comparable early-stage usage, especially if the business is still validating volume and does not yet need richer workspace behavior.<br>- Branding transition from Getform to FormInit can create procurement and documentation friction, especially for non-technical stakeholders comparing tools or searching for support references.<br>- Richer vendor tooling can make the team more comfortable staying in the vendor environment longer, which is useful short term but can increase migration friction later. |
-| Operational Risks (Non-Security) | - Vendor lock-in risk is moderate to high because the operational habits formed around inbox, logs, workspace roles, and analytics can become embedded in daily review behavior.<br>- Pricing scaling can feel less predictable in practice because the team may need paid access not due to raw submission volume, but because form count, collaboration, or operator tooling becomes necessary early.<br>- Visibility is stronger than lighter competitors, but that can also create a false sense that the vendor dashboard is the final system of record rather than a Phase 1 operating surface.<br>- Dependency risk is meaningful: if the vendor's logs, workspace semantics, or plan packaging change, the business process may have to adapt around external constraints.<br>- Internal ambiguity can arise if some stakeholders refer to the product as Getform and others as FormInit, leading to process and support confusion during rollout. |
-| Best-Fit Scenarios | - Startup or small business site where the owner wants a real submission console, not just email delivery, and is comfortable paying for better day-to-day visibility.<br>- Portfolio or consultancy site run by more than one person, where shared review and logs are valuable from the start.<br>- High-consideration services workflow where a missed inquiry has meaningful business cost and a centralized inbox is worth more than the cheapest possible setup.<br>- Less ideal for an extremely cost-sensitive landing page, a very small solo setup that only wants inbox delivery, or a high-volume SaaS / internal enterprise tool that will soon require a fully owned internal workflow platform. |
-| Scalability Behavior | - **Low traffic (0-50 submissions/day):** very comfortable operationally; the inbox, logs, and analytics feel polished, but the value comes with a higher likelihood of moving to a paid tier sooner than simpler tools.<br>- **Medium traffic (50-500/day):** strong fit; this is where the richer operator tooling starts to pay off because multiple reviewers, queue visibility, and submission reconciliation become more important.<br>- **High traffic (500+/day):** vendor infrastructure may still handle intake volume, but strategic friction grows around cost, ownership, and the need for business-specific routing and status models; at this point the internal NestJS path becomes more compelling.<br>- Operational implication: FormInit scales better than email-first tools for review complexity, but not indefinitely for organizations that want full control over lifecycle and reporting semantics. |
-| Failure Behavior | - If the vendor experiences downtime, the business loses not only delivery but also access to its primary shared review console, which can affect both intake visibility and ongoing reconciliation work.<br>- If notifications are delayed, the centralized inbox and logs provide a stronger fallback than email-first tools because reviewers can verify recent submissions directly inside the platform.<br>- Submission loss scenarios are less likely to remain ambiguous because logs and analytics help distinguish between acceptance, notification, and review issues, but recovery still depends on vendor availability.<br>- Fallback behavior is stronger than Web3Forms because the dashboard is a more complete operational surface, but weaker than an internal NestJS system because ultimate recovery control still belongs to the vendor. |
-| System Ownership | - FormInit owns the intake runtime, hosted data flow, logs, analytics surfaces, workspace model, and notification plumbing.<br>- Skill-Wanderer owns the frontend form experience, field definitions, review responsibilities, and all downstream business actions after a submission becomes visible.<br>- Data flow is vendor-controlled during intake and short-term operations, though exports, APIs, and integrations create better escape paths than a purely inbox-bound tool.<br>- Responsibility for failures is shared: the vendor is responsible for system availability and platform behavior, while the business remains responsible for response discipline, queue ownership, and operational follow-through.<br>- Dependency level is moderate to high: the richer the team's use of inbox, logs, and workspaces, the more the vendor becomes an operational dependency rather than just a form endpoint provider. |
+| Operational Characteristics | Lifecycle: Phase 1 handles intake, notification, and review through the vendor while the team documents real operating behavior; Phase 2 moves intake, workflow state, reporting, and downstream orchestration into the owned NestJS platform.<br><br>This model improves decision quality because it lets the business observe actual operating behavior before finalizing its long-term control plane.<br><br>Evolution capability: The long-term system is informed by actual traffic patterns, review habits, routing needs, and reporting questions collected during stabilization rather than by assumptions alone. |
+| Strengths | - Balances urgency and long-term direction by delivering an immediate operational fix without abandoning the strategic goal of ownership.<br>- Lowers decision risk because real workflow data from Phase 1 shapes a more accurate Phase 2 architecture.<br>- Reduces premature complexity because the team avoids inventing abstractions before it knows which abstractions matter.<br>- Improves change management because business stakeholders can adapt to structured intake processes gradually rather than all at once.<br>- Supports better investment timing because internal engineering effort is committed when the value of customization is clearer.<br>- Creates a cleaner migration narrative because each phase has a distinct business purpose: stabilize first, internalize second. |
+| Limitations | - Two-step delivery path means the team integrates once for the managed service and then migrates again for the internal platform.<br>- Temporary duplication of concepts can appear because routing categories, reporting views, and operator habits may exist in both environments during transition.<br>- Migration planning is required because history, dashboards, and team processes must be moved deliberately rather than assumed to transfer cleanly.<br>- Risk of phase drift exists if the organization stays in Phase 1 too long or starts Phase 2 without enough operational evidence.<br>- Some lessons collected in Phase 1 may reflect vendor workflow constraints as much as pure business needs.<br>- Transitional observability can be fragmented while metrics and workflow state span vendor and owned systems. |
+| Operational Risks (Non-Security) | - Migration fatigue can delay Phase 2 if the organization underestimates the effort required to move people, habits, and reporting off the vendor platform.<br>- Phase ambiguity can create confusion about ownership, support expectations, and priority-setting if responsibilities are not explicit at each stage.<br>- Historical reporting continuity can suffer if Phase 1 and Phase 2 data are not normalized or exported in a comparable form.<br>- Tooling overlap can confuse stakeholders when alerts, dashboards, and follow-up steps exist in multiple places during the handoff period.<br>- Budget creep can occur if the vendor plan remains active longer than intended while the internal platform is also being built and operated.<br>- Decision inertia can turn the temporary phase into accidental permanence if migration triggers are not defined up front. |
+| Best-Fit Scenarios | - The business needs immediate stabilization now but still expects the intake system to become an owned strategic workflow later.<br>- Current review habits, routing logic, and reporting expectations are not yet mature enough to justify a full internal platform immediately.<br>- Leadership wants a roadmap that is both executable in the short term and credible in the long term.<br>- Engineering bandwidth is constrained today, but the organization expects future volume or process complexity to justify ownership later.<br>- The team wants to gather real operational evidence before locking in a backend design.<br>- The organization values risk reduction in decision-making as much as speed of initial deployment. |
+| Scalability Behavior | Early scaling is absorbed by the vendor, which is efficient while the organization needs time to stabilize intake and learn from real workflow behavior.<br><br>Later scaling is reclaimed by the internal team once traffic, routing complexity, and reporting needs justify deeper control and a NestJS-based operating surface.<br><br>The strength of the model is that scalability evolves in stages: low-friction scaling first, high-control scaling second. |
+| Failure Behavior | Phase 1 relies on vendor recovery patterns and disciplined manual queue review, while Phase 2 allows the organization to introduce owned persistence, replay behavior, richer operational telemetry, and more controlled degradation paths.<br><br>The migration window itself requires careful cutover planning so no submissions disappear into split workflows.<br><br>The main exposure is not technical infeasibility; it is loss of phase discipline during transition. |
+| System Ownership | Ownership is transferred in stages, which reduces near-term load but requires clarity about who owns reliability, dashboards, process changes, and operator workflow in each phase.<br><br>This is the strongest option when leadership wants immediate operational relief and a credible path to ownership, but wants the long-term platform shaped by observed workflow reality rather than guesswork. |
+
+#### Phase Breakdown
+
+##### Phase 1 - Third-Party
+
+| Category | Detail |
+|----------|--------|
+| Objective | Establish immediate intake continuity by moving form handling onto a managed operating surface that can reliably accept submissions, notify stakeholders, and create a visible review queue without waiting for an internally owned backend program to finish.<br><br>- The primary purpose is stabilization, not long-term architectural completeness.<br>- This phase is meant to stop operational ambiguity around whether inquiries are arriving, being seen, and being advanced into follow-up work.<br>- Success in this phase is measured by reliability and visibility more than by customization depth. |
+| What | The Nuxt frontend is configured to submit to a managed third-party form platform, and the business begins running the intake workflow through the vendor's dashboard, notifications, and simple routing features.<br><br>- Incoming inquiries start landing in a managed queue instead of relying on a partially bespoke operating model.<br>- Alerts are standardized so the owner or operations lead has a consistent review loop.<br>- The team begins collecting evidence about submission quality, response timing, common categories, and actual workflow pain points. |
+| Why | This phase exists because the organization needs a fast, low-risk operational reset before it invests in a fully owned system.<br><br>- It buys stability quickly while preserving time to learn how the intake process really behaves in production.<br>- It prevents the team from building a NestJS-based system around assumptions that may turn out to be wrong once real submission volume, review behavior, and routing needs are observed.<br>- It reduces the near-term coordination burden while still moving the system forward materially. |
+| Who | Frontend engineers or a single implementation owner configure the integration, business owners or operations coordinators review and triage submissions, and the vendor provides the runtime, dashboard, and baseline workflow capabilities.<br><br>- The most important human role in this phase is the person responsible for disciplined queue review and timely follow-up.<br>- Engineering involvement is intentionally light, but operational accountability must still be explicit.<br>- If multiple stakeholders exist, clear ownership of review cadence and escalation paths should be assigned early. |
+| When | Execute this phase immediately when intake reliability needs to improve faster than an internal backend can be responsibly built.<br><br>- It is the right first move when traffic is still manageable, the operating model is not yet fully understood, or engineering bandwidth is constrained.<br>- It is also appropriate when the business is preparing for campaigns, launches, or increased visibility and cannot afford an intake blind spot.<br>- This phase should begin before a full internal platform design is finalized, not after. |
+| Where | User interaction remains on the Nuxt frontend, while intake processing, hosted submission storage, and dashboard review infrastructure run on the third-party platform.<br><br>- Operational review usually takes place in vendor dashboards, email inboxes, and connected communication tools such as Slack or CRM connectors.<br>- In practice, the system boundary is split: public capture remains internal, while the operating queue is externalized for speed and simplicity. |
+| How | 1. The user submits the form from the Nuxt frontend.<br>2. The frontend posts the submission to the managed vendor endpoint.<br>3. The vendor processes the payload, applies its routing and workflow rules, and stores the submission in a hosted queue or dashboard.<br>4. Notifications are sent to the business owner or review team through configured channels.<br>5. The owner or operations coordinator triages the submission, classifies it, and advances it into follow-up work.<br>6. The team observes how often inquiries arrive, which categories recur, where the review loop slows down, and which reporting questions cannot yet be answered easily.<br><br>- The final step is critical: this phase should produce operational learning, not just short-term relief. |
+| Operational Impact | This phase immediately lowers operational ambiguity and support burden because the organization now has a visible intake queue and predictable notification path.<br><br>- It removes the need to stand up and operate a custom backend under time pressure.<br>- It centralizes short-term observability in the vendor dashboard, which helps the business confirm that submissions are being received and reviewed.<br>- It also changes the operating model from hidden intake to explicit queue management, which is a material operational improvement even before Phase 2 begins. |
+| Business Impact | The business gains faster response capability, reduced risk of overlooked inquiries, and clearer awareness of inbound demand patterns.<br><br>- For owners, this phase creates confidence that leads are reaching a real review process rather than disappearing into an opaque system.<br>- For growth, it creates a more dependable front door for service inquiries, partnership conversations, or contributor applications.<br>- It also generates evidence about which submission types matter most, which informs later investment decisions. |
+| Scalability | Low traffic: extremely efficient, because the business gets reliable intake without building internal service infrastructure.<br><br>Moderate traffic: still effective, especially when submission categories remain simple and routing rules stay manageable within the vendor dashboard.<br><br>High traffic: the platform can often absorb raw submission volume, but process flexibility, analytics depth, and custom routing logic begin to lag behind business needs; commercial scaling through higher plans may be easier than engineering changes, but it can also become more expensive and operationally restrictive over time. |
+| Failure Behavior | If the vendor service degrades, intake handling becomes dependent on the vendor's recovery posture and on whether the internal team regularly reviews the hosted queue in addition to notifications.<br><br>- Notification lag or dashboard disruption can slow follow-up even when some submissions still land successfully.<br>- Operational fallback is usually manual review, support escalation with the vendor, and temporary use of simpler routing paths until service normalizes.<br>- The important consequence is that recovery speed depends more on external platform transparency and internal review discipline than on internal engineering intervention. |
+| Exit Criteria | Phase 1 is done when stabilization has been achieved and the organization has enough operational evidence to design Phase 2 intelligently.<br><br>- Submissions are reliably reaching a visible queue.<br>- The business has a defined review owner and a repeatable follow-up cadence.<br>- The team understands its common submission categories, routing expectations, and reporting questions.<br>- Friction points in vendor workflow, observability, or portability are documented.<br>- Leadership can clearly describe why an internal NestJS-based system is now justified beyond general preference for ownership. |
+
+##### Phase 2 - Independent System
+
+| Category | Detail |
+|----------|--------|
+| Objective | Replace the temporary managed intake layer with an owned system where the Nuxt frontend remains the public capture surface and a NestJS backend becomes the authoritative operational control plane for intake, workflow state, reporting, and future evolution.<br><br>- The primary purpose is to turn the contact process into a durable internal capability.<br>- This phase is about control, adaptability, and operating maturity rather than immediate stabilization.<br>- Success is measured by owned workflow behavior, clearer operational insight, and a sustainable path for future growth. |
+| What | The team designs and implements a NestJS-based backend that receives submissions from Nuxt, persists them in owned storage, dispatches notifications or jobs, records operational events, and feeds internal review or reporting workflows.<br><br>- The vendor-managed intake surface is gradually reduced or removed.<br>- The internal system becomes the canonical source for submission state and operating data.<br>- Business review moves toward owned queues, dashboards, or connected internal systems. |
+| Why | This phase exists because the business eventually needs more control than a managed platform can reasonably provide.<br><br>- It enables internal ownership of routing logic, lifecycle state, observability, integrations, and reporting semantics.<br>- It allows the intake system to grow with the business rather than forcing the business to grow around vendor-defined abstractions.<br>- It converts the learning gathered in Phase 1 into a system designed around actual workflow needs. |
+| Who | Frontend engineers maintain the Nuxt form experience, backend or platform engineers build and operate the NestJS service, and business or operations stakeholders help define routing rules, queue behavior, reporting expectations, and acceptance criteria for the new operational model.<br><br>- Ownership becomes explicitly internal across implementation, deployment, monitoring, and operational refinement.<br>- Product, operations, analytics, and leadership stakeholders should participate because this phase defines how the organization will process inbound demand over time.<br>- Clear production ownership for the NestJS service is essential before cutover. |
+| When | Execute this phase once Phase 1 has produced enough evidence about volume, categories, response patterns, reporting gaps, and workflow pain points to justify a fully owned system.<br><br>- It should begin when the benefits of customization and control clearly outweigh the convenience of the vendor platform.<br>- Typical triggers include rising complexity in routing, need for richer reporting, growing integration needs, or the desire to standardize intake across multiple business processes.<br>- It should not begin only because ownership feels architecturally cleaner; it should begin because the business now has enough clarity to use that ownership well. |
+| Where | User interaction continues to run in Nuxt, while operational processing moves into a NestJS backend and supporting owned infrastructure for storage, telemetry, notifications, and internal review flows.<br><br>- The system boundary becomes more coherent: capture is public-facing, while intake logic and state are internally governed.<br>- Depending on implementation choices, this can include owned databases, message dispatch mechanisms, background workers, and internal dashboards or CRM synchronization points. |
+| How | 1. The user submits from the Nuxt frontend.<br>2. Nuxt sends the request to the NestJS API.<br>3. NestJS maps the submission to the appropriate intake flow and records it in owned storage.<br>4. The backend emits notifications, triggers downstream jobs, or records workflow events for reporting and follow-up.<br>5. Internal teams review submissions through owned dashboards, queues, or connected operating systems.<br>6. The system captures operational telemetry such as intake rate, queue age, review timing, and downstream processing health.<br>7. The team iterates on routing, reporting, and workflow behavior without changing the public intake contract unnecessarily.<br><br>- The key difference from Phase 1 is that workflow behavior becomes a designed internal capability instead of a configured vendor feature. |
+| Operational Impact | This phase increases operational maturity by making the organization directly responsible for service behavior, monitoring, change management, and continuity planning.<br><br>- It creates a stronger foundation for reliable reporting and controlled workflow evolution.<br>- It also requires disciplined production practices: deployment hygiene, runbooks, dashboards, and shared service ownership are no longer optional.<br>- The organization gains flexibility, but it also inherits the operational work required to use that flexibility well. |
+| Business Impact | The business gains tighter control over how inquiries are classified, measured, routed, and followed up across the organization.<br><br>- It becomes easier to align the intake system with actual service lines, growth initiatives, or operating models.<br>- Leadership can ask more specific questions about demand, response speed, backlog, and conversion because the data model is owned internally.<br>- Over time, this phase supports stronger consistency between intake, delivery planning, and business reporting. |
+| Scalability | Low traffic: the system can operate with a straightforward synchronous model while still collecting high-quality operational data.<br><br>Moderate traffic: the architecture can add richer workflow state, internal routing, and reporting surfaces without major public-facing changes.<br><br>High traffic: NestJS and surrounding infrastructure can evolve toward queued execution, worker-based processing, more deliberate storage strategy, and stronger observability, enabling the business to scale both throughput and process sophistication under internal control. |
+| Failure Behavior | If downstream notifications slow or fail, the owned system can still preserve the submission record and expose a degraded-but-recoverable state for manual follow-up or replay.<br><br>- If internal queues or dashboards lag, the team can investigate directly rather than depending on vendor support timelines.<br>- If traffic spikes create pressure, the system can be tuned incrementally through routing, asynchronous jobs, or capacity changes.<br>- The main consequence is that failure recovery becomes more controllable, but also more clearly the team's responsibility. |
+| Exit Criteria | Phase 2 is done when the internal system can replace the temporary stabilization layer without degrading operational continuity.<br><br>- Nuxt is submitting reliably to the NestJS backend.<br>- Owned storage and workflow state are authoritative for new submissions.<br>- Notifications, reporting events, and internal review flows are operating predictably.<br>- Production ownership, monitoring, and runbooks are in place.<br>- The business can review, triage, and follow up through owned systems with acceptable continuity and visibility.<br>- The managed third-party layer can be retired or reduced to a non-critical fallback without creating operational confusion. |
+
+#### Phase Transition Logic
+
+Phase 1 must come first because the current need is operational stabilization, not speculative platform construction. A managed intake layer creates immediate continuity, exposes real-world workflow behavior, and gives the organization time to learn which categories, routing rules, response patterns, and reporting questions actually matter. Without that learning window, Phase 2 risks being shaped more by architecture preference than by observed business need.
+
+The transition to Phase 2 should be triggered when three things become true at the same time: the business has a stable review process, the team has evidence about where the managed workflow is constraining operations, and leadership can articulate the concrete value of owning routing, reporting, and lifecycle behavior internally. Typical triggers include repeated need for custom routing, growing need for owned analytics, rising submission volume or category complexity, or accumulating friction from keeping intake state in an external dashboard.
+
+If Phase 2 is delayed, Phase 1 can still continue providing operational value, but the cost of delay usually appears in flexibility rather than in raw reliability. Over time, vendor-shaped workflow semantics, pricing growth, fragmented reporting, and migration inertia become more pronounced. The system keeps working, but it becomes less aligned with long-term process control and less efficient as operational complexity grows.
+
+Both phases can coexist temporarily during transition. A practical coexistence model is a controlled cutover window where the vendor-managed path continues handling production intake while the NestJS system is validated in parallel through shadow traffic, controlled subsets of submissions, or staged rollouts by inquiry type. During that overlap, the team should define which system is authoritative for new records, how reporting is reconciled, and how operators avoid reviewing the same inquiry twice. Temporary coexistence is useful, but it must be tightly governed to avoid split-brain workflow behavior.
+
+#### Execution Timeline
+
+| Phase | Duration | Goal | Outcome |
+|------|--------|------|--------|
+| Phase 1 - Third-Party Stabilization | 1-2 weeks | Restore dependable intake operations quickly and create a visible review loop. | Managed intake is live, notifications are reliable, review ownership is clear, and operational learnings are being captured. |
+| Phase 2 - Independent System Buildout | 4-8 weeks | Build the Nuxt plus NestJS internal workflow control plane around observed Phase 1 needs. | Owned intake API, storage, notification flow, and operational telemetry are ready for controlled adoption. |
+| Transition / Parallel Run | 1-2 weeks | Move from vendor-led stabilization to owned operation without disrupting intake continuity. | Cutover is validated, internal workflows are authoritative, and the managed platform can be reduced or retired cleanly. |
 
 ---
 
-## 5. Comparative Decision Matrix (Detailed)
+## 3. Comparative Analysis
 
-| Dimension | Formspree | Web3Forms | Getform / FormInit |
-|----------|----------|-----------|---------|
-| Time to Deploy | **Fast.** Same-day setup is realistic for two forms and one owner review flow. | **Very fast.** Probably the fastest initial go-live path. | **Fast.** Still quick, but slightly more admin setup than Web3Forms. |
-| Ease of Setup | **High.** Clear dashboard-led setup and form-by-form configuration. | **Very high.** Access-key model is simple and easy to wire into Nuxt. | **High.** Straightforward, but more platform concepts to configure. |
-| Dashboard UX | **Strong.** Good for owner review, search, export, and ongoing intake visibility. | **Basic.** Enough for submission history, but not the strongest review console. | **Strong.** Central inbox and logs are attractive for operational review. |
-| Notification Flexibility | **High.** Email, autoresponders, multiple recipients, integrations, webhooks. | **Medium.** Strong email workflow, but deeper routing depends on paid features and external tools. | **High.** Email plus team-oriented notification paths such as Slack, Discord, and webhooks. |
-| Workflow Capability | **High.** Best overall balance for Phase 1 queue visibility and owner usability. | **Medium.** Works well for email-first review, weaker for structured workflow. | **High.** Strong if the team wants a more explicit review console from the start. |
-| Integration Options | **High.** Direct integrations plus API and webhook style extension paths. | **Medium.** Good endpoint-based integration, lighter operational ecosystem. | **High.** Headless model, SDK, REST API, webhooks, Zapier. |
-| Scalability | **High for Phase 1.** Good headroom before internalization is needed. | **Medium.** Throughput is fine, but process sophistication becomes the limit sooner. | **High.** Handles small-team review growth well, though internal ownership may still win later. |
-| Cost Predictability | **Medium to high.** Clear monthly tiers, but richer workflow features move the cost up. | **High.** Lowest-cost predictable option for a simple intake flow. | **Medium.** Clear plans, but paid usage likely starts earlier because of form-count needs. |
-| Vendor Lock-in Risk | **Medium.** Strong dashboard value, but exports and integrations reduce exit friction. | **Medium to low.** Simpler model means fewer embedded workflow habits. | **Medium.** Central inbox and workspace habits can become sticky over time. |
+### Decision Matrix (Expanded)
 
----
-
-## Execution Priority
-
-| Priority | Timeline | Action |
-|----------|--------|--------|
-| P0 (Immediate) | This week | Replace Firebase submission with Formspree and establish owner review workflow |
-| P1 (Short-term) | 2-4 weeks | Observe submission patterns, refine notification routing, improve review discipline |
-| P2 (Next phase) | 1-2 months | Design and plan NestJS internal system based on real workflow data |
-
-### Interpretation
-
-- P0 is NOT optional - current system risks business impact
-- P1 improves operational quality
-- P2 enables long-term ownership and scalability
-
-## Final Decision (Recommended)
-
-We will:
-
-1. Implement Formspree this week as Phase 1 stabilization
-2. Use it as the primary intake system for all contact workflows (`Hire the Guild` and `Join the Guild`)
-3. Establish a consistent owner review workflow using Formspree inbox and notifications
-4. Begin collecting operational data to inform Phase 2 (NestJS internal system)
-
-### Why This Decision
-
-- Eliminates immediate risk of missed leads
-- Provides a structured and visible intake workflow
-- Requires minimal engineering effort and coordination
-- Improves response speed and operational discipline
-- Enables clean transition to an internal system later
-
-### Decision Framing
-
-This is not a tool choice - it is an operational decision:
-
-- Phase 1 = restore business continuity
-- Phase 2 = build long-term ownership
-
-## Decision Confidence
-
-| Factor | Confidence |
-|-------|-----------|
-| Implementation Feasibility | High |
-| Time to Value | High |
-| Business Impact | High |
-| Risk Level | Low |
-| Long-Term Flexibility | High |
-
-### Summary
-
-This decision is low-risk, high-impact, and reversible, making it the safest and most effective immediate action.
+| Dimension | Third-Party | Independent | Hybrid |
+|---|---|---|---|
+| Time to Deploy | Fastest. Can usually be integrated and made operational quickly because workflow tooling already exists. | Slowest. Requires API design, storage decisions, notification orchestration, and operational instrumentation before it is dependable. | Fast in Phase 1, slower in full realization. Delivers early results quickly while deferring deeper engineering to Phase 2. |
+| Operational Ownership | Lowest internal ownership. The vendor runs intake infrastructure and much of the workflow surface. | Highest internal ownership. The team owns API behavior, storage, notifications, and observability. | Shared over time. Vendor owns early operations, then ownership transitions to the internal team. |
+| Flexibility | Limited by vendor features, plans, and integration model. | Highest flexibility because workflows and data models are fully owned. | Moderate early, high later. Phase 1 is constrained, Phase 2 unlocks custom behavior. |
+| Complexity | Low initial complexity, low operating complexity, but hidden dependency complexity increases over time. | Highest engineering and operating complexity, but complexity is purposeful and controlled internally. | Moderate overall complexity because it spreads complexity over phases instead of absorbing it all at once. |
+| Scalability Control | Throughput can scale, but control of scaling behavior is largely commercial and vendor-defined. | Strongest control over throughput, storage strategy, queueing patterns, and process scaling. | Vendor handles early scaling; internal team gains control when the system matures. |
+| Maintenance Effort | Lowest ongoing engineering maintenance; most upkeep is configuration and vendor administration. | Highest maintenance effort because the team must run and evolve the platform. | Moderate maintenance effort with a shift from low to higher effort as Phase 2 begins. |
+| Business Continuity | Strong if vendor reliability is strong, but continuity depends on external platform health and support responsiveness. | Stronger long-term continuity if well operated internally, but continuity becomes the team's direct responsibility. | Strong pragmatic continuity because Phase 1 restores stability quickly while Phase 2 improves control over time. |
+| Observability | Convenient dashboard-level visibility, usually good for intake status but limited for custom business metrics. | Best observability potential because the team can instrument the workflow end to end. | Adequate early visibility with improved custom observability after migration. |
+| Vendor Dependency | High. Core intake operations and workflow behavior depend on the vendor platform. | Low. External services may still exist, but the workflow control plane is owned internally. | Medium. Dependency exists early by design, then is reduced as the internal system replaces it. |
 
 ---
 
-## 7. Phase 1 Execution Plan (CRITICAL)
+## 4. Strategic Interpretation
 
-Phase 1 should treat the current `/contact` page as **two separate intake workflows**, not one generic contact form:
+This is a strategic trade-off between:
 
-- **Workflow A:** `Hire the Guild`
-- **Workflow B:** `Join the Guild`
+- Speed
+- Control
+- Evolution
 
-The recommended Phase 1 implementation is to create **two vendor forms/endpoints** so the owner can review project inquiries and guild applications separately from day one.
+The third-party option optimizes for speed. It is the best answer when the primary business need is immediate operational stabilization and reliable workflow execution with minimal engineering load.
 
-### Step-by-Step Implementation Plan
+The independent engineering option optimizes for control. It makes sense when the intake system is expected to become a durable internal capability with custom routing, reporting, and operational logic.
 
-| Step | Action | Owner | Output |
-|------|--------|-------|--------|
-| 1 | Setup vendor account and workspace | Business owner + engineer | Active Formspree account, owner admin access, primary business email connected |
-| 2 | Configure form endpoint | Engineer | Two forms created: `hire-the-guild` and `join-the-guild`, each with a dedicated Formspree endpoint or form ID |
-| 3 | Integrate with Nuxt frontend | Engineer | `pages/contact.vue` updated to submit both forms to Formspree instead of Firebase while preserving loading, success, and error states |
-| 4 | Configure notifications | Business owner + engineer | Primary notification email, backup notification destination, and distinct labels or subject lines for `Hire` vs `Join` |
-| 5 | Test submission flow | Engineer | Verified test submissions for both tabs on `/contact`, visible in vendor inbox and received by notification channels |
-| 6 | Validate review workflow | Business owner | Defined intake review routine, ownership of first response, and a clear method for marking submissions as handled |
-| 7 | Go live | Engineer + business owner | Production form IDs enabled, smoke test passed, owner confirms live review workflow is usable |
+The hybrid option optimizes for evolution. It accepts that the business has two different needs at two different times: immediate reliability now and adaptable ownership later. That makes it strategically stronger than a simple middle-ground framing. It is not averaging the trade-offs; it is sequencing them.
 
-### Timeline
-
-| Phase | Duration | Outcome |
-|------|--------|--------|
-| Setup | 1 day | Vendor account, two forms, owner access, and notification targets configured |
-| Integration | 1-2 days | Nuxt handlers switched from Firebase writes to vendor POST flow for both contact tabs |
-| Testing | 1 day | End-to-end verification for both inquiry types, notification paths, and dashboard visibility |
-| Go-live | Same week | Contact intake stabilized in production with owner-ready review workflow |
-
-### Success Criteria
-
-- Submissions reliably received
-- Notifications delivered consistently
-- Owner can review all submissions
-- No manual gaps in workflow
-
-Recommended operating interpretation of those criteria:
-
-- Both `/contact` tabs produce visible submissions in the vendor dashboard within the same business workflow
-- The owner can distinguish `Hire` from `Join` without opening engineering tools
-- A missed email notification does not mean a missed submission because the dashboard remains the source of review truth
-
-### Operational Checklist
-
-- [ ] Email notification verified
-- [ ] Dashboard access confirmed
-- [ ] Test submissions logged
-- [ ] Review process defined
-- [ ] Backup notification channel configured
-- [ ] Separate handling for `Hire the Guild` and `Join the Guild` confirmed
-
-Recommended implementation notes for engineers:
-
-- Keep the current `isSubmitting`, `isGuildSubmitting`, success messages, and error messages so the user experience does not change during Phase 1.
-- Add vendor identifiers through Nuxt runtime configuration rather than hardcoding them into `pages/contact.vue`.
-- Preserve the current field groupings so business review remains understandable:
-  - `Hire the Guild`: `name`, `email`, `topic`, `message`, `valuesQuality`
-  - `Join the Guild`: `name`, `email`, `skill`, `experience`, `portfolio`, `message`
-- Add a lightweight `form_type` or separate endpoint naming convention so exports and downstream review remain unambiguous.
-
-Recommended operating notes for the owner:
-
-- Review the dashboard at least twice daily during the first live week.
-- Keep one backup notification destination in addition to the primary email inbox.
-- Use a simple handled-state rule from day one, for example: `New -> Reviewed -> Replied`.
+The practical leadership question is therefore not only which architecture is best in isolation. It is which operating path best matches the organization's current maturity, workload, and near-term decision horizon.
 
 ---
 
-## 8. Risks & Mitigation (Operational Only)
+## 5. Decision Framework
 
-| Risk | Mitigation |
-|------|-----------|
-| Vendor downtime | Keep direct email contact visible on the contact page, define a rollback note for temporary manual intake, and review vendor status during any incident window. |
-| Notification delay | Use both a primary notification email and one backup channel, and require dashboard review as part of the routine rather than relying on alerts alone. |
-| Misconfiguration | Configure test forms first, run a two-form test matrix before cutover, and verify each field mapping against the existing `/contact` page. |
-| Workflow confusion | Assign one named owner for initial review, define simple handled states, and separate project inquiries from guild applications from the first day of rollout. |
+### When to Choose Each
+
+Choose the third-party managed solution when the primary requirement is immediate operational stability, when engineering bandwidth is scarce, and when the business needs reliable notifications and a basic review workflow more urgently than it needs custom logic.
+
+Choose the independent Nuxt plus NestJS system when contact intake is becoming a core business workflow, when specialized routing and reporting matter, and when the team is prepared to own the service as an operational product rather than as a one-time implementation.
+
+Choose the hybrid strategy when the business needs both a fast fix and a credible long-term internal platform, but does not yet have enough operational evidence or engineering bandwidth to justify building the full owned system immediately.
+
+### Decision Heuristics
+
+- If traffic is currently low, review workflows are simple, and the business mostly needs dependable intake and notifications, choose Third-Party.
+- If traffic is growing, submissions need different routing paths, and leadership wants reporting tied to owned systems, choose Independent.
+- If the business needs rapid stabilization now but expects scaling and process complexity later, choose Hybrid.
+- If the team cannot support backend operations consistently in the near term, avoid going directly to Independent.
+- If the organization already knows it will need custom workflow states, internal analytics, and tighter integration with future systems, avoid treating Third-Party as a permanent destination.
+- If the business wants to learn from real intake behavior before defining the internal platform, use Hybrid with explicit migration checkpoints.
 
 ---
 
-## 9. Transition Readiness for Phase 2
+## 6. Recommended Strategy
 
-Phase 1 should not just stabilize intake. It should also produce the operating evidence needed to decide when a NestJS-based internal system becomes worthwhile.
+Phase 1 -> Third-party stabilization  
+Phase 2 -> NestJS-based internal system
 
-What data should be observed:
+The recommended strategy is the phased hybrid approach.
 
-- Submission volume by workflow: `Hire` vs `Join`
-- Time from submission to first owner review
-- Time from owner review to first reply
-- Number of submissions that require manual copy/paste into email, spreadsheets, or other tools
-- Common routing patterns, such as project inquiry vs partnership vs applicant review
-- Frequency of export needs or reporting requests from the owner
-- Monthly plan usage and whether the vendor tier still matches actual operating behavior
+In Phase 1, the business should move to a third-party managed form platform to stabilize intake operations quickly. This gives immediate workflow continuity: submissions are received consistently, notifications arrive promptly, and the business gains a usable dashboard for reviewing and managing incoming messages. Operationally, this closes the most urgent gap with the lowest coordination cost.
 
-Signals that indicate readiness for a NestJS system:
+In Phase 2, the organization should migrate to a NestJS-based internal system behind the Nuxt frontend. This transition should happen once the team has enough evidence about real traffic patterns, required routing rules, review cadence, reporting needs, and integration priorities. At that point, building the internal platform is no longer speculative. It becomes an informed investment in long-term process control and scalability.
 
-- The owner needs a canonical internal database rather than a vendor inbox
-- More than one person must collaborate in the review workflow regularly
-- The team wants custom status models, internal notes, or richer queue states than the vendor provides
-- Manual handoff into spreadsheets, CRM tools, or project systems becomes a daily burden
-- Reporting questions become more specific than submission counts and email notifications
-- Vendor cost or workflow constraints start shaping the business process more than the business itself
+This recommendation is strong in operational terms for three reasons.
 
-Recommended Phase 2 readiness rule:
+First, it restores business continuity quickly. The organization does not need to wait for a backend initiative to become reliable at receiving and reviewing submissions.
 
-Move to a NestJS-based intake system when the team can clearly describe the workflow it wants to own, not merely when it prefers the idea of owning it.
+Second, it improves the quality of the eventual internal architecture. The NestJS system can be designed around observed operating needs instead of assumptions, which reduces wasted engineering effort and avoids overbuilding.
+
+Third, it aligns platform ownership with organizational readiness. The business takes on backend operational responsibility only when the value of doing so is clearer and when the workflow is mature enough to justify the cost.
+
+To make this recommendation succeed, Phase 1 should have explicit exit criteria such as stable submission flow, documented review workflow, defined routing categories, agreed reporting requirements, and a target migration window. Without those criteria, the organization risks turning the temporary stabilization tool into an accidental permanent dependency.
+
+---
+
+## 7. Strategic Conclusion
+
+The contact form should be treated as an operational intake system, not just a website feature. From that perspective, the decision is not about choosing the most technically interesting option. It is about choosing the operating path that delivers reliable intake now while preserving the ability to scale process maturity later.
+
+The third-party managed model is the strongest immediate stabilizer. The independent Nuxt plus NestJS model is the strongest long-term ownership model. The hybrid strategy is the strongest overall business decision because it sequences those strengths in the right order.
+
+Executive recommendation: deploy a managed service first to restore dependable workflow execution, use that period to gather operational evidence, and then migrate to a NestJS-based internal platform once the organization is ready to own the process end to end. That path gives the business speed without surrendering evolution, and control without demanding premature complexity.
+
+The final structure remains fully aligned with 5W1H reasoning, keeps clear separation between the three solution models, uses Nuxt consistently as the frontend and NestJS consistently as the backend, preserves the expanded third-party analysis, and stays readable for both engineering and ownership audiences.
