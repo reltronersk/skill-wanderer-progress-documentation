@@ -2,6 +2,21 @@
 
 ---
 
+## Executive Summary
+
+| Area | Summary |
+|------|--------|
+| Problem | Current contact workflow lacks visibility, structured review, and reliable notification handling |
+| Business Impact | Risk of missed leads, delayed responses, and lack of intake tracking |
+| Decision | Use Formspree as Phase 1 stabilization solution |
+| Timeline | Go live within 1 week |
+| Effort | Low engineering effort (1-2 days integration) |
+| Next Step | Transition to NestJS internal system after workflow validation |
+
+### One-Line Decision
+
+We will implement Formspree this week to stabilize intake operations and prepare for a future internal system.
+
 ## 1. Objective
 
 Skill-Wanderer needs a vendor comparison because the current `/contact` page already runs two real intake workflows from the Nuxt frontend:
@@ -17,6 +32,29 @@ This document supports one immediate decision:
 
 - Which third-party form vendor should Skill-Wanderer use for Phase 1 stabilization?
 - How should that vendor be implemented in the current Nuxt codebase with minimal confusion for both the owner and engineers?
+
+## Business Impact Summary
+
+### Current Risks
+
+- Silent lead loss due to lack of structured intake visibility
+- Delayed response time due to missing notification discipline
+- No centralized review queue -> inconsistent follow-up
+- Operational ambiguity -> owner cannot confidently track inquiries
+
+### Business Consequences
+
+- Direct revenue loss from missed project inquiries
+- Reduced conversion from slow or inconsistent responses
+- Lower trust in contact channel reliability
+- Increased manual overhead and cognitive load for the owner
+
+### Phase 1 Impact (After Implementation)
+
+- Immediate visibility of all incoming submissions
+- Reliable notification system with backup channels
+- Structured review workflow with clear ownership
+- Faster response time and improved lead handling discipline
 
 ---
 
@@ -41,6 +79,29 @@ Note: `getform.io` currently redirects to `forminit.com`. For evaluation purpose
 | Pricing model | Free: 50 submissions/month. Paid tiers start at $10/month and scale by submissions and workflow features. | Free: 250 submissions/month. Paid tiers are low-cost yearly plans with clear submission limits. | Free: 1 form and 50 submissions/month. Paid tiers start higher but include richer operator tooling. |
 | Vendor maturity | High. Established platform, extensive help docs, status page, large public customer base. | Medium. Well-suited for static sites, lower-friction product, lighter operating surface. | Medium to high. Long-running product lineage, stronger operator features, but current branding transition adds some procurement ambiguity. |
 | Workflow capability | Strong for Phase 1. Good inbox, analytics, exports, and upgrade path into richer routing. | Adequate for simple owner inbox workflows. Best when email is the main review surface. | Strong. Good fit when the owner wants a centralized queue plus logs and team-oriented review surfaces. |
+
+## Effort & Cost Overview
+
+### Vendor Comparison (Effort vs Cost)
+
+| Vendor | Engineering Effort | Time to Implement | Cost (Estimated) | Operational Complexity |
+|--------|------------------|------------------|------------------|------------------------|
+| Formspree | Low | 1-2 days | Free -> ~$10/month | Low |
+| Web3Forms | Very Low | <1 day | Free -> Low-cost | Low |
+| FormInit | Medium | 1-2 days | Paid earlier | Medium |
+
+### Phase Effort Overview
+
+| Phase | Effort Level | Time | Description |
+|------|------------|------|-------------|
+| Phase 1 | Low | 2-5 days | Vendor integration and workflow stabilization |
+| Phase 2 | Medium-High | 4-8 weeks | Internal NestJS system development and migration |
+
+### Interpretation
+
+- Phase 1 is low-cost, low-risk, and fast to deploy
+- Phase 2 is higher investment but enables long-term control
+- Choosing Formspree minimizes initial effort while preserving future flexibility
 
 ---
 
@@ -774,23 +835,57 @@ Fallback path:
 
 ---
 
-## 6. Recommendation (Forced Choice)
+## Execution Priority
 
-### Recommended Vendor (Phase 1)
+| Priority | Timeline | Action |
+|----------|--------|--------|
+| P0 (Immediate) | This week | Replace Firebase submission with Formspree and establish owner review workflow |
+| P1 (Short-term) | 2-4 weeks | Observe submission patterns, refine notification routing, improve review discipline |
+| P2 (Next phase) | 1-2 months | Design and plan NestJS internal system based on real workflow data |
 
-We recommend: **Formspree**
+### Interpretation
 
-Reason:
+- P0 is NOT optional - current system risks business impact
+- P1 improves operational quality
+- P2 enables long-term ownership and scalability
 
-- It provides the best owner-facing operating model for Skill-Wanderer's actual Phase 1 problem: reliable intake, clear notifications, and a reviewable inbox for two separate workflows.
-- It maps cleanly to the current Nuxt implementation because the existing `handleSubmit()` and `handleGuildSubmit()` handlers can be swapped from Firebase writes to two Formspree endpoints with minimal UX disruption.
-- It gives the best balance between immediate deployment speed and later Phase 2 transition readiness because exports, integrations, and a mature dashboard reduce the risk of getting stuck in an email-only process.
+## Final Decision (Recommended)
 
-Practical interpretation:
+We will:
 
-- If the goal is **owner-ready stabilization with minimal confusion**, choose **Formspree**.
-- If the goal is **lowest possible cost and fastest raw setup**, choose **Web3Forms**.
-- If the goal is **richer inbox and logs for a small paid operational setup**, consider **Getform / FormInit** as the main alternative.
+1. Implement Formspree this week as Phase 1 stabilization
+2. Use it as the primary intake system for all contact workflows (`Hire the Guild` and `Join the Guild`)
+3. Establish a consistent owner review workflow using Formspree inbox and notifications
+4. Begin collecting operational data to inform Phase 2 (NestJS internal system)
+
+### Why This Decision
+
+- Eliminates immediate risk of missed leads
+- Provides a structured and visible intake workflow
+- Requires minimal engineering effort and coordination
+- Improves response speed and operational discipline
+- Enables clean transition to an internal system later
+
+### Decision Framing
+
+This is not a tool choice - it is an operational decision:
+
+- Phase 1 = restore business continuity
+- Phase 2 = build long-term ownership
+
+## Decision Confidence
+
+| Factor | Confidence |
+|-------|-----------|
+| Implementation Feasibility | High |
+| Time to Value | High |
+| Business Impact | High |
+| Risk Level | Low |
+| Long-Term Flexibility | High |
+
+### Summary
+
+This decision is low-risk, high-impact, and reversible, making it the safest and most effective immediate action.
 
 ---
 
