@@ -995,3 +995,181 @@ Signals that indicate readiness for a NestJS system:
 Recommended Phase 2 readiness rule:
 
 Move to a NestJS-based intake system when the team can clearly describe the workflow it wants to own, not merely when it prefers the idea of owning it.
+
+---
+
+# Contact Form Strategic Decision
+
+## Executive Summary
+
+| Area | Detail |
+|------|--------|
+| Problem | The current `/contact` workflow writes directly to Firebase.<br><br>The operating need is still simple: reliable delivery, clear owner visibility, and fast response for a low-volume intake stream. |
+| Current Limitation | Firebase is functioning as a persistence mechanism, not as an operating model.<br><br>It captures submissions, but it does not create a stage-appropriate intake workflow for the owner. At the same time, current submission volume and review complexity still do not justify moving immediately to a dashboard-first vendor. |
+| Decision | Adopt Web3Forms for Phase 1.<br><br>Do not implement Formspree at the current stage. |
+| Reason | Current intake volume and review complexity do not justify a dashboard-first tool.<br><br>Web3Forms matches the actual operating model, provides a lower-friction replacement for Firebase, and offers more free-tier headroom than Formspree. |
+| Timeline | Implement immediately as the next stabilization step for contact intake.<br><br>This is an operational stabilization decision for the current stage, not a permanent platform commitment. |
+| Future Plan | Reassess only when submission volume, review complexity, or routing needs cross defined trigger conditions.<br><br>Advance through Formspree, FormInit, and ultimately NestJS only when each step becomes operationally necessary. |
+
+The decision posture is direct: replace Firebase with the lightest reliable intake system that fits current operating reality, then add workflow surfaces only when real pressure justifies them.
+
+---
+
+## Core Shift
+
+The strategic shift is from a dashboard-driven workflow to an email-driven workflow.
+
+| Aspect | Formspree (Before) | Web3Forms (After) | Impact |
+|--------|--------------------|-------------------|--------|
+| Workflow Model | Dashboard-driven.<br><br>Formspree optimizes for a centralized review console where the owner gets full value only by treating the vendor inbox as part of the normal operating routine. | Email-driven.<br><br>Web3Forms optimizes for direct delivery: the form submits, the owner receives the email, the owner replies, and hosted history stays in reserve as a fallback rather than as the primary control plane. | Aligns the intake system with the business's actual operating rhythm instead of forcing adoption of a richer review model before it is needed. |
+| Complexity | Introduces a second review surface, dashboard habits, and queue-style thinking earlier in the lifecycle. | Keeps the workflow centered on the inbox with a lighter vendor surface and fewer day-to-day operating steps. | Reduces operational ceremony, lowers onboarding overhead, and keeps the Phase 1 change focused on stabilization rather than process redesign. |
+| Ownership | The vendor dashboard becomes the practical operating surface for daily intake handling. | The owner's inbox remains the practical operating surface, while the vendor primarily owns delivery and basic history. | Keeps business control close to the owner's existing behavior and delays dependency on richer vendor-specific workflow semantics. |
+| Visibility | Strong centralized visibility, search, export, and queue review if the business is ready to use them consistently. | Sufficient low-volume visibility through direct email plus submission-history fallback for reconciliation. | Accepts less native observability now in exchange for a better stage fit and lower process overhead. |
+| Speed | Fast to integrate, but its real value depends on the business also adopting a dashboard-first review discipline. | Fastest path from Firebase to reliable delivery because the technical change and the workflow change are both minimal. | Improves time-to-value and lowers the risk that the replacement introduces more operating friction than the current stage can absorb. |
+
+Formspree optimizes for a centralized review console. That is useful when submissions must be managed as a queue, reviewed by multiple people, tagged, exported, and monitored as an operating system. That is not the current state of this business.
+
+Web3Forms optimizes for direct delivery. For the current stage, that is the more accurate operating model.
+
+---
+
+## Trade-off Analysis
+
+### What We Optimize
+
+| Dimension | Why It Matters | Web3Forms Advantage |
+|----------|---------------|---------------------|
+| Speed | Phase 1 is about stabilization, not redesigning intake operations.<br><br>The longer Firebase remains in place, the longer the business operates on a hidden submission path that is not optimized for response discipline. | Web3Forms is the fastest route to a production replacement because it uses a lightweight API-style model, requires minimal platform setup, and does not require the owner to adopt a new dashboard habit to realize value. |
+| Cost | Current volume is low, so unused platform capability is a real operating inefficiency rather than an abstract optimization issue.<br><br>Paying early for queue tooling the business does not yet use is poor phase discipline. | Web3Forms provides better free-tier headroom than Formspree for the current stage and keeps the monthly cost ceiling lower while intake demand is still being validated. |
+| Simplicity | The business is still owner-centric and inbox-centric.<br><br>Extra review surfaces create more failure modes, more habit changes, and more process overhead than the current workflow can justify. | Web3Forms keeps the owner inside the inbox, with submission history available only when needed, so the system matches the real operating pattern instead of trying to upgrade it prematurely. |
+| Engineering Effort | The current contact experience already has two client-side workflows. The objective is to replace the Firebase submission path, not to redesign the business workflow and supporting review surface simultaneously. | Web3Forms minimizes implementation complexity because the integration change is mostly about swapping submission endpoints and payload handling rather than configuring forms, dashboards, and richer vendor review semantics. |
+| Phase Alignment | Early-stage systems should buy only the capability that current demand can absorb.<br><br>Premature sophistication creates operational drag and increases the odds of adopting a tool for its potential instead of its present necessity. | Web3Forms supports the exact Phase 1 job: reliable delivery, simple owner review, and low-friction replacement of Firebase without introducing a bigger operating model than current demand requires. |
+| Workflow Lock-In | Richer vendor tools create stronger habits around dashboards, tags, exports, and queue management. Those habits can be useful later, but they also create migration friction if adopted before they are necessary. | Web3Forms keeps the vendor role lighter. That reduces dependence on vendor workflow semantics and preserves optionality for future moves to Formspree, FormInit, or NestJS. |
+
+### What We Accept
+
+| Trade-off | Impact | Mitigation |
+|----------|--------|-----------|
+| Visibility | Web3Forms is weaker than Formspree as a dashboard and queue-management tool.<br><br>A delayed email or a noisy inbox can make a valid submission operationally less visible than it would be in a dashboard-first system. | Keep email as the primary control plane only while volume remains low, and use Web3Forms submission history as a fallback for reconciliation when notification timing or inbox noise creates doubt. |
+| Workflow Discipline | Submission history is a fallback mechanism, not the primary operating surface.<br><br>This means the business accepts a more manual review habit and must keep inbox discipline high because the platform does not enforce structured handling states. | Retain a single-owner operating model in Phase 1, keep the routine simple, and define explicit upgrade triggers so backlog or follow-up drift pushes the system into Formspree before it becomes a revenue risk. |
+| Scalability | As volume grows, this decision will need to be revisited earlier than if a richer tool had been adopted now.<br><br>Email-first review remains efficient only while inbox load, submission variety, and response coordination stay modest. | Treat the limitation as deferred by design, not as an oversight. Upgrade at defined thresholds rather than paying the complexity cost before the business receives corresponding value. |
+| Analytics | Native analytics and operational reporting are lighter than Formspree's dashboard-led model.<br><br>Trend analysis, tagging, and export-heavy workflows remain less mature in Phase 1. | Accept lighter reporting while volume is low and escalate to Formspree or FormInit once analytics, tagging, or auditability become part of normal operations rather than occasional needs. |
+| Queue Management | There is no strong vendor-side queue, assignment model, or explicit review-state management for multi-step workflows. | Keep the scope intentionally narrow: one primary reviewer, two simple form types, and manual action after email review. Move to Formspree or FormInit when coordination, backlog, or reviewer count makes a queue operationally necessary. |
+
+These trade-offs are accepted, not ignored. The decision is defensible because the limitations are known in advance, bounded by current volume, and paired with explicit escalation points.
+
+---
+
+## Visibility Trade-off (Intentional)
+
+The visibility trade-off is deliberate.
+
+| Factor | Current State | Decision | Justification |
+|--------|---------------|----------|---------------|
+| Submission Volume | Low-volume intake stream with no evidence of sustained queue pressure. | Use Email | Email is enough when the owner can still review submissions as they arrive without needing a dedicated review console to prevent loss or delay. |
+| Reviewer Count | One owner-centric review pattern. | No Dashboard | A dashboard adds most value when shared visibility, assignment, or formal handoff is required. That is not the current operating pattern. |
+| Backlog | Minimal; no current sign that untreated submissions are accumulating into a queue-management problem. | No Queue Needed | Queue tooling is valuable when work stacks up. The present state does not justify paying that complexity cost yet. |
+| Workflow Count | Two simple workflows with limited routing complexity. | Manual Routing Remains Acceptable | The business can still distinguish and act on inquiries without tags, assignments, or dashboard triage. |
+| Dashboard Surface Area | A dashboard would create another place the owner must remember to check, another workflow to maintain and explain, and another source of process complexity before there is enough volume to benefit from it. | Avoid for Now | The visibility gained does not yet offset the operating friction introduced by a second daily review surface. |
+| Fallback Visibility | Occasional verification and reconciliation are sufficient. | Use Submission History as Backup | Web3Forms preserves enough hosted history to validate whether a submission exists without making the platform the primary review environment. |
+
+Formspree's dashboard is not being rejected because it is weak. It is being rejected because it is premature.
+
+Email is enough at this stage because the current business action is still straightforward: receive the inquiry, evaluate it, reply, and log it manually if needed. Web3Forms supports that model directly while still preserving submission history for reconciliation if an email is delayed or missed.
+
+---
+
+## Scalability Trade-off (Deferred by Design)
+
+Scalability is not being ignored. It is being deferred on purpose.
+
+The current Firebase-backed contact flow does not show signs of needing shared queue management, structured handling states, or advanced reporting. The cost of introducing those concerns now would be higher than the value they produce.
+
+| Scale Level | Condition | System Behavior | Required Upgrade |
+|------------|----------|----------------|------------------|
+| Low | 0-50 submissions per day.<br><br>Current demand is low enough that inbox-based review remains manageable. | Email-first review works cleanly.<br><br>The workflow count is small enough that manual routing is still acceptable, and the business does not yet need a formal intake operations platform. | None. Continue operating on Web3Forms. |
+| Medium | 50-100 submissions per day, or lower volume with growing response latency, inbox strain, or follow-up drift. | The inbox begins to act like an unreliable queue.<br><br>Manual logging, reconciliation, and owner review discipline start consuming more time than the simplicity benefit is worth. | Formspree. Introduce dashboard visibility, search, export, and more explicit review discipline before leads begin to slip. |
+| High | 100+ submissions per day, or materially lower volume combined with multi-reviewer coordination, workflow branching, or reporting needs. | The email-first model begins to break down as the primary operating system.<br><br>Human review, categorization, and state tracking become a structural bottleneck rather than an acceptable manual cost. | FormInit or NestJS, depending whether the need is richer vendor workspace behavior or full internal ownership. |
+
+These thresholds are operational thresholds, not vendor hard limits. The principle remains the same: do not prepay for operational complexity that current volume does not require.
+
+---
+
+## Operational Flow Comparison
+
+| Step | Web3Forms Flow | Formspree Flow | Difference |
+|------|----------------|----------------|------------|
+| Submission | User submits the form in Nuxt, and Nuxt posts the payload to Web3Forms. | User submits the form in Nuxt, and Nuxt posts the payload to Formspree. | Submission mechanics are similar. The strategic difference begins after acceptance, not at the browser edge. |
+| Processing | Web3Forms acts primarily as a lightweight delivery layer with basic validation and hosted history. | Formspree acts as both intake endpoint and structured operating surface with stored submissions inside its dashboard. | Web3Forms behaves more like delivery infrastructure; Formspree behaves more like an intake workspace. |
+| Notification | Web3Forms delivers the submission to the owner by email as the primary operating path. | Formspree stores the submission in its dashboard and sends notifications around that dashboard-centric model. | In Web3Forms, email is the control plane. In Formspree, email is an alerting layer around a richer review console. |
+| Review | The owner reviews and responds from the inbox. Submission history is used only for fallback or reconciliation. | The owner must use the dashboard to realize the full value of the product, including richer visibility, tagging, and queue review. | Web3Forms preserves current behavior; Formspree requires the business to adopt a more structured review routine. |
+| Action | Reply, qualify, and manually log if needed. This keeps the workflow lightweight and fast at low volume. | Reply, tag, export, route, and manage review status with richer controls. | Formspree offers more workflow leverage, but only by making the operating model more formal than the current stage requires. |
+| Failure / Fallback | If delivery timing is in doubt, the owner checks Web3Forms submission history directly. | If email timing is in doubt, the owner checks the Formspree dashboard directly. | Formspree has stronger native fallback visibility, while Web3Forms keeps fallback lighter because the system is intentionally email-first. |
+
+The difference is not technical feasibility. Both tools can receive the form. The difference is the operating model each tool expects the business to adopt.
+
+---
+
+## Strategic Interpretation
+
+| Statement Type | Explanation |
+|---------------|-------------|
+| Not This | "Web3Forms is the better tool."<br><br>That framing is too shallow and is not what this decision says. Formspree is stronger if the business already needs a dashboard-first intake workflow. |
+| But This | "We do not need Formspree yet."<br><br>Web3Forms is stronger only in the current context: the immediate goal is to replace Firebase with the simplest reliable delivery path and keep the owner operating in the inbox. |
+| Strategy | Stage-based system evolution.<br><br>Choose the lightest system that satisfies the present operating need, then add dashboards, workspace tooling, or full internal ownership only when scale, coordination, or reporting pressure makes them economically justified. |
+| Decision Reading | "Formspree is early, and Web3Forms is timely."<br><br>Stage-appropriate fit matters more than feature depth when current volume profile and workflow simplicity do not require the richer tool's additional operating surface. |
+
+This is not about choosing the better tool. It is about choosing the tool that matches the current stage.
+
+---
+
+## Scaling Trigger Conditions
+
+| Trigger | Symptom | Impact | Action |
+|--------|---------|--------|--------|
+| High volume | Monthly submissions begin to approach the practical limits of the low-cost Web3Forms operating model, or daily intake creates inbox backlog and delayed response risk. | The email-first workflow stops feeling lightweight and starts behaving like an overloaded manual queue. | Move to Formspree to introduce stronger review visibility before response quality degrades into lead loss. |
+| Missed leads | Valid submissions exist, but follow-up becomes inconsistent because emails are delayed, buried, or operationally easy to overlook. | Business risk shifts from low-cost simplicity to direct revenue leakage and reputational damage. | Add a stronger review surface immediately; at minimum adopt Formspree, and escalate further if process complexity already exceeds a single-owner model. |
+| Multi-reviewer need | More than one reviewer needs shared visibility, assignment, or explicit handling states. | The inbox is no longer a trustworthy system of record for who owns what and what has already been handled. | Upgrade to Formspree or FormInit, depending how much coordination, logging, and workspace structure are required. |
+| Manual tracking overhead | Submission follow-up can no longer be managed safely through inbox review plus occasional manual logging. | Hidden operational labor begins to exceed the simplicity savings of the lightweight tool. | Introduce a dashboard or workspace model so review, logging, and reconciliation stop depending on memory and manual discipline. |
+| Analytics / Auditability Need | The business needs dashboard-based tagging, analytics, exports, or auditability as part of normal operations rather than occasional investigation. | Decision quality starts depending on structured operational data rather than email history and ad hoc notes. | Move to Formspree or FormInit, depending whether the need is basic queue visibility or richer operational instrumentation. |
+| Automation / Routing Pressure | Routing, integrations, attachments, or workflow automation become business requirements rather than optional enhancements. | Email-first handling becomes a process bottleneck and a source of manual error. | Move to FormInit or directly to NestJS if business-specific routing and automation logic must be owned internally. |
+| Ownership Threshold | The contact form becomes important enough that vendor workflow ownership is no longer acceptable. | Third-party workflow semantics become a strategic constraint rather than a convenience. | Build a NestJS-owned intake system with internal control over states, routing, storage, reporting, and downstream workflow ownership. |
+
+Revisit this decision when one or more of these conditions becomes true. Until then, the lighter operating model remains the correct choice.
+
+---
+
+## Migration Path
+
+| Phase | Tool | Capability | Reason |
+|------|------|------------|--------|
+| Phase 1 | Web3Forms | Immediate replacement for Firebase.<br><br>Email-first delivery, lightweight operation, and submission-history fallback for reconciliation. | Best fit for the present stage because the business needs reliable intake handling without prematurely adopting a dashboard-centered operating model. |
+| Phase 1.5 | Formspree | Dashboard visibility, search, export, tagging, and more explicit queue-oriented review discipline. | Move here when visibility becomes operationally necessary but a fully internal system is still premature. This is the point where shared queue review starts to matter more than raw simplicity. |
+| Phase 1.7 | FormInit | Richer workspace-style review model, stronger centralized logs, and better team-oriented operating surfaces than an email-first tool can comfortably support. | Move here when the business needs more operational structure than Formspree provides comfortably, but still wants to stay on a managed vendor surface before building internal ownership. |
+| Phase 2 | NestJS | Internal control over states, routing, storage, reporting, and downstream workflow ownership. | Build this when contact submission handling becomes part of core business infrastructure and vendor workflow ownership becomes strategically limiting. |
+
+The path is evolutionary, not automatic. Each step is conditional on the trigger matrix above, not on a predetermined calendar.
+
+---
+
+## Final Decision
+
+| Action | Timeline | Outcome |
+|--------|---------|---------|
+| Implement Web3Forms | This week | Replace Firebase-backed submission handling with a lighter, stage-appropriate external intake path that is easier to operate immediately. |
+| Use as Primary Intake | Immediate | Establish email-first review as the official Phase 1 operating model, with submission history reserved for fallback and reconciliation rather than daily control. |
+| Do Not Adopt Formspree Yet | Immediate | Avoid premature dashboard complexity, preserve lower operating overhead, and keep the system aligned with actual volume and owner workflow. |
+| Observe Usage | Ongoing | Monitor submission volume, response latency, backlog risk, reviewer count, and manual tracking friction against the defined trigger conditions. |
+| Prepare Phase 2 | Next phase | Preserve strategic optionality for Formspree, FormInit, and NestJS without prepaying for those capabilities before the business can use them. |
+
+Skill-Wanderer will use Web3Forms as the Phase 1 contact form backend.
+
+Formspree will not be adopted at this stage. Its dashboard value is real, but it is not justified by the current submission volume, owner workflow, or operational complexity of the contact channel. The present need is reliable delivery with minimal overhead, not a dashboard-centered intake system.
+
+The operating model for Phase 1 is therefore email-first by design. We will monitor volume and workflow complexity, and we will only move to Formspree, FormInit, or NestJS when the trigger conditions above are met.
+
+---
+
+## One-Line Decision
+
+> **Use Web3Forms now; buy dashboard complexity only when real volume and workflow pressure make it necessary.**
