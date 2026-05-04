@@ -1,0 +1,562 @@
+# 🧠 END-TO-END ENGINEERING BLUEPRINT
+## Client Portal System — Skill Wanderer
+
+---
+
+## 0. OBJECTIVE
+
+This document defines a **deterministic engineering blueprint** to transform the current system into a **production-grade distributed architecture**.
+
+Scope includes:
+
+- Keycloak integration (client realm)
+- Frontend refactor (Next.js)
+- Backend creation (Laravel)
+- Infrastructure routing (Cloudflare)
+- End-to-end deployment
+- Final system state (target snapshot)
+
+---
+
+## 1. CORE ENGINEERING PHILOSOPHY
+
+### Reltroner Engineering Principles
+
+```text
+Deterministic > Trial & Error
+Clarity > Cleverness
+System Thinking > Local Fix
+Minimal Blast Radius > Big Bang Rewrite
+````
+
+---
+
+### Principal Engineer Mindset
+
+```text
+✔ design before coding
+✔ define boundaries before implementation
+✔ isolate responsibilities
+✔ eliminate ambiguity
+✔ enforce system invariants
+```
+
+---
+
+## 2. CURRENT STATE (BASELINE)
+
+```text
+Monolithic BFF (Next.js)
+
+- FE + API + Auth in one repo
+- File-based session
+- Keycloak integrated directly
+- Internal API self-fetch
+- No system boundary
+```
+
+---
+
+## 3. TARGET STATE (FINAL SNAPSHOT)
+
+```text
+Browser
+  ↓
+client.skill-wanderer.com (FE)
+  ↓ HTTPS
+api.skill-wanderer.com (BE - Laravel)
+  ↓
+PostgreSQL
+  ↓
+Redis (session)
+  ↓
+sso.skill-wanderer.com (Keycloak - client realm)
+```
+
+---
+
+## 4. SYSTEM INVARIANTS (MUST HOLD)
+
+```text
+✔ Backend is the only authority
+✔ Frontend is UI only
+✔ Keycloak = identity only
+✔ Database = authorization source
+✔ Session = server-side
+✔ No token leakage to client
+✔ All access is scoped and validated
+```
+
+---
+
+## 5. ENGINEERING LIFECYCLE (MASTER FLOW)
+
+```text
+1. Observe
+2. Diagnose
+3. Define Target
+4. Isolate
+5. Implement (controlled)
+6. Validate
+7. Stabilize
+8. Refactor
+9. Enforce
+10. Deploy
+11. Audit
+```
+
+---
+
+## 6. PHASE 1 — SYSTEM OBSERVATION
+
+### Objective
+
+```text
+Understand current system behavior without assumptions
+```
+
+---
+
+### Output
+
+```text
+✔ auth flow mapping
+✔ API mapping
+✔ session lifecycle
+✔ DB dependency mapping
+✔ failure points identified
+```
+
+---
+
+## 7. PHASE 2 — PROBLEM DEFINITION
+
+### Current State
+
+```text
+- tightly coupled FE and BE
+- auth logic in frontend
+- session stored in file
+- no separation of concerns
+```
+
+---
+
+### Expected State
+
+```text
+- FE independent from BE
+- BE handles auth and logic
+- session centralized (Redis)
+- API-first architecture
+```
+
+---
+
+### Core Problem
+
+```text
+System is not designed for distributed architecture and cannot scale safely.
+```
+
+---
+
+## 8. PHASE 3 — TARGET ARCHITECTURE DESIGN
+
+### Architecture
+
+```text
+FE (Next.js) → API → BE (Laravel) → DB
+                       ↓
+                    Redis
+                       ↓
+                  Keycloak
+```
+
+---
+
+### Responsibility Split
+
+| Layer    | Responsibility        |
+| -------- | --------------------- |
+| FE       | UI only               |
+| BE       | auth + business logic |
+| Keycloak | identity              |
+| DB       | authorization         |
+| Redis    | session               |
+
+---
+
+## 9. PHASE 4 — KEYCLOAK ENGINEERING
+
+### Objective
+
+```text
+Use Keycloak as identity provider only
+```
+
+---
+
+### Required Configuration
+
+```text
+Realm: client-portal
+Client: client-portal-fe
+
+✔ Standard flow enabled
+✔ PKCE (S256) enabled
+✔ Confidential client
+✔ Valid redirect URIs updated (production domain)
+```
+
+---
+
+### Critical Rules
+
+```text
+❌ do not trust Keycloak roles
+✔ only trust DB roles
+✔ BE performs token exchange
+✔ FE never sees tokens
+```
+
+---
+
+### Security Hardening
+
+```text
+✔ replace temporary admin user
+✔ enforce strong credentials
+✔ restrict redirect URIs
+✔ disable unused flows
+```
+
+---
+
+## 10. PHASE 5 — BACKEND DEVELOPMENT (FROM ZERO)
+
+### Objective
+
+```text
+Build Laravel backend as system authority
+```
+
+---
+
+### Core Modules
+
+```text
+Auth Controller
+Session Service (Redis)
+User Mapping Service
+RBAC Module
+Project/Task Domain Services
+Audit Logger
+```
+
+---
+
+### Auth Flow
+
+```text
+GET /auth/login
+→ redirect to Keycloak
+
+GET /auth/callback
+→ exchange code
+→ create session
+
+GET /auth/me
+→ return current user
+
+POST /auth/logout
+→ destroy session
+```
+
+---
+
+### Session Implementation
+
+```text
+Storage: Redis
+
+✔ create
+✔ read
+✔ refresh
+✔ expire
+✔ destroy
+```
+
+---
+
+### Enforcement
+
+```text
+✔ middleware for session validation
+✔ role enforcement
+✔ ownership enforcement
+```
+
+---
+
+## 11. PHASE 6 — FRONTEND REFACTOR
+
+### Objective
+
+```text
+Transform FE into pure presentation layer
+```
+
+---
+
+### Remove
+
+```text
+❌ internal API routes
+❌ session logic
+❌ auth handling
+❌ business logic
+```
+
+---
+
+### Add
+
+```text
+✔ API client (fetch/axios)
+✔ auth-aware routing
+✔ error handling UI
+✔ loading states
+```
+
+---
+
+### Pattern
+
+```text
+FE → call BE API
+BE → returns JSON
+FE → render UI
+```
+
+---
+
+## 12. PHASE 7 — API CONTRACT
+
+### Structure
+
+```text
+/api/v1/*
+```
+
+---
+
+### Segmentation
+
+```text
+/api/v1/client/*
+/api/v1/admin/*
+```
+
+---
+
+### Rules
+
+```text
+✔ derive user from session
+✔ no userId from request body
+✔ explicit error responses
+✔ deterministic outputs
+```
+
+---
+
+## 13. PHASE 8 — INFRASTRUCTURE SETUP
+
+### Cloudflare Routing
+
+```text
+client.skill-wanderer.com → FE
+api.skill-wanderer.com    → BE
+sso.skill-wanderer.com    → Keycloak
+```
+
+---
+
+### TLS
+
+```text
+✔ HTTPS enforced
+✔ valid certificates
+✔ no insecure bypass
+```
+
+---
+
+### Optional
+
+```text
+✔ WAF
+✔ rate limiting
+✔ Zero Trust (admin)
+```
+
+---
+
+## 14. PHASE 9 — CONTROLLED MIGRATION
+
+### Strategy
+
+```text
+❌ no big bang rewrite
+✔ incremental transition
+✔ dual system coexistence
+```
+
+---
+
+### Steps
+
+```text
+1. Build BE
+2. Implement auth in BE
+3. Connect FE to BE (partial)
+4. Migrate endpoints one-by-one
+5. Disable old API
+```
+
+---
+
+## 15. PHASE 10 — VALIDATION
+
+### Test Matrix
+
+```text
+✔ login success
+✔ login failure
+✔ session expiry
+✔ unauthorized access
+✔ DB failure
+✔ network failure
+✔ invalid input
+```
+
+---
+
+### Observability
+
+```text
+✔ correlation ID
+✔ structured logs
+✔ auth logs
+✔ error tracking
+```
+
+---
+
+## 16. PHASE 11 — STABILIZATION
+
+```text
+✔ repeated manual testing
+✔ monitor logs
+✔ verify session lifecycle
+✔ validate RBAC behavior
+```
+
+---
+
+## 17. PHASE 12 — DEPLOYMENT
+
+### Deployment Model
+
+```text
+FE → static / SSR deploy
+BE → containerized service
+Redis → managed or container
+DB → managed PostgreSQL
+Keycloak → existing service
+```
+
+---
+
+### Deployment Flow
+
+```text
+1. deploy BE
+2. deploy Redis
+3. connect DB
+4. deploy FE
+5. configure domain routing
+6. test end-to-end
+```
+
+---
+
+## 18. PHASE 13 — FINAL SNAPSHOT (SYSTEM STATE)
+
+```text
+✔ FE fully decoupled
+✔ BE authoritative
+✔ Keycloak isolated to identity
+✔ Redis session stable
+✔ API contract enforced
+✔ security deterministic
+```
+
+---
+
+## 19. QUALITY METRICS
+
+```text
+✔ deterministic behavior
+✔ no hidden failure
+✔ full observability
+✔ reproducible system
+✔ auditable logs
+✔ minimal blast radius changes
+```
+
+---
+
+## 20. FINAL DEFINITION OF DONE (DoD)
+
+System is complete when:
+
+```text
+✔ all flows validated
+✔ no auth leakage
+✔ RBAC enforced
+✔ API contract stable
+✔ logs complete
+✔ deployment reproducible
+✔ no ambiguity remains
+```
+
+---
+
+## 🔥 FINAL STATEMENT
+
+```text
+This system is not just implemented.
+
+It is:
+✔ deterministic
+✔ secure
+✔ observable
+✔ scalable
+✔ auditable
+```
+
+---
+
+## 🚀 ONE-LINE SUMMARY
+
+```text
+You do not build features.
+
+You build a system that:
+predicts behavior,
+controls access,
+and scales without breaking.
+```
+
