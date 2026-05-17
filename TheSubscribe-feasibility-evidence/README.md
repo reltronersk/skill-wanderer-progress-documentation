@@ -1,3 +1,7 @@
+<img width="1918" height="1007" alt="image" src="https://github.com/user-attachments/assets/a7e1d00e-693c-4855-8578-e9d8e345b7d7" />
+<img width="1918" height="790" alt="image" src="https://github.com/user-attachments/assets/3263dd01-39f2-4fdd-9b23-0c70a97c8cd4" />
+<img width="1917" height="777" alt="image" src="https://github.com/user-attachments/assets/0f05f245-ac2e-4b64-8371-2baf2abc6ac9" />
+<img width="1491" height="957" alt="image" src="https://github.com/user-attachments/assets/30314ac3-ee1e-43e2-8c12-95e75e4ce424" />
 
 
 domains.json:
