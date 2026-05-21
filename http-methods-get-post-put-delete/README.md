@@ -438,43 +438,100 @@ DELETE /comments/10
 
 # HTTP Methods Comparison Matrix
 
+# HTTP Methods Comparison Matrix
+
+| Method | Primary Purpose | Safe | Idempotent | Common Usage | Request Body | Common Status Codes | Browser Cacheable | Bookmarkable | HTML Form Support | Typical Response | Common Example |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| GET | Retrieve data | Yes | Yes | Reading resources | Usually No | 200, 304, 404 | Usually Yes | Yes | Yes | Resource data | `GET /products/10` |
+| POST | Create or submit data | No | No | Form submission, resource creation | Yes | 201, 400, 422 | Usually No | No | Yes | Created resource or result | `POST /users` |
+| PUT | Replace entire resource | No | Yes | Full resource replacement | Yes | 200, 204 | Usually No | No | No | Updated resource | `PUT /users/10` |
+| PATCH | Partially update resource | No | Depends | Partial field updates | Yes | 200, 204 | Usually No | No | No | Updated resource | `PATCH /users/10` |
+| DELETE | Remove resource | No | Yes | Resource deletion | Sometimes | 200, 204, 404 | Usually No | No | No | Deletion confirmation | `DELETE /posts/15` |
+| HEAD | Retrieve headers only | Yes | Yes | Metadata inspection | No | 200, 304, 404 | Usually Yes | No | No | Response headers only | `HEAD /video.mp4` |
+| OPTIONS | Discover allowed operations | Yes | Yes | Capability discovery, preflight requests | Usually No | 200, 204 | Usually No | No | No | Allowed methods and headers | `OPTIONS /users` |
+
+---
+
+# HTTP Methods Usage Matrix
+
 | Category | GET | POST | PUT | PATCH | DELETE | HEAD | OPTIONS |
 |---|---|---|---|---|---|---|---|
-| Primary Purpose | Retrieve data | Create or submit data | Replace entire resource | Partially update resource | Remove resource | Retrieve headers only | Discover supported operations |
-| Safe Method | Yes | No | No | No | No | Yes | Yes |
-| Idempotent | Yes | No | Yes | Depends on implementation | Yes | Yes | Yes |
+| Retrieves Data | Yes | Sometimes | Sometimes | Sometimes | No | Metadata only | No |
+| Creates Resources | No | Yes | Sometimes | No | No | No | No |
+| Updates Resources | No | Sometimes | Yes | Yes | No | No | No |
+| Removes Resources | No | No | No | No | Yes | No | No |
 | Changes Server State | No | Yes | Yes | Yes | Yes | No | No |
-| Common Usage | Reading resources | Form submission | Full replacement | Partial update | Resource deletion | Metadata retrieval | Capability discovery |
-| Typical Request Body | Usually none | Yes | Yes | Yes | Sometimes | No | Usually none |
-| Typical Response Body | Resource data | Created resource or result | Updated resource | Updated resource | Confirmation or empty | Headers only | Allowed methods or headers |
-| Browser Bookmarkable | Yes | No | No | No | No | No | No |
-| Browser Cacheable | Usually yes | Usually no | Usually no | Usually no | Usually no | Usually yes | Usually no |
-| Browser Refresh Safe | Yes | Usually no | Usually yes | Depends | Usually yes | Yes | Yes |
-| Common HTML Form Support | Yes | Yes | No native support | No native support | No native support | No | No |
-| Typical HTML Form Method | GET | POST | Requires JavaScript | Requires JavaScript | Requires JavaScript | Not used in forms | Not used in forms |
-| Query Parameter Usage | Very common | Sometimes | Sometimes | Sometimes | Sometimes | Sometimes | Sometimes |
-| Typical Payload Size | Small | Small to large | Medium to large | Usually small | Small | Very small | Very small |
-| Resource Creation | No | Yes | Sometimes | No | No | No | No |
+| Usually Uses Request Body | No | Yes | Yes | Yes | Sometimes | No | Usually No |
+| Safe to Refresh Repeatedly | Yes | Usually No | Yes | Depends | Yes | Yes | Yes |
+| Suitable for Bookmarking | Yes | No | No | No | No | No | No |
+| Commonly Used in Browsers | Very Common | Very Common | Common via JavaScript | Common via JavaScript | Common via JavaScript | Less Common | Automatic browser usage |
+| Standard HTML Form Support | Yes | Yes | No | No | No | No | No |
+| Commonly Cacheable | Yes | Usually No | Usually No | Usually No | Usually No | Yes | Usually No |
+| Intended for Read Operations | Yes | No | No | No | No | Yes | No |
+| Intended for Write Operations | No | Yes | Yes | Yes | Yes | No | No |
 | Full Resource Replacement | No | No | Yes | No | No | No | No |
 | Partial Resource Update | No | No | No | Yes | No | No | No |
-| Resource Removal | No | No | No | No | Yes | No | No |
 | Metadata Retrieval | No | No | No | No | No | Yes | Sometimes |
 | Capability Discovery | No | No | No | No | No | No | Yes |
-| Common Content Types | Query string | JSON, form-data | JSON | JSON | Usually none | None | None |
-| Common Status Codes | 200, 304, 404 | 201, 400, 422 | 200, 204 | 200, 204 | 204, 404 | 200, 304 | 200, 204 |
-| Retry Safety | Usually safe | May create duplicates | Usually safe | Depends | Usually safe | Usually safe | Usually safe |
-| Typical URL Pattern | `/products/10` | `/users` | `/users/10` | `/users/10` | `/users/10` | `/files/report.pdf` | `/api/users` |
-| Request Semantics | Read-only retrieval | Submission or creation | Full replacement | Partial modification | Deletion | Header inspection | Operation inspection |
-| Side Effects Allowed | No | Yes | Yes | Yes | Yes | No | No |
-| Common Frontend Usage | Loading pages | Login forms | Updating profiles | Updating settings | Delete buttons | File checking | CORS preflight |
-| Common Backend Usage | Fetching records | Creating records | Synchronizing resources | Updating fields | Removing records | Metadata validation | Method validation |
-| Typical API Example | `GET /products` | `POST /orders` | `PUT /users/10` | `PATCH /users/10` | `DELETE /posts/15` | `HEAD /video.mp4` | `OPTIONS /users` |
-| URL Visibility | Visible in URL | Usually hidden in body | Usually hidden in body | Usually hidden in body | Usually hidden | Visible URL only | Visible URL only |
-| Sensitive Data Suitability | Poor | Good | Good | Good | Acceptable | Poor | Acceptable |
-| Common Mistake | Mutating state | Using for retrieval | Partial update misuse | Full replacement misuse | Missing authorization | Returning body accidentally | Missing CORS headers |
-| Best Used When | Reading data | Sending new data | Replacing complete data | Updating specific fields | Removing resources | Checking metadata | Discovering allowed operations |
-| Typical Client Behavior | Frequent retrieval | Interactive submission | Controlled updates | Lightweight edits | Explicit destructive action | Metadata checks | Browser negotiation |
-| Common Real Example | Opening webpages | Registering accounts | Replacing profile data | Updating email only | Deleting comments | Checking file size | Browser preflight request |
+| Common Browser Example | Opening pages | Submitting forms | Saving settings | Updating profile | Deleting comments | Checking file metadata | Browser preflight request |
+| Common API Example | `GET /products` | `POST /orders` | `PUT /users/10` | `PATCH /users/10` | `DELETE /posts/15` | `HEAD /report.pdf` | `OPTIONS /api/users` |
+
+---
+
+# HTTP Methods Retry Behavior Matrix
+
+| Method | Retry Safety | Reason |
+|---|---|---|
+| GET | Usually Safe | Does not modify server state |
+| POST | Risky | May create duplicate actions |
+| PUT | Usually Safe | Same request produces same final state |
+| PATCH | Depends | Depends on update implementation |
+| DELETE | Usually Safe | Resource remains deleted |
+| HEAD | Safe | Metadata retrieval only |
+| OPTIONS | Safe | Capability inspection only |
+
+---
+
+# HTTP Methods Request Body Matrix
+
+| Method | Request Body Usage | Typical Body Content |
+|---|---|---|
+| GET | Usually No | Query parameters in URL |
+| POST | Yes | Form data, JSON, files |
+| PUT | Yes | Full resource representation |
+| PATCH | Yes | Partial field updates |
+| DELETE | Sometimes | Optional deletion metadata |
+| HEAD | No | None |
+| OPTIONS | Usually No | Optional capability metadata |
+
+---
+
+# HTTP Methods Browser Behavior Matrix
+
+| Method | Can Be Cached | Can Be Bookmarked | Can Appear in Browser History | Common Browser Warning |
+|---|---|---|---|---|
+| GET | Yes | Yes | Yes | Usually none |
+| POST | Usually No | No | Sometimes | Form resubmission warning |
+| PUT | Usually No | No | Sometimes | None |
+| PATCH | Usually No | No | Sometimes | None |
+| DELETE | Usually No | No | Sometimes | None |
+| HEAD | Yes | No | Rarely | None |
+| OPTIONS | Usually No | No | Rarely | None |
+
+---
+
+# HTTP Methods Common Use Case Matrix
+
+| Scenario | Recommended Method |
+|---|---|
+| Load homepage | GET |
+| Submit login form | POST |
+| Upload profile image | POST |
+| Replace profile settings | PUT |
+| Update email address only | PATCH |
+| Delete notification | DELETE |
+| Check file metadata | HEAD |
+| Discover supported API methods | OPTIONS |
 
 ---
 
