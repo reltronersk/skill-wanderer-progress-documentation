@@ -436,6 +436,48 @@ DELETE /comments/10
 
 ---
 
+# HTTP Methods Comparison Matrix
+
+| Category | GET | POST | PUT | PATCH | DELETE | HEAD | OPTIONS |
+|---|---|---|---|---|---|---|---|
+| Primary Purpose | Retrieve data | Create or submit data | Replace entire resource | Partially update resource | Remove resource | Retrieve headers only | Discover supported operations |
+| Safe Method | Yes | No | No | No | No | Yes | Yes |
+| Idempotent | Yes | No | Yes | Depends on implementation | Yes | Yes | Yes |
+| Changes Server State | No | Yes | Yes | Yes | Yes | No | No |
+| Common Usage | Reading resources | Form submission | Full replacement | Partial update | Resource deletion | Metadata retrieval | Capability discovery |
+| Typical Request Body | Usually none | Yes | Yes | Yes | Sometimes | No | Usually none |
+| Typical Response Body | Resource data | Created resource or result | Updated resource | Updated resource | Confirmation or empty | Headers only | Allowed methods or headers |
+| Browser Bookmarkable | Yes | No | No | No | No | No | No |
+| Browser Cacheable | Usually yes | Usually no | Usually no | Usually no | Usually no | Usually yes | Usually no |
+| Browser Refresh Safe | Yes | Usually no | Usually yes | Depends | Usually yes | Yes | Yes |
+| Common HTML Form Support | Yes | Yes | No native support | No native support | No native support | No | No |
+| Typical HTML Form Method | GET | POST | Requires JavaScript | Requires JavaScript | Requires JavaScript | Not used in forms | Not used in forms |
+| Query Parameter Usage | Very common | Sometimes | Sometimes | Sometimes | Sometimes | Sometimes | Sometimes |
+| Typical Payload Size | Small | Small to large | Medium to large | Usually small | Small | Very small | Very small |
+| Resource Creation | No | Yes | Sometimes | No | No | No | No |
+| Full Resource Replacement | No | No | Yes | No | No | No | No |
+| Partial Resource Update | No | No | No | Yes | No | No | No |
+| Resource Removal | No | No | No | No | Yes | No | No |
+| Metadata Retrieval | No | No | No | No | No | Yes | Sometimes |
+| Capability Discovery | No | No | No | No | No | No | Yes |
+| Common Content Types | Query string | JSON, form-data | JSON | JSON | Usually none | None | None |
+| Common Status Codes | 200, 304, 404 | 201, 400, 422 | 200, 204 | 200, 204 | 204, 404 | 200, 304 | 200, 204 |
+| Retry Safety | Usually safe | May create duplicates | Usually safe | Depends | Usually safe | Usually safe | Usually safe |
+| Typical URL Pattern | `/products/10` | `/users` | `/users/10` | `/users/10` | `/users/10` | `/files/report.pdf` | `/api/users` |
+| Request Semantics | Read-only retrieval | Submission or creation | Full replacement | Partial modification | Deletion | Header inspection | Operation inspection |
+| Side Effects Allowed | No | Yes | Yes | Yes | Yes | No | No |
+| Common Frontend Usage | Loading pages | Login forms | Updating profiles | Updating settings | Delete buttons | File checking | CORS preflight |
+| Common Backend Usage | Fetching records | Creating records | Synchronizing resources | Updating fields | Removing records | Metadata validation | Method validation |
+| Typical API Example | `GET /products` | `POST /orders` | `PUT /users/10` | `PATCH /users/10` | `DELETE /posts/15` | `HEAD /video.mp4` | `OPTIONS /users` |
+| URL Visibility | Visible in URL | Usually hidden in body | Usually hidden in body | Usually hidden in body | Usually hidden | Visible URL only | Visible URL only |
+| Sensitive Data Suitability | Poor | Good | Good | Good | Acceptable | Poor | Acceptable |
+| Common Mistake | Mutating state | Using for retrieval | Partial update misuse | Full replacement misuse | Missing authorization | Returning body accidentally | Missing CORS headers |
+| Best Used When | Reading data | Sending new data | Replacing complete data | Updating specific fields | Removing resources | Checking metadata | Discovering allowed operations |
+| Typical Client Behavior | Frequent retrieval | Interactive submission | Controlled updates | Lightweight edits | Explicit destructive action | Metadata checks | Browser negotiation |
+| Common Real Example | Opening webpages | Registering accounts | Replacing profile data | Updating email only | Deleting comments | Checking file size | Browser preflight request |
+
+---
+
 # Final Conclusion
 
 HTTP methods define how clients and servers communicate.
