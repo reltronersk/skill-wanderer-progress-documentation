@@ -1,8 +1,5 @@
 # HTTP Methods Deep Dive Extension
 
-> File suggestion:
-> `app/data/courses/restful-api-mastery-greybox/module-1-rest-anatomy/http-methods-deep-dive.md`
-
 ---
 
 # HTTP Methods Deep Dive
