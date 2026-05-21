@@ -269,6 +269,58 @@ Consequences:
 
 ---
 
+# GET Method Comprehensive Matrix
+
+| Category | Explanation | Real-World Scenario | Real Problem | Root Cause | Solution | Result / Impact |
+|---|---|---|---|---|---|---|
+| Primary Purpose | Retrieve data from server without modifying state | E-commerce product listing | Users only need to view products, not modify them | Data retrieval mixed with business mutation | Use GET strictly for read-only operations | Predictable API behavior and safer systems |
+| Core Philosophy | GET represents safe read operations | News website homepage | Homepage accidentally increases counters on every crawler request | Hidden side effects inside GET endpoint | Separate analytics tracking from GET | Stable analytics and cleaner architecture |
+| Safe Operation | GET should not change server data | Banking transaction history | Refreshing page accidentally changes transaction states | Backend logic improperly mutates records | Enforce read-only service layer | Financial consistency preserved |
+| Idempotency | Repeating GET requests should produce same outcome | Social media feed refresh | Repeated refresh creates duplicate notifications | Notification generation coupled with retrieval | Separate retrieval from notification creation | Stable user experience |
+| Cacheability | GET responses can be cached | Viral product launch | Backend overload during traffic spike | Every request hits database directly | CDN caching and cache headers | Massive reduction in infrastructure load |
+| Browser Dependency | Browsers fundamentally depend on GET | Opening websites | Webpages fail to load quickly | Unoptimized asset delivery | Cache static assets aggressively | Faster page rendering |
+| API Ecosystem | APIs expose data via GET | Mobile dashboard app | Mobile app becomes slow on poor networks | Excessive payload size | Pagination and selective fields | Better mobile performance |
+| Search Engines | Crawlers heavily rely on GET | SEO indexing | Search engines overload servers | Crawlers repeatedly fetch large pages | Robots policies and caching | Improved crawl efficiency |
+| CDN Optimization | CDNs optimize GET heavily | Global streaming platform | High latency across continents | No edge caching strategy | Deploy CDN edge caching | Lower global latency |
+| Infrastructure Scaling | GET traffic dominates most systems | SaaS analytics platform | Database CPU spikes during peak usage | Millions of identical queries | Response caching layer | Lower operational cost |
+| Overfetching | Fetching more data than needed | User profile API | Mobile app downloads unnecessary metadata | Poor API response design | Sparse fieldsets and DTO optimization | Reduced bandwidth consumption |
+| Underfetching | Too little data requires multiple requests | Dashboard widgets | Frontend triggers 30 API calls | Fragmented API structure | Aggregation endpoints | Faster UI rendering |
+| N+1 Query Problem | Excessive database queries from one request | Blog system | Loading posts causes hundreds of author queries | ORM lazy loading misuse | Eager loading and joins | Faster database performance |
+| Unbounded Pagination | Returning unlimited records | Order management dashboard | API crashes when loading millions of orders | No pagination enforcement | Cursor or offset pagination | Stable API performance |
+| Filtering | GET supports resource filtering | Marketplace search | Users cannot narrow search results | Missing query filtering support | Query parameters for filtering | Better search usability |
+| Sorting | Ordering returned data | Product catalog | Users cannot sort by price or popularity | No sorting implementation | Sorting query parameters | Better UX and discoverability |
+| Query Parameters | Flexible data retrieval customization | Flight booking system | Frontend creates many redundant endpoints | Hardcoded API routes | Dynamic query parameter support | Cleaner API architecture |
+| ETags | Reduce unnecessary payload transfer | News portal | Browser repeatedly downloads unchanged content | Missing validation headers | Implement ETag support | Lower bandwidth usage |
+| Conditional Requests | Efficient synchronization | Realtime dashboards | Polling repeatedly downloads identical data | No change detection mechanism | Last-Modified and If-None-Match | Improved network efficiency |
+| Deterministic Responses | Same request should behave consistently | Financial reporting API | Different results for same query unexpectedly | Hidden randomness or mutable state | Deterministic query handling | Predictable business reporting |
+| Monitoring and Observability | GET traffic reveals usage patterns | Enterprise monitoring | Teams cannot identify slow endpoints | Missing observability tooling | Metrics and tracing systems | Faster incident response |
+| Security Exposure | Sensitive data leakage risk | Healthcare API | Private patient data exposed via GET | Weak authorization controls | RBAC and access validation | Regulatory compliance |
+| URL Visibility | GET parameters visible in URLs | Login systems | Passwords accidentally exposed in logs | Sensitive data sent via query params | Use POST for secrets | Improved security posture |
+| Rate Limiting | Prevent abuse and scraping | Public API platform | Bots overload servers | Unlimited anonymous requests | API gateway throttling | Better system stability |
+| Data Freshness | Cached GET responses may become stale | Stock market dashboard | Users see outdated prices | Overaggressive cache TTL | Smart cache invalidation | More accurate realtime data |
+| Microservices Communication | Internal services heavily use GET | Distributed inventory system | Excessive inter-service traffic | Chatty microservice design | Aggregation and caching | Reduced internal latency |
+| API Gateway Policies | Infrastructure behavior differs by method | Enterprise gateway | GET traffic bypasses optimization | Missing gateway rules | GET-specific cache policy | Better throughput |
+| Health Checks | GET commonly used for availability checks | Kubernetes cluster | Services appear healthy despite DB failure | Shallow health endpoint | Deep dependency health checks | More accurate orchestration |
+| Logging Complexity | High GET traffic creates massive logs | CDN-backed application | Storage cost increases rapidly | Excessive verbose logging | Structured sampling strategies | Lower logging costs |
+| Analytics Distortion | Bots trigger unintended analytics | Marketing platform | Traffic metrics become inaccurate | Crawlers counted as humans | Bot detection filtering | Cleaner analytics |
+| SEO Impact | GET affects discoverability | Content platform | Duplicate pages hurt rankings | Poor URL structure | Canonical URL strategy | Better SEO performance |
+| Mobile Optimization | GET performance affects battery/network | Ride-hailing app | App drains mobile data excessively | Large repeated payloads | Compression and lightweight responses | Better mobile retention |
+| Realtime Polling | Frequent GET polling creates pressure | Chat application | Polling overloads backend | Inefficient realtime strategy | WebSocket or SSE adoption | Lower infrastructure load |
+| Data Consistency | Cached GET may conflict with writes | Banking balances | Users see outdated account balances | Eventual consistency delays | Cache invalidation strategy | Higher trust and accuracy |
+| Distributed Systems | GET may traverse many services | Airline booking system | One slow service delays entire response | Synchronous dependency chain | Timeout and fallback policies | More resilient APIs |
+| Edge Computing | GET suitable for edge delivery | Video streaming thumbnails | Long-distance latency hurts UX | Centralized serving architecture | Edge caching deployment | Faster global delivery |
+| AI Recommendation Systems | GET powers recommendation feeds | Video platform recommendations | Recommendations load too slowly | Heavy inference on every request | Precomputed recommendation cache | Better user engagement |
+| Disaster Recovery | GET traffic spikes during incidents | Public emergency systems | Infrastructure collapses under panic traffic | No scaling preparation | Autoscaling and CDN redundancy | Improved resilience |
+| Regulatory Compliance | GET logs may contain sensitive info | Fintech auditing | Compliance violations from exposed logs | Sensitive query parameter logging | Redaction and encryption | Regulatory safety |
+| Abuse Prevention | GET endpoints vulnerable to scraping | Ticket booking platform | Scalpers scrape inventory massively | No anti-bot controls | CAPTCHA and fingerprinting | Fairer platform access |
+| Cost Efficiency | GET optimization reduces cloud bills | Enterprise SaaS | Cloud cost increases uncontrollably | Uncached repetitive traffic | Layered caching strategy | Significant cost reduction |
+| Developer Experience | Predictable GET improves maintainability | Large engineering teams | Inconsistent endpoint behavior | Lack of standards | RESTful conventions | Easier collaboration |
+| Operational Stability | GET misuse creates cascading failures | Marketplace during flash sale | Database crashes during viral traffic | Missing caching and optimization | Multi-layer caching architecture | Stable production environment |
+| Business Trust | Reliable GET affects user trust | Banking application | Users distrust inconsistent balances | Stale or incorrect responses | Strong consistency strategy | Increased customer confidence |
+| Scalability Foundation | GET optimization enables global scale | Global social network | Infrastructure cannot handle growth | Direct database dependency | CDN + cache hierarchy | Internet-scale architecture |
+
+---
+
 # POST Method
 
 # What is POST
