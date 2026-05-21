@@ -1,4 +1,3 @@
-````md
 # HTTP Methods Deep Dive — Chunk 1.1
 ## GET Method — Reading Data in REST API
 
