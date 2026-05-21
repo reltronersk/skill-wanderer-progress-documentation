@@ -438,8 +438,6 @@ DELETE /comments/10
 
 # HTTP Methods Comparison Matrix
 
-# HTTP Methods Comparison Matrix
-
 | Method | Primary Purpose | Safe | Idempotent | Common Usage | Request Body | Common Status Codes | Browser Cacheable | Bookmarkable | HTML Form Support | Typical Response | Common Example |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | GET | Retrieve data | Yes | Yes | Reading resources | Usually No | 200, 304, 404 | Usually Yes | Yes | Yes | Resource data | `GET /products/10` |
