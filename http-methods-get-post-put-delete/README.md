@@ -463,12 +463,6 @@ DELETE /comments/10
 | Safe to Refresh Repeatedly | Yes | Usually No | Yes | Depends | Yes | Yes | Yes |
 | Suitable for Bookmarking | Yes | No | No | No | No | No | No |
 | Commonly Used in Browsers | Very Common | Very Common | Common via JavaScript | Common via JavaScript | Common via JavaScript | Less Common | Automatic browser usage |
-| Standard HTML Form Support | Yes | Yes | No | No | No | No | No |
-| Commonly Cacheable | Yes | Usually No | Usually No | Usually No | Usually No | Yes | Usually No |
-| Intended for Read Operations | Yes | No | No | No | No | Yes | No |
-| Intended for Write Operations | No | Yes | Yes | Yes | Yes | No | No |
-| Full Resource Replacement | No | No | Yes | No | No | No | No |
-| Partial Resource Update | No | No | No | Yes | No | No | No |
 | Metadata Retrieval | No | No | No | No | No | Yes | Sometimes |
 | Capability Discovery | No | No | No | No | No | No | Yes |
 | Common Browser Example | Opening pages | Submitting forms | Saving settings | Updating profile | Deleting comments | Checking file metadata | Browser preflight request |
