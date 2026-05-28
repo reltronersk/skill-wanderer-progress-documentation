@@ -51,15 +51,15 @@ Examples: `POST`, `PUT`, `PATCH`, `DELETE`
 
 ## Quick Overview of All Common Methods
 
-| Method   | Purpose                            | Safe? | Idempotent? |
-|----------|------------------------------------|-------|-------------|
-| GET      | Retrieve data                      | Yes   | Yes         |
-| POST     | Create new resources               | No    | No          |
-| PUT      | Replace whole resource             | No    | Yes         |
-| PATCH    | Update parts of a resource         | No    | Depends     |
-| DELETE   | Remove a resource                  | No    | Yes         |
-| HEAD     | Get only headers (no body)         | Yes   | Yes         |
-| OPTIONS  | Find out what methods are allowed  | Yes   | Yes         |
+| Method   | Purpose                            | Safe? |
+|----------|------------------------------------|-------|
+| GET      | Retrieve data                      | Yes   |
+| POST     | Create new resources               | No    |
+| PUT      | Replace whole resource             | No    |
+| PATCH    | Update parts of a resource         | No    |
+| DELETE   | Remove a resource                  | No    |
+| HEAD     | Get only headers (no body)         | Yes   |
+| OPTIONS  | Find out what methods are allowed  | Yes   |
 
 ---
 
@@ -79,14 +79,17 @@ Examples: `POST`, `PUT`, `PATCH`, `DELETE`
 
 ## GET – Ask for Information
 
-`GET` is used whenever you want to **read** data from the server.  
+`GET` is used whenever you want to **read** data from the server.
 It should **never change** anything on the server.
 
-Example:  
+Example:
+
 ```http
 GET /products/10
 ```
+
 Response (the product info):
+
 ```json
 {
   "id": 10,
@@ -95,10 +98,35 @@ Response (the product info):
 ```
 
 GET is:
-- **Safe** (doesn’t change server state)
-- **Cacheable** (browser can save a copy)
-- **Bookmarkable** (you can save the link)
-- **Linkable** (you can share it)
+
+* **Safe** (doesn’t change server state)
+* **Cacheable** (browser can save a copy)
+* **Bookmarkable** (you can save the link)
+* **Linkable** (you can share it)
+
+### Why GET Is Safe
+
+`GET` is considered **safe** because it is intended only for retrieving information.
+A client can call the same GET request many times without creating, modifying, or deleting data on the server.
+
+Example:
+
+```http
+GET /users/10
+```
+
+This only reads the user data.
+It does not:
+
+* Create a new user
+* Update existing data
+* Remove anything
+
+Because of this behavior:
+
+* Browsers can safely preload GET requests
+* Search engines can crawl GET URLs
+* Users can refresh the page without accidental data modification
 
 ### Common Query Parameters
 
@@ -108,10 +136,11 @@ GET /search?q=laptop
 ```
 
 Used for:
-- Pagination
-- Filtering
-- Sorting
-- Searching
+
+* Pagination
+* Filtering
+* Sorting
+* Searching
 
 ---
 
@@ -119,12 +148,15 @@ Used for:
 
 `POST` is for **submitting data** and usually **creating a new resource**.
 
-Example:  
+Example:
+
 ```http
 POST /users
 Content-Type: application/json
 ```
+
 Body:
+
 ```json
 {
   "name": "John Doe"
@@ -132,23 +164,46 @@ Body:
 ```
 
 POST is typically used for:
-- Form submissions (login, signup)
-- Creating a new user, order, post
-- File uploads
-- Any action where you’re adding something new
+
+* Form submissions (login, signup)
+* Creating a new user, order, post
+* File uploads
+* Any action where you’re adding something new
+
+### Why POST Is Not Safe
+
+`POST` is **not safe** because it changes server data or triggers server-side actions.
+
+Example:
+
+```http
+POST /orders
+```
+
+This may:
+
+* Create a new order
+* Insert data into a database
+* Trigger payment processing
+* Send notifications
+
+Calling the same POST request repeatedly may create duplicate data or repeated actions.
 
 ---
 
 ## PUT – Replace the Whole Thing
 
-`PUT` **replaces an entire resource** with the data you send.  
+`PUT` **replaces an entire resource** with the data you send.
 You must send the **complete** updated version.
 
-Example:  
+Example:
+
 ```http
 PUT /users/10
 ```
+
 Body:
+
 ```json
 {
   "name": "John",
@@ -158,23 +213,55 @@ Body:
 
 If you only send the email, the `name` may be erased because PUT expects the **full resource**.
 
+### Why PUT Is Not Safe
+
+`PUT` is **not safe** because it modifies existing data on the server.
+
+Example:
+
+```http
+PUT /users/10
+```
+
+This changes the stored resource by replacing its content with the new version provided by the client.
+
+Even though repeated PUT requests may produce the same final state, the request still performs a modification operation.
+
 ---
 
 ## PATCH – Update Only Certain Fields
 
 `PATCH` makes a **partial update**. You only send the fields you want to change.
 
-Example:  
+Example:
+
 ```http
 PATCH /users/10
 ```
+
 Body:
+
 ```json
 {
   "email": "new@example.com"
 }
 ```
+
 Only the email is changed; the rest of the user data stays as it was.
+
+### Why PATCH Is Not Safe
+
+`PATCH` is **not safe** because it changes part of an existing resource.
+
+Example:
+
+```http
+PATCH /users/10
+```
+
+This modifies selected fields in the stored data.
+
+Even small updates still change server state, which makes PATCH unsafe.
 
 ---
 
@@ -182,27 +269,66 @@ Only the email is changed; the rest of the user data stays as it was.
 
 `DELETE` removes a resource permanently.
 
-Example:  
+Example:
+
 ```http
 DELETE /posts/15
 ```
+
+### Why DELETE Is Not Safe
+
+`DELETE` is **not safe** because it removes data from the server.
+
+Example:
+
+```http
+DELETE /posts/15
+```
+
+This may:
+
+* Remove database records
+* Delete files
+* Remove relationships between resources
+
+Because server data changes after the request, DELETE is classified as unsafe.
 
 ---
 
 ## HEAD – Get Only the Headers
 
-`HEAD` works exactly like `GET` but **does not return the body** (the actual content).  
+`HEAD` works exactly like `GET` but **does not return the body** (the actual content).
 It only sends back the headers (information *about* the resource).
 
 Useful for:
-- Checking file size before downloading
-- Verifying if a page has changed (cache validation)
-- Seeing metadata
 
-Example:  
+* Checking file size before downloading
+* Verifying if a page has changed (cache validation)
+* Seeing metadata
+
+Example:
+
 ```http
 HEAD /video.mp4
 ```
+
+### Why HEAD Is Safe
+
+`HEAD` is considered **safe** because it only retrieves metadata about a resource and does not modify server data.
+
+Example:
+
+```http
+HEAD /video.mp4
+```
+
+The server only returns headers such as:
+
+* Content-Length
+* Content-Type
+* Last-Modified
+
+No resource is created, updated, or deleted.
 
 ---
 
@@ -210,18 +336,40 @@ HEAD /video.mp4
 
 `OPTIONS` asks the server: “What methods can I use on this URL?”
 
-Example:  
+Example:
+
 ```http
 OPTIONS /users
 ```
+
 Response header:
+
 ```http
 Allow: GET, POST, PUT, DELETE
 ```
 
 Commonly used for:
-- Discovering what operations an API supports
-- Browser **preflight** requests (CORS checks)
+
+* Discovering what operations an API supports
+* Browser **preflight** requests (CORS checks)
+
+### Why OPTIONS Is Safe
+
+`OPTIONS` is considered **safe** because it only asks the server about supported communication methods.
+
+Example:
+
+```http
+OPTIONS /users
+```
+
+The server responds with information such as:
+
+* Allowed HTTP methods
+* CORS permissions
+* Communication capabilities
+
+It does not create, update, or remove data on the server.
 
 ---
 
@@ -277,20 +425,6 @@ To use `PUT`, `PATCH` or `DELETE`, you usually need JavaScript or a special API 
 | DELETE   | Usually safe       | Deleting again does nothing extra               |
 | HEAD     | Safe               | No body or changes                              |
 | OPTIONS  | Safe               | Just a question, no changes                     |
-
----
-
-## Common Response Codes (What the Server Answers)
-
-| Method   | Typical status codes | What they mean                                     |
-|----------|----------------------|----------------------------------------------------|
-| GET      | 200, 304, 404        | 200 OK, 304 Not Modified (cached), 404 Not Found   |
-| POST     | 201, 400, 422        | 201 Created, 400 Bad Request, 422 Unprocessable    |
-| PUT      | 200, 204             | 200 OK (with body), 204 No Content (success)       |
-| PATCH    | 200, 204             | Same as PUT                                        |
-| DELETE   | 204, 404             | 204 Deleted, 404 Already gone or not found         |
-| HEAD     | 200, 304             | 200 OK (headers only), 304 Not Modified            |
-| OPTIONS  | 200, 204             | 200 OK, 204 No Content                             |
 
 ---
 
