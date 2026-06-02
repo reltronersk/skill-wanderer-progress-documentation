@@ -1,46 +1,48 @@
 # HTTP Status Codes Overview
 
-HTTP status codes are the server's way of answering a request.
+HTTP status codes are short messages sent by the server to tell the client what happened after a request.
 
-When a client sends a request, the server responds with two things:
+Whenever a browser, mobile app, or API sends a request, the server responds with a status code.
 
-1. A status code
-2. A response body (optional)
+Think of status codes as the server's quick answer:
 
-The status code immediately tells the client whether the request succeeded, failed, or requires additional action.
+* "Everything worked."
+* "You need to log in."
+* "I can't find that resource."
+* "Something went wrong on my side."
 
 ---
 
-## Why Status Codes Matter
+# Why Status Codes Matter
 
-Imagine submitting a form on a website.
+Without status codes, applications would have no standard way to understand whether a request succeeded or failed.
 
-Without a status code, the client would have no quick way to know:
+Status codes allow browsers, mobile apps, APIs, and servers to communicate using the same language.
+
+They help developers quickly understand:
 
 * Was the request successful?
-* Was the resource missing?
-* Was authentication required?
-* Did the server encounter an error?
-
-Status codes provide a standardized language that every browser, mobile app, API client, and server understands.
+* Is authentication required?
+* Does the resource exist?
+* Is the server experiencing problems?
 
 ---
 
-## The Five Status Code Categories
+# The Five Status Code Categories
 
-Every HTTP status code belongs to one of five categories.
+Every HTTP status code belongs to one of five groups.
 
-| Range | Category      | Meaning                                |
-| ----- | ------------- | -------------------------------------- |
-| 1xx   | Informational | Request received, processing continues |
-| 2xx   | Success       | Request completed successfully         |
-| 3xx   | Redirection   | Additional action required             |
-| 4xx   | Client Error  | Problem with the request               |
-| 5xx   | Server Error  | Problem on the server                  |
+| Range | Category      | Meaning                    |
+| ----- | ------------- | -------------------------- |
+| 1xx   | Informational | Processing continues       |
+| 2xx   | Success       | Request succeeded          |
+| 3xx   | Redirection   | Additional action required |
+| 4xx   | Client Error  | Problem with the request   |
+| 5xx   | Server Error  | Problem on the server      |
 
-The first digit tells you the category immediately.
+The first digit immediately tells you the category.
 
-For example:
+Examples:
 
 * 200 → Success
 * 404 → Client Error
@@ -48,76 +50,22 @@ For example:
 
 ---
 
-# 1xx Informational Responses
+# Common Status Codes (Know These First)
 
-Informational responses indicate that the server received the request and is continuing to process it.
-
-Most frontend developers rarely interact with these codes directly.
-
----
-
-## 100 Continue
-
-The server has received the initial part of the request and allows the client to continue sending the rest.
-
-Example:
-
-```http
-HTTP/1.1 100 Continue
-```
-
-Common usage:
-
-* Large file uploads
-* Streaming requests
-
----
-
-## 101 Switching Protocols
-
-The server agrees to switch communication protocols.
-
-Example:
-
-```http
-HTTP/1.1 101 Switching Protocols
-```
-
-Common usage:
-
-* WebSocket connections
-
----
-
-# 2xx Success Responses
-
-These status codes indicate successful requests.
-
-This is the category developers see most often.
+These are the status codes developers encounter most often.
 
 ---
 
 ## 200 OK
 
-The request succeeded.
+Everything worked successfully.
 
-Example:
+Common situations:
 
-```http
-GET /users/10
-```
-
-Response:
-
-```http
-HTTP/1.1 200 OK
-```
-
-Common usage:
-
-* Fetching data
-* Successful updates
-* Successful searches
+* Loading user data
+* Fetching products
+* Viewing a page
+* Running a search
 
 ---
 
@@ -125,37 +73,175 @@ Common usage:
 
 A new resource was successfully created.
 
-Example:
+Common situations:
 
-```http
-POST /users
-```
+* Creating a user account
+* Creating a blog post
+* Creating an order
 
-Response:
+---
 
-```http
-HTTP/1.1 201 Created
-```
+## 204 No Content
 
-Common usage:
+The request succeeded, but there is nothing to return.
 
-* Creating users
-* Creating orders
-* Creating posts
+Common situations:
+
+* Deleting a record
+* Completing an action without returning data
+
+---
+
+## 400 Bad Request
+
+The request is invalid.
+
+Common situations:
+
+* Missing required fields
+* Invalid input format
+* Invalid JSON data
+
+---
+
+## 401 Unauthorized
+
+Authentication is required.
+
+Common situations:
+
+* Missing access token
+* Expired login session
+* Invalid token
+
+Think:
+
+> "Who are you?"
+
+---
+
+## 403 Forbidden
+
+The user is authenticated but does not have permission.
+
+Common situations:
+
+* Admin-only pages
+* Restricted resources
+* Access control rules
+
+Think:
+
+> "I know who you are, but you can't do this."
+
+---
+
+## 404 Not Found
+
+The requested resource does not exist.
+
+Common situations:
+
+* Wrong URL
+* Deleted record
+* Invalid ID
+
+This is one of the most common status codes on the web.
+
+---
+
+## 409 Conflict
+
+The request conflicts with existing data.
+
+Common situations:
+
+* Duplicate email
+* Duplicate username
+* Duplicate unique value
+
+---
+
+## 422 Unprocessable Entity
+
+The request format is valid, but the data fails validation.
+
+Common situations:
+
+* Invalid email format
+* Password too short
+* Business rule validation failures
+
+---
+
+## 429 Too Many Requests
+
+The client is sending too many requests.
+
+Common situations:
+
+* API rate limits
+* Spam protection
+* Excessive automated requests
+
+---
+
+## 500 Internal Server Error
+
+The server encountered an unexpected problem.
+
+Common situations:
+
+* Programming errors
+* Crashed services
+* Database failures
+
+---
+
+## 503 Service Unavailable
+
+The service is temporarily unavailable.
+
+Common situations:
+
+* Maintenance
+* Server overload
+* Temporary downtime
+
+---
+
+# Rare Status Codes (Good to Know)
+
+These status codes exist but are encountered less frequently by most developers.
+
+---
+
+## 100 Continue
+
+The server is ready to receive the rest of the request.
+
+Usually seen during:
+
+* Large uploads
+* Streaming operations
+
+---
+
+## 101 Switching Protocols
+
+The server agrees to switch communication protocols.
+
+Usually seen during:
+
+* WebSocket connections
 
 ---
 
 ## 202 Accepted
 
-The request was accepted but processing has not finished yet.
+The request was accepted and will be processed later.
 
-Example:
-
-```http
-HTTP/1.1 202 Accepted
-```
-
-Common usage:
+Usually seen during:
 
 * Background jobs
 * Queue processing
@@ -163,64 +249,22 @@ Common usage:
 
 ---
 
-## 204 No Content
-
-The request succeeded, but no response body is returned.
-
-Example:
-
-```http
-DELETE /users/10
-```
-
-Response:
-
-```http
-HTTP/1.1 204 No Content
-```
-
-Common usage:
-
-* Delete operations
-* Successful actions that do not return data
-
----
-
-# 3xx Redirection Responses
-
-Redirection status codes tell the client to perform another action before completing the request.
-
----
-
 ## 301 Moved Permanently
 
-The resource has permanently moved to a new URL.
+The resource permanently moved to another location.
 
-Example:
-
-```http
-HTTP/1.1 301 Moved Permanently
-Location: https://example.com/new-page
-```
-
-Common usage:
+Usually seen during:
 
 * Website migrations
-* URL restructuring
+* SEO redirects
 
 ---
 
 ## 302 Found
 
-The resource temporarily exists at another URL.
+The resource temporarily moved elsewhere.
 
-Example:
-
-```http
-HTTP/1.1 302 Found
-```
-
-Common usage:
+Usually seen during:
 
 * Temporary redirects
 
@@ -230,238 +274,21 @@ Common usage:
 
 The resource has not changed since the last request.
 
-Example:
-
-```http
-HTTP/1.1 304 Not Modified
-```
-
-Common usage:
+Usually seen during:
 
 * Browser caching
 * Performance optimization
 
 ---
 
-# 4xx Client Errors
-
-These errors indicate a problem with the client's request.
-
-The server understood the request but could not process it.
-
----
-
-## 400 Bad Request
-
-The request is malformed or invalid.
-
-Example:
-
-```http
-POST /users
-```
-
-Invalid body:
-
-```json
-{
-  "email":
-}
-```
-
-Response:
-
-```http
-HTTP/1.1 400 Bad Request
-```
-
-Common causes:
-
-* Invalid JSON
-* Missing required fields
-* Incorrect request format
-
----
-
-## 401 Unauthorized
-
-Authentication is required.
-
-Example:
-
-```http
-HTTP/1.1 401 Unauthorized
-```
-
-Common causes:
-
-* Missing access token
-* Invalid token
-* Expired token
-
----
-
-## 403 Forbidden
-
-The user is authenticated but lacks permission.
-
-Example:
-
-```http
-HTTP/1.1 403 Forbidden
-```
-
-Common causes:
-
-* Role restrictions
-* Access control rules
-
----
-
-## 404 Not Found
-
-The requested resource does not exist.
-
-Example:
-
-```http
-GET /users/999999
-```
-
-Response:
-
-```http
-HTTP/1.1 404 Not Found
-```
-
-Common causes:
-
-* Wrong URL
-* Missing resource
-* Deleted data
-
----
-
 ## 405 Method Not Allowed
 
-The endpoint exists but does not support the requested method.
+The endpoint exists, but the requested HTTP method is not supported.
 
-Example:
+Usually seen when:
 
-```http
-DELETE /login
-```
-
-Response:
-
-```http
-HTTP/1.1 405 Method Not Allowed
-```
-
-Common causes:
-
-* Wrong HTTP method
-
----
-
-## 409 Conflict
-
-The request conflicts with existing data.
-
-Example:
-
-```http
-POST /users
-```
-
-Body:
-
-```json
-{
-  "email": "existing@example.com"
-}
-```
-
-Response:
-
-```http
-HTTP/1.1 409 Conflict
-```
-
-Common causes:
-
-* Duplicate email
-* Duplicate username
-* Unique constraint violations
-
----
-
-## 422 Unprocessable Entity
-
-The request format is valid, but the data fails validation.
-
-Example:
-
-```json
-{
-  "email": "not-an-email"
-}
-```
-
-Response:
-
-```http
-HTTP/1.1 422 Unprocessable Entity
-```
-
-Common causes:
-
-* Validation failures
-* Business rule violations
-
----
-
-## 429 Too Many Requests
-
-The client exceeded rate limits.
-
-Example:
-
-```http
-HTTP/1.1 429 Too Many Requests
-```
-
-Common causes:
-
-* API abuse
-* Excessive requests
-* Rate limiting protection
-
----
-
-# 5xx Server Errors
-
-These errors indicate that something went wrong on the server.
-
-The client usually cannot fix the issue directly.
-
----
-
-## 500 Internal Server Error
-
-A generic server-side failure.
-
-Example:
-
-```http
-HTTP/1.1 500 Internal Server Error
-```
-
-Common causes:
-
-* Unhandled exceptions
-* Database failures
-* Programming errors
+* Using POST instead of GET
+* Using DELETE on an endpoint that doesn't allow deletion
 
 ---
 
@@ -469,226 +296,48 @@ Common causes:
 
 One server received an invalid response from another server.
 
-Example:
+Usually seen in:
 
-```http
-HTTP/1.1 502 Bad Gateway
-```
-
-Common causes:
-
-* Reverse proxy failures
-* Upstream service failures
-
----
-
-## 503 Service Unavailable
-
-The service is temporarily unavailable.
-
-Example:
-
-```http
-HTTP/1.1 503 Service Unavailable
-```
-
-Common causes:
-
-* Maintenance
-* Overloaded infrastructure
-* Temporary downtime
+* Reverse proxy setups
+* Microservices architectures
 
 ---
 
 ## 504 Gateway Timeout
 
-A server waited too long for another service to respond.
+The server waited too long for another service to respond.
 
-Example:
+Usually seen when:
 
-```http
-HTTP/1.1 504 Gateway Timeout
-```
-
-Common causes:
-
-* Slow backend services
-* Network issues
-* Database timeouts
+* Databases are slow
+* External APIs are slow
+* Backend services timeout
 
 ---
 
-# Status Code Troubleshooting Guide
+# Status Codes Every Beginner Should Memorize
 
-| Status Code | Typical Meaning      | First Thing to Check        |
-| ----------- | -------------------- | --------------------------- |
-| 200         | Success              | Response body               |
-| 201         | Resource created     | Created data                |
-| 204         | Success without body | Expected empty response     |
-| 400         | Invalid request      | Request payload             |
-| 401         | Authentication issue | Access token                |
-| 403         | Permission issue     | User role                   |
-| 404         | Resource missing     | URL or ID                   |
-| 409         | Data conflict        | Duplicate records           |
-| 422         | Validation failure   | Input fields                |
-| 429         | Rate limit exceeded  | Request frequency           |
-| 500         | Server failure       | Server logs                 |
-| 502         | Upstream failure     | Gateway configuration       |
-| 503         | Service unavailable  | Infrastructure status       |
-| 504         | Timeout              | Network/backend performance |
-
----
-
-# Real-World Examples
-
-## Login API
-
-Successful login:
-
-```http
-HTTP/1.1 200 OK
-```
-
-Wrong password:
-
-```http
-HTTP/1.1 401 Unauthorized
-```
-
----
-
-## Product API
-
-Product exists:
-
-```http
-HTTP/1.1 200 OK
-```
-
-Product not found:
-
-```http
-HTTP/1.1 404 Not Found
-```
-
----
-
-## User Registration
-
-Successful registration:
-
-```http
-HTTP/1.1 201 Created
-```
-
-Email already exists:
-
-```http
-HTTP/1.1 409 Conflict
-```
-
----
-
-## File Upload
-
-Upload accepted:
-
-```http
-HTTP/1.1 202 Accepted
-```
-
-File too large:
-
-```http
-HTTP/1.1 413 Payload Too Large
-```
-
----
-
-# Common Beginner Mistakes
-
-## Mistake 1: Treating All Errors as 500
-
-Many beginners assume every failure is a server issue.
-
-Not all failures are server errors.
-
-Examples:
-
-* Invalid request → 400
-* Missing token → 401
-* Missing resource → 404
-
----
-
-## Mistake 2: Ignoring Response Codes
-
-Some developers only inspect the response body.
-
-Always check:
-
-```http
-HTTP Status Code
-```
-
-before processing data.
-
----
-
-## Mistake 3: Confusing 401 and 403
-
-401:
-
-```text
-You are not authenticated.
-```
-
-403:
-
-```text
-You are authenticated,
-but not allowed.
-```
-
----
-
-## Mistake 4: Treating 404 as a System Failure
-
-A missing resource is often a normal situation.
-
-Example:
-
-```http
-GET /users/999999
-```
-
-Returning:
-
-```http
-404 Not Found
-```
-
-may be completely expected.
-
----
-
-# Final Summary
-
-HTTP status codes are a universal language for communicating request outcomes.
-
-The most important codes every developer should know are:
+If you're just starting web development, focus on these first:
 
 * 200 OK
 * 201 Created
-* 204 No Content
 * 400 Bad Request
 * 401 Unauthorized
 * 403 Forbidden
 * 404 Not Found
-* 409 Conflict
 * 422 Unprocessable Entity
 * 429 Too Many Requests
 * 500 Internal Server Error
 * 503 Service Unavailable
 
-Learning status codes allows you to quickly diagnose problems, understand API behavior, and build applications that respond correctly to success and failure scenarios.
+These ten status codes cover the vast majority of situations you'll encounter when building APIs and web applications.
+
+---
+
+# Final Summary
+
+HTTP status codes are the standard language servers use to explain what happened after a request.
+
+For beginners, the most important thing is not memorizing every status code, but understanding what category the code belongs to and what action should be taken next.
+
+When debugging APIs, always check the status code first before looking at anything else.
