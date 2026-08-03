@@ -29,6 +29,7 @@ By the end of this lesson, you should be able to:
 - Understand the basic meaning of a status code.
 - Recognize JSON data returned by an API.
 - Explain how Chrome DevTools and Postman help us test APIs.
+- Read the most important parts of a basic Postman result.
 
 ---
 
@@ -102,6 +103,8 @@ Server returns a response.
 | Endpoint | The address used to access an API resource |
 | HTTP method | The type of action requested |
 | Status code | A number that describes the request result |
+| Header | Extra information attached to a request or response |
+| Response body | The main data returned by the server |
 
 Examples of clients:
 
@@ -371,7 +374,145 @@ The main question is:
 
 ---
 
-## 12. Chrome DevTools and Postman
+## 12. Reading a Real Postman Result
+
+The screenshot below shows a real request sent with Postman.
+
+> Place the image in your repository at:
+>
+> `public/images/courses/restful-api-mastery/postman-404-response-example.png`
+
+![Postman GET request returning 404 Not Found](/images/courses/restful-api-mastery/postman-404-response-example.png)
+
+### What Happened in This Test?
+
+Postman sent this request:
+
+```http
+GET https://httpbin.org/status/404
+```
+
+The server returned:
+
+```text
+404 Not Found
+```
+
+This is an intentionally unsuccessful request. The endpoint is designed to return status code `404`.
+
+The screenshot highlights four important parts.
+
+### 1. Request Method
+
+The request method is:
+
+```text
+GET
+```
+
+`GET` tells the server that the client wants to retrieve something.
+
+In Postman, the method appears in the dropdown to the left of the request URL.
+
+### 2. Request URL
+
+The request URL is:
+
+```text
+https://httpbin.org/status/404
+```
+
+The URL tells Postman where to send the request.
+
+In this example:
+
+- `https://httpbin.org` is the server address.
+- `/status/404` is the endpoint path.
+- The endpoint is designed to return `404 Not Found`.
+
+### 3. Status Code
+
+The returned status is:
+
+```text
+404 Not Found
+```
+
+This tells us that the request reached the server, but the server returned a not-found result.
+
+This is important:
+
+> A `404` response is still a valid HTTP response.
+
+The server did not remain silent. It processed the request and deliberately returned a result that describes what happened.
+
+### 4. Response Headers
+
+The lower part of the screenshot shows response headers.
+
+Response headers provide additional information about the server response.
+
+Examples visible in the screenshot include:
+
+| Header | Example value | Simple meaning |
+|---|---|---|
+| `:status` | `404` | The numeric HTTP status |
+| `date` | A GMT date and time | When the response was generated |
+| `content-type` | `text/html; charset=utf-8` | The format of the returned content |
+| `content-length` | `0` | The response body contains zero bytes |
+| `server` | `gunicorn/19.9.0` | Information about the server software |
+| `access-control-allow-origin` | `*` | Cross-origin requests are allowed from any origin |
+| `access-control-allow-credentials` | `true` | The server allows credentials in supported cross-origin requests |
+
+You do not need to memorize all these headers yet.
+
+For now, understand that headers are extra information attached to the response.
+
+### Why Is the Response Body Empty?
+
+The screenshot shows:
+
+```text
+content-length: 0
+```
+
+This means the response does not contain a response body.
+
+The server returned only the status and headers.
+
+That is valid. Not every API response must contain JSON or visible text.
+
+### Beginner Interpretation
+
+From this Postman result, we can say:
+
+```text
+Client:
+Postman
+
+Method:
+GET
+
+Request URL:
+https://httpbin.org/status/404
+
+Status:
+404 Not Found
+
+Response body:
+Empty
+
+Response headers:
+Present
+```
+
+The result can be summarized as:
+
+> Postman sent a GET request to an endpoint that intentionally returns `404 Not Found`. The server responded with a valid HTTP response containing a status code and response headers, but no response body.
+
+---
+
+## 13. Chrome DevTools and Postman
 
 | Chrome DevTools | Postman |
 |---|---|
@@ -383,7 +524,7 @@ Both tools help us understand the same RESTful API interaction from different st
 
 ---
 
-## 13. Common Beginner Misunderstandings
+## 14. Common Beginner Misunderstandings
 
 ### “The website is the API”
 
@@ -397,6 +538,25 @@ Postman is a client used to send requests to an API.
 
 Chrome DevTools mainly helps you observe requests made by the browser.
 
+### “A 404 response means no response was returned”
+
+This is incorrect.
+
+`404 Not Found` is a response returned by the server.
+
+The server processed the request and reported that the requested resource was not found.
+
+### “Every response must contain JSON”
+
+A response may contain:
+
+- JSON
+- HTML
+- Plain text
+- A file
+- An image
+- No response body
+
 ### “Every failed request means the server is broken”
 
 A request may fail because of:
@@ -408,7 +568,7 @@ A request may fail because of:
 - Missing permission
 - A server problem
 
-Always inspect the method, endpoint, status code, and response.
+Always inspect the method, endpoint, status code, headers, and response body.
 
 ### “RESTful API means JSON”
 
@@ -416,7 +576,7 @@ JSON is commonly used by RESTful APIs, but RESTful APIs are not defined only by 
 
 ---
 
-## 14. Lesson Summary
+## 15. Lesson Summary
 
 A RESTful API allows a client to communicate with a server through HTTP requests and responses.
 
@@ -436,10 +596,19 @@ Chrome DevTools helps you observe requests made by a browser.
 
 Postman helps you send requests directly.
 
+The Postman example demonstrated that:
+
+- `GET` was the request method.
+- `https://httpbin.org/status/404` was the request URL.
+- `404 Not Found` was the returned status.
+- Response headers provided additional information.
+- The response body was empty.
+- An unsuccessful result can still be a valid HTTP response.
+
 The basic evidence pattern is:
 
 ```text
-Method + Endpoint + Status + Response
+Method + Endpoint + Status + Headers + Response Body
 ```
 
 ---
@@ -453,4 +622,5 @@ You will identify:
 - The request URL
 - The HTTP method
 - The status code
+- The response headers
 - The returned response data
