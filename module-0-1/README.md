@@ -383,53 +383,7 @@ Both tools help us understand the same RESTful API interaction from different st
 
 ---
 
-## 13. Guided Exercise
-
-Examine this test result:
-
-```text
-Request Method:
-GET
-
-Request URL:
-https://example.com/api/courses/restful-api-mastery-greybox
-
-Status Code:
-200 OK
-```
-
-Response:
-
-```json
-{
-  "slug": "restful-api-mastery-greybox",
-  "title": "RESTful API Mastery: The Greybox Approach",
-  "level": "beginner"
-}
-```
-
-Answer these questions:
-
-1. Which HTTP method was used?
-2. Which endpoint was requested?
-3. Did the request succeed?
-4. Which status code provides the evidence?
-5. What data did the server return?
-
-<details>
-<summary>Show answers</summary>
-
-1. The method was `GET`.
-2. The endpoint was `/api/courses/restful-api-mastery-greybox`.
-3. Yes, the request succeeded.
-4. The evidence was `200 OK`.
-5. The server returned the course slug, title, and level.
-
-</details>
-
----
-
-## 14. Common Beginner Misunderstandings
+## 13. Common Beginner Misunderstandings
 
 ### “The website is the API”
 
@@ -462,7 +416,7 @@ JSON is commonly used by RESTful APIs, but RESTful APIs are not defined only by 
 
 ---
 
-## 15. Lesson Summary
+## 14. Lesson Summary
 
 A RESTful API allows a client to communicate with a server through HTTP requests and responses.
 
