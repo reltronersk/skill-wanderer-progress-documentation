@@ -1,6 +1,6 @@
 # Your First Look at a RESTful API
 
-> **Module 0 — Discovering RESTful APIs Through Testing**
+> **Module 0-1 — Discovering RESTful APIs Through Testing**
 
 ## Lesson Overview
 
