@@ -382,7 +382,7 @@ The screenshot below shows a real request sent with Postman.
 >
 > `public/images/courses/restful-api-mastery/postman-404-response-example.png`
 
-![Postman GET request returning 404 Not Found](/images/courses/restful-api-mastery/postman-404-response-example.png)
+![Postman GET request returning 404 Not Found](postman-404-response-example.png)
 
 ### What Happened in This Test?
 
