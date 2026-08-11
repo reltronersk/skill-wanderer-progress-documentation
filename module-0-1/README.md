@@ -4,31 +4,35 @@
 
 ## Lesson Overview
 
-You may already understand RESTful API concepts such as HTTP methods, endpoints, resources, requests, responses, status codes, headers, and JSON.
+You may already understand RESTful API concepts such as:
 
-But knowing the theory is different from **seeing an API request happen in a real application**.
+- HTTP methods
+- Endpoints
+- Resources
+- Requests
+- Responses
+- Status codes
+- Headers
+- JSON
 
-This lesson connects the theory you already know to what you can actually see in:
+But knowing the theory is different from **seeing those concepts appear in a real tool**.
 
-- **Google Chrome DevTools**
-- **Postman**
+This lesson is designed to bridge that gap.
 
-The goal is not to teach these tools as products.
+You will see how a normal website action can produce a RESTful API request in **Google Chrome DevTools**, and how you can create a request yourself in **Postman**.
 
-The goal is to answer:
+The goal is not to memorize tool interfaces.
 
-> **Where can I actually see the RESTful API concepts I learned in theory?**
-
-By the end of this lesson, you should be able to look at a browser or Postman and recognize:
+The goal is to learn how to look at a real tool and recognize:
 
 ```text
+REQUEST
+    ↓
 What did the client send?
-        ↓
-Where was it sent?
-        ↓
+    ↓
+RESPONSE
+    ↓
 What did the server return?
-        ↓
-What data came back?
 ```
 
 ---
@@ -37,353 +41,368 @@ What data came back?
 
 By the end of this lesson, you should be able to:
 
-- Understand why developers use Chrome DevTools to investigate RESTful APIs.
-- Understand why developers use Postman to test RESTful APIs.
-- Understand the difference between **observing** an API request and **sending** an API request.
-- Find the HTTP method, URL, status code, headers, and response body in a tool.
-- Understand what a compact example such as `GET /api/courses 200 OK` actually represents.
-- Connect what you see in a tool to the RESTful API theory you already know.
+- Understand why Chrome DevTools is useful for discovering API requests.
+- Understand why Postman is useful for sending and testing API requests.
+- Understand the difference between **observing** a browser request and **creating** a request yourself.
+- Recognize where the method, URL, status, headers, and response body appear in a real tool.
+- Understand how a visual API result connects to RESTful API theory.
+- Read a real Postman result without relying on shorthand such as `GET /api/courses 200 OK`.
 
 ---
 
-# 1. You Know the Theory — Now See It
+# 1. From REST Theory to a Real API
 
-You may already know that an HTTP request conceptually contains:
+You already know that an API communicates through requests and responses.
 
-```text
-Method + URL + Headers + Body
-```
-
-And that the server returns:
+Instead of starting with a line such as:
 
 ```text
-Status + Headers + Body
+GET /api/courses 200 OK
 ```
 
-For example:
+start with what actually happens:
 
-```http
-GET /api/courses
+```mermaid
+flowchart LR
+    A[Client] -->|HTTP Request| B[RESTful API / Server]
+    B -->|HTTP Response| A
 ```
 
-may produce:
+The request and response contain several pieces of information.
+
+```mermaid
+flowchart TB
+    R[HTTP Request]
+
+    R --> M[Method]
+    R --> U[URL]
+    R --> RH[Request Headers]
+    R --> RB[Request Body]
+
+    S[HTTP Response]
+
+    S --> SC[Status]
+    S --> SH[Response Headers]
+    S --> SB[Response Body]
+```
+
+For example, a real request may contain:
 
 ```text
-200 OK
+Method → GET
+URL → https://example.com/api/courses
 ```
 
-with a response body such as:
+And the response may contain:
 
-```json
-{
-  "courses": [
-    {
-      "id": 1,
-      "title": "RESTful API Mastery"
-    }
-  ]
-}
+```text
+Status → 200 OK
+Response Body → course data
 ```
 
-The problem is often not understanding these concepts individually.
+The important point is:
 
-The problem is:
-
-> **Where do I actually see them?**
-
-That is where Chrome DevTools and Postman become useful.
+> **The information is normally shown as separate fields inside a tool.**
 
 ---
 
-# 2. The Two Tools Have Different Jobs
+# 2. Where Can We See This Communication?
 
-Think of the two tools as two different windows into the same API.
+There are two useful ways to observe this communication.
 
 ```mermaid
 flowchart TB
     API[RESTful API]
 
-    Browser[Web Application]
+    Browser[Browser]
     DevTools[Chrome DevTools]
     Postman[Postman]
 
-    Browser -->|Browser uses API| API
-    DevTools -.->|Observe the browser request| Browser
-    Postman -->|Send a request directly| API
+    Browser -->|Uses API| API
+    DevTools -.->|Observes browser communication| Browser
+    Postman -->|Sends request directly| API
 ```
+
+The tools have different starting points.
 
 ### Chrome DevTools
 
-Chrome DevTools helps you answer:
+You start with the **website**.
 
-> **"What API request did this website just make?"**
-
-You normally start with a website action.
-
-```text
-Open course page
-       ↓
-Browser needs course data
-       ↓
-Browser sends API request
-       ↓
-Chrome DevTools shows the request
+```mermaid
+flowchart LR
+    A[Use Website] --> B[Browser needs data]
+    B --> C[Browser sends API request]
+    C --> D[DevTools shows the request]
+    D --> E[Inspect request and response]
 ```
 
 ### Postman
 
-Postman helps you answer:
+You start with the **API request**.
 
-> **"What happens if I send this API request myself?"**
-
-You normally start with the API request.
-
-```text
-Choose GET
-       ↓
-Enter API URL
-       ↓
-Click Send
-       ↓
-Server receives request
-       ↓
-Postman shows the response
+```mermaid
+flowchart LR
+    A[Choose Method] --> B[Enter URL]
+    B --> C[Click Send]
+    C --> D[Server receives request]
+    D --> E[Server returns response]
+    E --> F[Postman shows result]
 ```
 
-The key distinction is:
+This is the main difference:
 
-| Tool | Starting point | Main purpose |
+| Tool | You start with | What you discover |
 |---|---|---|
-| Chrome DevTools | A website action | Observe what the browser sends |
-| Postman | An API request | Send and inspect the API directly |
+| Chrome DevTools | A website action | The API request the browser made |
+| Postman | An API request | What the API returns when you call it |
 
 ---
 
-# 3. What Does an API Request Look Like in Real Life?
+# 3. Chrome DevTools: Discover the API Behind a Website
 
-A beginner may see:
+Imagine you are using a learning website.
 
-```text
-GET /api/courses/restful-api-mastery-greybox
-200 OK
-```
-
-This can look like one mysterious piece of information.
-
-It is actually a **short summary of several pieces of HTTP information**:
+You click:
 
 ```text
-GET
-↓
-Request Method
-
-/api/courses/restful-api-mastery-greybox
-↓
-Request Path / Endpoint
-
-200 OK
-↓
-Response Status
+Load Lessons
 ```
 
-A real tool usually shows these pieces separately.
+You see lessons appear on the page.
+
+Something happened behind the scenes.
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant Browser
+    participant API as RESTful API
+    participant DevTools as Chrome DevTools
+
+    User->>Browser: Click "Load Lessons"
+    Browser->>API: HTTP Request
+    API-->>Browser: HTTP Response
+    Browser->>User: Display lessons
+    Browser-->>DevTools: Network activity can be inspected
+```
+
+The important discovery is:
+
+> The website may not contain all of the lesson data inside the page itself. The browser may request that data from an API.
+
+Chrome DevTools lets you investigate that request.
+
+---
+
+# 4. What Do You Actually Look For in DevTools?
+
+Open the browser's **Network** panel while using the website.
+
+You may see many network requests.
+
+When you perform an action, a new request may appear.
+
+Think of the investigation like this:
+
+```mermaid
+flowchart TD
+    A[Perform an action on the website]
+    B[Look at Network activity]
+    C[Find the request related to the action]
+    D[Open the request]
+    E[Inspect Request URL]
+    F[Inspect Request Method]
+    G[Inspect Response Status]
+    H[Inspect Response Body]
+
+    A --> B --> C --> D
+    D --> E
+    D --> F
+    D --> G
+    D --> H
+```
+
+Now the REST theory has a visual location:
+
+| REST concept | Where you look |
+|---|---|
+| HTTP method | Request Method |
+| Endpoint | Part of Request URL |
+| Request headers | Request Headers |
+| Status code | Response Status |
+| Response headers | Response Headers |
+| Response data | Response / Response Body |
+
+The purpose of DevTools is therefore simple:
+
+> **Find out what API communication the browser is actually performing.**
+
+---
+
+# 5. What Does `GET /api/courses 200 OK` Actually Mean?
+
+A beginner may encounter shorthand like:
+
+```text
+GET /api/courses 200 OK
+```
+
+Do not try to understand this as one new format.
+
+It is only a compact summary.
+
+Instead, visualize it as a request followed by a response:
+
+```mermaid
+flowchart LR
+    A[GET] --> B["/api/courses"]
+    B --> C[Server]
+    C --> D["200 OK"]
+    D --> E[Response Body]
+```
+
+Now expand each part:
+
+```mermaid
+flowchart TB
+    Q[REQUEST]
+
+    Q --> M["GET"]
+    M --> M2["HTTP Method"]
+
+    Q --> U["/api/courses"]
+    U --> U2["Endpoint / Request Path"]
+
+    R[RESPONSE]
+
+    R --> S["200 OK"]
+    S --> S2["HTTP Status"]
+
+    R --> B["Response Body"]
+    B --> B2["Returned Data"]
+```
+
+So the shorthand:
+
+```text
+GET /api/courses 200 OK
+```
+
+means:
+
+```text
+The client used GET
+        ↓
+to request /api/courses
+        ↓
+the server returned 200 OK
+        ↓
+and may also return response headers and response data
+```
+
+### Important
+
+The shorthand is **not a complete API response**.
+
+A real tool can show much more information.
+
+---
+
+# 6. See the Complete Request and Response
+
+A more realistic view is:
+
+```mermaid
+flowchart TB
+    Client[Client]
+
+    Req[HTTP REQUEST]
+    Req --> RM[Method]
+    Req --> RU[URL]
+    Req --> RH[Request Headers]
+    Req --> RB[Request Body]
+
+    Server[API Server]
+
+    Res[HTTP RESPONSE]
+    Res --> RS[Status]
+    Res --> RSH[Response Headers]
+    Res --> RSB[Response Body]
+
+    Client --> Req
+    Req --> Server
+    Server --> Res
+    Res --> Client
+```
+
+For a simple GET request, the body may be empty.
 
 For example:
 
-```text
-REQUEST
+```mermaid
+flowchart TB
+    R[GET Request]
 
+    R --> M["Method: GET"]
+    R --> U["URL: /api/courses"]
+    R --> H["Headers: optional"]
+    R --> B["Body: usually empty"]
+
+    S[Response]
+
+    S --> ST["Status: 200 OK"]
+    S --> SH["Headers"]
+    S --> SB["Body: JSON course data"]
+```
+
+This is much closer to what you will actually encounter in DevTools or Postman.
+
+---
+
+# 7. Why Use Chrome DevTools?
+
+Chrome DevTools is especially useful when you **do not know which API the website is using**.
+
+Suppose this button exists:
+
+```text
+[ Load Lessons ]
+```
+
+You click it.
+
+The lessons appear.
+
+You want to know:
+
+> Which API provided these lessons?
+
+The investigation becomes:
+
+```mermaid
+flowchart LR
+    A["Click Load Lessons"] --> B["Browser sends request"]
+    B --> C["Network panel records request"]
+    C --> D["Find the new request"]
+    D --> E["Open request details"]
+    E --> F["See URL + Method + Status + Response"]
+```
+
+You may discover something like:
+
+```text
 Method:
 GET
 
 URL:
-https://example.com/api/courses/restful-api-mastery-greybox
-
-
-RESPONSE
-
-Status:
-200 OK
-
-Headers:
-...
-
-Body:
-{
-  "slug": "restful-api-mastery-greybox",
-  "title": "RESTful API Mastery",
-  "level": "beginner"
-}
-```
-
-So:
-
-```text
-GET /api/courses/restful-api-mastery-greybox 200 OK
-```
-
-is **not normally the entire HTTP response**.
-
-It is simply a compact way of saying:
-
-> A GET request was sent to this endpoint, and the server returned 200 OK.
-
----
-
-# 4. The Real Request/Response Picture
-
-Here is the complete mental model:
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant S as Server
-
-    C->>S: GET /api/courses/restful-api-mastery-greybox
-    Note over C,S: Request
-    S-->>C: 200 OK
-    S-->>C: JSON response body
-    Note over C,S: Response
-```
-
-The client could be:
-
-- A browser
-- Postman
-- A mobile application
-- Another backend service
-
-The RESTful API itself is not the tool.
-
-The tool helps you **see or create the communication**.
-
----
-
-# 5. Chrome DevTools: From Website Action to API Result
-
-Chrome DevTools is useful when an API call happens **because of something you do on a website**.
-
-Imagine a learning website.
-
-You open:
-
-```text
-Course → RESTful API Mastery
-```
-
-The browser needs course data.
-
-The process looks like this:
-
-```mermaid
-flowchart TD
-    A[1. User opens a course page]
-    B[2. Browser needs course data]
-    C[3. Browser sends HTTP request]
-    D[4. RESTful API receives request]
-    E[5. Server processes request]
-    F[6. Server returns response]
-    G[7. Chrome DevTools captures the network request]
-    H[8. Developer opens the request and inspects its details]
-
-    A --> B --> C --> D --> E --> F
-    C --> G --> H
-```
-
-You are not manually creating the request.
-
-You are using the website normally.
-
-For example:
-
-```text
-Open course page
-```
-
-Then Chrome DevTools lets you inspect what happened behind the scenes.
-
----
-
-# 6. What You Look For in Chrome DevTools
-
-When you open the browser's **Network** panel, you may see many requests.
-
-Your job is to find the request related to the action you just performed.
-
-Conceptually, you may find:
-
-```text
-Name:
-courses/restful-api-mastery-greybox
-
-Method:
-GET
-
-Status:
-200
-```
-
-When you open that request, you can inspect:
-
-```text
-Headers
-    ↓
-Request URL
-Request Method
-Request Headers
-
-Response
-    ↓
-Response Headers
-Response Body
-```
-
-This is where RESTful API theory becomes visible.
-
-### Theory → DevTools
-
-| REST theory | What you may see in DevTools |
-|---|---|
-| HTTP method | `GET` |
-| Endpoint | URL / Request URL |
-| Request headers | Request Headers |
-| Status code | `200 OK` |
-| Response headers | Response Headers |
-| Response body | JSON / text / other data |
-
-So DevTools answers:
-
-> **"Show me the API request that the browser actually made."**
-
----
-
-# 7. Why Would I Use Chrome DevTools?
-
-Suppose clicking **"Load Lessons"** displays a list of lessons.
-
-You do not know which API endpoint provides those lessons.
-
-Instead of guessing:
-
-```mermaid
-flowchart LR
-    A[Click "Load Lessons"] --> B[Browser sends request]
-    B --> C[Open Network in DevTools]
-    C --> D[Find the new request]
-    D --> E[Inspect URL + Method + Status + Response]
-    E --> F[Discover the API used by the website]
-```
-
-You might discover:
-
-```text
-GET
 https://example.com/api/courses/123/lessons
 
+Status:
 200 OK
 ```
 
-And the response:
+and perhaps:
 
 ```json
 [
@@ -398,113 +417,104 @@ And the response:
 ]
 ```
 
-Now the theory becomes visible:
+Now you can connect the real result to your REST theory:
 
 ```text
 GET
-    ↓
+↓
 HTTP method
 
 /api/courses/123/lessons
-    ↓
+↓
 Endpoint
 
 200 OK
-    ↓
+↓
 Status code
 
 JSON array
-    ↓
+↓
 Response body
 ```
 
 ---
 
-# 8. Postman: From API Request to API Result
+# 8. Postman: Create the Request Yourself
 
-Postman starts from the opposite direction.
+Postman works differently.
 
-Instead of opening a website first, you already have an API endpoint that you want to test.
+You do not need to start from a website.
 
-The flow is:
+You can create the request yourself.
 
 ```mermaid
 flowchart TD
-    A[1. Choose HTTP method]
-    B[2. Enter API URL]
-    C[3. Add headers or body if needed]
-    D[4. Click Send]
-    E[5. Server receives request]
-    F[6. Server processes request]
-    G[7. Server returns response]
-    H[8. Postman displays response]
+    A[You know an API URL]
+    B[Open Postman]
+    C[Choose HTTP Method]
+    D[Enter Request URL]
+    E[Add headers or body if required]
+    F[Click Send]
+    G[API Server receives request]
+    H[API Server returns response]
+    I[Postman displays response]
 
-    A --> B --> C --> D --> E --> F --> G --> H
+    A --> B --> C --> D --> E --> F --> G --> H --> I
 ```
 
-The important idea is:
-
-> **Postman lets you create the client request yourself and see exactly what the server returns.**
-
----
-
-# 9. What Does Postman Actually Show?
-
-Suppose you want to test:
+For example:
 
 ```text
-https://httpbin.org/status/404
-```
-
-In Postman you select:
-
-```text
+Method:
 GET
-```
 
-and enter:
-
-```text
+URL:
 https://httpbin.org/status/404
 ```
 
-Then click:
+Then:
 
 ```text
-Send
+Click Send
 ```
 
-Postman sends:
+Postman sends the HTTP request.
 
-```http
-GET https://httpbin.org/status/404
-```
+The server returns a response.
 
-The server returns:
+Postman displays that response.
 
-```text
-404 Not Found
-```
+The purpose is:
 
-Postman then displays the result.
-
-Postman is not creating a new kind of API communication.
-
-It gives you a visual interface for the HTTP communication you already learned in theory.
+> **You create the request, send it, and inspect what the server returns.**
 
 ---
 
-# 10. Visual Example: A Real Postman Request
+# 9. Visual Example: Real Postman Request
 
-The following screenshot shows a real Postman request:
+The following screenshot shows an actual Postman request:
 
 ![Postman GET request returning 404 Not Found](postman-404-response-example-for-github.png)
 
-The screenshot can be understood from **top to bottom**.
+Read the screenshot as a sequence.
+
+```mermaid
+flowchart TB
+    A["1. Select GET"]
+    B["2. Enter https://httpbin.org/status/404"]
+    C["3. Click Send"]
+    D["4. Server receives request"]
+    E["5. Server returns 404 Not Found"]
+    F["6. Postman displays status and headers"]
+
+    A --> B --> C --> D --> E --> F
+```
+
+The screenshot is useful because it shows the **actual visual location** of the concepts.
 
 ### Request Method
 
-At the top left:
+At the top-left of the request:
 
 ```text
 GET
@@ -522,47 +532,71 @@ https://httpbin.org/status/404
 
 This is the URL where Postman sends the request.
 
-So the request is:
-
-```text
-Method:
-GET
-
-URL:
-https://httpbin.org/status/404
-```
-
 ### Send
 
-When you click:
+The button:
 
 ```text
 Send
 ```
 
-Postman sends the request to the server.
+causes Postman to actually send the request.
 
 ### Response Status
 
-The response area shows:
+After the request finishes, Postman displays:
 
 ```text
 404 Not Found
 ```
 
-This is the response status.
-
-The server is saying:
-
-> The request was processed, but the requested resource was not found.
-
-A `404` **is itself a response**.
+This is the server's response status.
 
 ---
 
-# 11. Now Look at the Response Headers
+# 10. Read the Postman Result as Request → Response
 
-The screenshot also shows response headers:
+Instead of looking at the screenshot as one large interface, follow this path:
+
+```mermaid
+flowchart LR
+    A["GET"] --> B["Request URL"]
+    B --> C["Send"]
+    C --> D["Server"]
+    D --> E["404 Not Found"]
+    E --> F["Response Headers"]
+    F --> G["Response Body"]
+```
+
+The screenshot therefore represents:
+
+```text
+REQUEST
+    ↓
+GET
+    ↓
+https://httpbin.org/status/404
+    ↓
+Send
+    ↓
+SERVER
+    ↓
+RESPONSE
+    ↓
+404 Not Found
+    ↓
+Headers
+    ↓
+Body
+```
+
+This is the connection between the Postman interface and the RESTful API theory.
+
+---
+
+# 11. What Are Those Response Headers?
+
+The screenshot shows response headers such as:
 
 ```text
 :status
@@ -574,18 +608,25 @@ access-control-allow-origin
 access-control-allow-credentials
 ```
 
-You do not need to memorize these yet.
+Do not memorize them yet.
 
-For now, understand the structure:
+Think of headers as **additional information attached to the response**.
 
-```text
-Response
-├── Status
-├── Headers
-└── Body
+```mermaid
+flowchart TB
+    R[HTTP RESPONSE]
+
+    R --> S[Status]
+    R --> H[Headers]
+    R --> B[Body]
+
+    H --> H1["date"]
+    H --> H2["content-type"]
+    H --> H3["content-length"]
+    H --> H4["server"]
 ```
 
-In this particular example:
+In this example:
 
 ```text
 Status:
@@ -598,413 +639,294 @@ Body:
 Empty
 ```
 
-The header:
+The screenshot shows:
 
 ```text
 content-length: 0
 ```
 
-helps explain why there is no response body.
+which indicates that the response body contains zero bytes.
+
+You do not need to understand every header yet.
+
+The important lesson is that:
+
+> **A response is more than just a status code.**
 
 ---
 
-# 12. Translate the Postman Screenshot Into REST Theory
+# 12. Why Is `404 Not Found` Still a Response?
 
-The screenshot can be translated into:
-
-```text
-REQUEST
-│
-├── Method
-│   └── GET
-│
-└── URL
-    └── https://httpbin.org/status/404
-
-
-RESPONSE
-│
-├── Status
-│   └── 404 Not Found
-│
-├── Headers
-│   ├── :status
-│   ├── date
-│   ├── content-type
-│   ├── content-length
-│   └── ...
-│
-└── Body
-    └── Empty
-```
-
-This is the important connection:
+A common beginner misunderstanding is:
 
 ```text
-Postman UI
-    ↓
-HTTP information
-    ↓
-RESTful API concepts you already know
+404 = no response
 ```
 
----
+That is incorrect.
 
-# 13. Why Is This Example 404?
+The server did respond.
 
-The endpoint:
-
-```text
-https://httpbin.org/status/404
-```
-
-is intentionally used to return:
+The response is:
 
 ```text
 404 Not Found
 ```
 
-This makes it easy to see that:
+Visualize it:
 
-> A server can receive and process a request while returning an unsuccessful result.
+```mermaid
+sequenceDiagram
+    participant P as Postman
+    participant S as API Server
 
-Compare:
-
-```text
-GET /some-resource
-200 OK
+    P->>S: GET /status/404
+    S-->>P: 404 Not Found
+    S-->>P: Response Headers
+    S-->>P: Empty Body
 ```
 
-with:
+So:
 
 ```text
-GET /some-resource
 404 Not Found
 ```
 
-Both are HTTP responses.
+means:
 
-The difference is what the status tells us.
+> The server returned an HTTP response indicating that the requested resource was not found.
 
 ---
 
-# 14. Success and Failure Use the Same Structure
+# 13. Success and Failure Have the Same Shape
 
-Instead of memorizing:
+The request/response structure does not suddenly change when the result is unsuccessful.
 
-```text
-GET /api/courses 200 OK
+### Successful example
+
+```mermaid
+flowchart LR
+    A["GET /api/courses"] --> B[Server]
+    B --> C["200 OK"]
+    C --> D["JSON response"]
 ```
 
-think about the actual structure:
+### Not-found example
+
+```mermaid
+flowchart LR
+    A["GET /api/courses/does-not-exist"] --> B[Server]
+    B --> C["404 Not Found"]
+    C --> D["Response body may be empty"]
+```
+
+The structure is still:
 
 ```text
-REQUEST
-    ↓
-Method + URL
+Request
     ↓
 Server
     ↓
-RESPONSE
-    ↓
-Status + Headers + Body
+Response
 ```
 
-### Successful response
-
-```text
-Method:
-GET
-
-URL:
-/api/courses/restful-api-mastery-greybox
-
-Status:
-200 OK
-
-Body:
-{
-  "slug": "restful-api-mastery-greybox",
-  "title": "RESTful API Mastery"
-}
-```
-
-### Not-found response
-
-```text
-Method:
-GET
-
-URL:
-/api/courses/does-not-exist
-
-Status:
-404 Not Found
-
-Body:
-Possibly empty or an error representation
-```
-
-The **structure is the same**.
-
-Only the returned result is different.
+Only the response result is different.
 
 ---
 
-# 15. Chrome DevTools vs Postman
+# 14. Chrome DevTools vs Postman
+
+The workflows are different.
 
 ```mermaid
 flowchart TB
     subgraph DEV["Chrome DevTools"]
-        A1[Use the website]
-        A2[Browser sends API request]
-        A3[Open Network panel]
-        A4[Find request]
-        A5[Inspect request + response]
+        A1["Use website"]
+        A2["Browser makes request"]
+        A3["Open Network panel"]
+        A4["Find request"]
+        A5["Inspect request + response"]
+
         A1 --> A2 --> A3 --> A4 --> A5
     end
 
     subgraph PM["Postman"]
-        B1[Choose method]
-        B2[Enter URL]
-        B3[Click Send]
-        B4[Server receives request]
-        B5[Inspect response]
+        B1["Choose method"]
+        B2["Enter URL"]
+        B3["Click Send"]
+        B4["Server processes request"]
+        B5["Inspect response"]
+
         B1 --> B2 --> B3 --> B4 --> B5
     end
 ```
 
 ### Chrome DevTools
 
-```text
-Website action
-    ↓
-Browser creates request
-    ↓
-DevTools lets you inspect it
-```
+Use it when you want to discover:
+
+> **What is this website doing behind the scenes?**
 
 ### Postman
 
-```text
-You create request
-    ↓
-Postman sends it
-    ↓
-Postman lets you inspect response
-```
+Use it when you want to test:
 
-But both eventually expose the same RESTful API concepts:
-
-```text
-Method
-URL / Endpoint
-Headers
-Status
-Response Body
-```
+> **What happens when I call this API directly?**
 
 ---
 
-# 16. When Should You Use Each Tool?
+# 15. The Same REST Theory Appears in Both Tools
 
-### Use Chrome DevTools when you want to know:
+Once you know where to look, the tools become much less mysterious.
 
-> **"What is this website doing behind the scenes?"**
-
-Examples:
-
-- Which API loads the course list?
-- Which endpoint loads a lesson?
-- What request is sent when I click a button?
-- What data did the website receive?
-
-### Use Postman when you want to know:
-
-> **"What happens when I call this API directly?"**
-
-Examples:
-
-- Does this endpoint work?
-- What status code does it return?
-- What does the response body look like?
-- What headers does the server return?
-- What happens if I change the endpoint or request?
-
----
-
-# 17. The Important Mental Model
-
-Do not think:
-
-```text
-RESTful API
-    ↓
-Postman
-```
-
-Postman is not part of REST itself.
-
-Instead:
-
-```text
-                    RESTful API
-                         ▲
-                         │
-          ┌──────────────┴──────────────┐
-          │                             │
-      Browser                       Postman
-          │                             │
-    Website action               Manual request
-          │                             │
-          └──────────────┬──────────────┘
-                         │
-                  HTTP Request
-                         │
-                         ▼
-                    API Server
-                         │
-                         ▼
-                  HTTP Response
-```
-
-Chrome DevTools sits beside the browser and lets you inspect that browser communication:
-
-```text
-Browser
-   │
-   ├── sends request ───────────→ API
-   │
-   └── DevTools observes it
-```
-
----
-
-# 18. From Theory to What You Actually See
-
-You already know the theory.
-
-Now connect each concept to its visual location.
-
-| Theory | Chrome DevTools | Postman |
+| REST concept | Chrome DevTools | Postman |
 |---|---|---|
-| HTTP method | Request Method | Method dropdown |
+| HTTP method | Request Method | Method selector |
 | URL | Request URL | URL field |
 | Endpoint | Part of Request URL | Part of URL |
 | Request headers | Request Headers | Headers |
-| Status code | Status | Response status |
+| Request body | Payload / Request | Body |
+| Status code | Response Status | Response status |
 | Response headers | Response Headers | Headers |
-| Response body | Response tab/body | Response body |
-| Request body | Request Payload | Body |
+| Response body | Response | Response body |
 
-This is the bridge between:
+The goal is not to memorize the UI.
 
-```text
-REST theory
-```
-
-and:
+The goal is to recognize:
 
 ```text
-Actual tool usage
+Theory
+  ↓
+Visual evidence
+  ↓
+Understanding
 ```
 
 ---
 
-# 19. Beginner Exercise: Read the Result
+# 16. A Better Way to Read API Results
 
-Look at this simplified result:
+Whenever you see an API request in a tool, read it in this order:
+
+```mermaid
+flowchart TD
+    A["1. What method?"] --> B["2. What URL?"]
+    B --> C["3. What happened?"]
+    C --> D["4. What status?"]
+    D --> E["5. What headers?"]
+    E --> F["6. What response body?"]
+```
+
+Ask:
+
+### 1. What method?
 
 ```text
-REQUEST
+GET?
+POST?
+PUT?
+PATCH?
+DELETE?
+```
 
+### 2. What URL?
+
+```text
+Where was the request sent?
+```
+
+### 3. What happened?
+
+```text
+Did the server receive and process the request?
+```
+
+### 4. What status?
+
+```text
+200?
+201?
+400?
+401?
+403?
+404?
+500?
+```
+
+### 5. What headers?
+
+```text
+What additional information was returned?
+```
+
+### 6. What response body?
+
+```text
+What data did the server return?
+```
+
+This gives you a repeatable way to inspect APIs.
+
+---
+
+# 17. Beginner Exercise
+
+Imagine Postman shows:
+
+```text
 Method:
 GET
 
 URL:
 https://example.com/api/courses
 
-
-RESPONSE
-
 Status:
 200 OK
 
-Body:
+Response Body:
 {
   "title": "RESTful API Mastery",
   "level": "beginner"
 }
 ```
 
-Do not read it as one strange block.
+Do not memorize the block.
 
-Read it step by step.
+Read it visually as:
 
-### Step 1 — What did the client do?
-
-```text
-GET
+```mermaid
+flowchart TB
+    A["GET"] --> B["https://example.com/api/courses"]
+    B --> C["Server"]
+    C --> D["200 OK"]
+    D --> E["JSON Response Body"]
 ```
 
-The client requested information.
+Now answer:
 
-### Step 2 — Where did it send the request?
+1. What method was used?
+2. Where was the request sent?
+3. What status did the server return?
+4. What data came back?
 
-```text
-https://example.com/api/courses
-```
+### Answers
 
-This is the request URL.
-
-### Step 3 — What did the server say?
-
-```text
-200 OK
-```
-
-The request was successful.
-
-### Step 4 — What did the server return?
-
-```json
-{
-  "title": "RESTful API Mastery",
-  "level": "beginner"
-}
-```
-
-That is the response body.
-
-So the compact notation:
-
-```text
-GET /api/courses 200 OK
-```
-
-simply summarizes:
-
-```text
-GET
-+
-/api/courses
-+
-200 OK
-```
-
-It is a summary of the request and result, not a replacement for the full request/response structure.
+1. `GET`
+2. `https://example.com/api/courses`
+3. `200 OK`
+4. Course title and level
 
 ---
 
-# 20. Common Beginner Misunderstandings
+# 18. Common Beginner Misunderstandings
 
 ### "I know GET theoretically, but where do I see GET?"
 
-In Chrome DevTools, look at the request's **Method**.
+In DevTools, look at **Request Method**.
 
-In Postman, look at the **method dropdown**.
+In Postman, look at the **method selector**.
 
-### "I know an endpoint theoretically, but where do I see it?"
+### "I know the endpoint theoretically, but where do I see it?"
 
 Look at the **Request URL**.
 
@@ -1014,60 +936,47 @@ For example:
 https://example.com/api/courses
 ```
 
-The endpoint path is:
+The path is:
 
 ```text
 /api/courses
 ```
 
-### "I know 200 OK theoretically, but where does it appear?"
+### "Where does 200 OK appear?"
 
 It appears as the **response status**.
 
-For example:
-
-```text
-200 OK
-```
-
-### "Is `GET /api/courses 200 OK` the actual response?"
+### "Is `GET /api/courses 200 OK` the entire response?"
 
 No.
 
-It is a compact summary:
+It is only a compact summary:
 
-```text
-GET
-    ↓
-Request method
-
-/api/courses
-    ↓
-Request endpoint
-
-200 OK
-    ↓
-Response status
+```mermaid
+flowchart TB
+    A["GET"] --> A2["Request Method"]
+    B["/api/courses"] --> B2["Request Endpoint"]
+    C["200 OK"] --> C2["Response Status"]
 ```
 
-The actual response may additionally contain:
+A real response may also contain:
 
 ```text
-Response headers
-Response body
+Response Headers
+Response Body
 ```
 
 ### "Is Postman the API?"
 
 No.
 
-Postman is a client/tool used to send requests to an API.
+Postman is a client/tool that sends requests to an API.
 
-### "Does Chrome DevTools send the API request?"
+### "Does Chrome DevTools create the API request?"
 
-Normally, the browser sends the request.
+Normally, the browser creates and sends the request.
 
-Chrome DevTools lets you observe and inspect it.
+DevTools lets you inspect it.
 
 ### "Does every response contain JSON?"
 
@@ -1084,21 +993,19 @@ A response may contain:
 
 ---
 
-# 21. Lesson Summary
+# 19. Lesson Summary
 
-The important lesson is not memorizing Postman or Chrome DevTools.
-
-The important lesson is learning to **recognize RESTful API communication when you see it**.
+The purpose of this lesson is to connect **RESTful API theory with visible evidence**.
 
 ### Chrome DevTools
 
 ```text
-Use website
-    ↓
-Browser makes API request
-    ↓
-DevTools captures request
-    ↓
+Website action
+      ↓
+Browser sends API request
+      ↓
+DevTools shows request
+      ↓
 Inspect request + response
 ```
 
@@ -1106,29 +1013,38 @@ Inspect request + response
 
 ```text
 Choose method
-    ↓
+      ↓
 Enter URL
-    ↓
+      ↓
 Send request
-    ↓
+      ↓
 Server returns response
-    ↓
-Inspect response
+      ↓
+Inspect result
 ```
 
-Both tools expose the same fundamental HTTP information:
+The core structure is:
 
-```text
-REQUEST
-├── Method
-├── URL
-├── Headers
-└── Body
+```mermaid
+flowchart LR
+    A[Request] --> B[API Server]
+    B --> C[Response]
+```
 
-RESPONSE
-├── Status
-├── Headers
-└── Body
+And inside those:
+
+```mermaid
+flowchart TB
+    R[REQUEST]
+    R --> R1[Method]
+    R --> R2[URL]
+    R --> R3[Headers]
+    R --> R4[Body]
+
+    S[RESPONSE]
+    S --> S1[Status]
+    S --> S2[Headers]
+    S --> S3[Body]
 ```
 
 The compact notation:
@@ -1137,7 +1053,7 @@ The compact notation:
 GET /api/courses 200 OK
 ```
 
-should now be understood as:
+is simply a shorthand representation of:
 
 ```text
 GET
@@ -1153,28 +1069,26 @@ Request endpoint
 Response status
 ```
 
+The next step is to stop looking at API communication as abstract text and start **finding the same information inside a real browser and Postman interface**.
+
 ---
 
 # Next Lesson
 
 In the next lesson, you will use **Chrome DevTools** for the first time.
 
-You will start from a real website action:
+You will follow this real workflow:
 
-```text
-Open a page
-    ↓
-Trigger an action
-    ↓
-Watch the Network panel
-    ↓
-Find the API request
-    ↓
-Open the request
-    ↓
-Identify Method + URL + Status + Response
+```mermaid
+flowchart LR
+    A["Open a website"] --> B["Trigger an action"]
+    B --> C["Open Network"]
+    C --> D["Find the API request"]
+    D --> E["Open request"]
+    E --> F["Identify Method + URL"]
+    F --> G["Identify Status + Response"]
 ```
 
 The goal is simple:
 
-> **See a RESTful API request happen in a real browser instead of only reading about it in theory.**
+> **See a RESTful API request happen in a real browser, find it in DevTools, and recognize the REST concepts you already know.**
