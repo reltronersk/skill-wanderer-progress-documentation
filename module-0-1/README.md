@@ -1110,17 +1110,7 @@ The following screenshot shows an actual Postman request:
 
 Read the screenshot as a sequence.
 
-```mermaid
-flowchart TB
-    A["1. Select GET"]
-    B["2. Enter https://httpbin.org/status/404"]
-    C["3. Click Send"]
-    D["4. Server receives request"]
-    E["5. Server returns 404 Not Found"]
-    F["6. Postman displays status and headers"]
-
-    A --> B --> C --> D --> E --> F
-```
+![postman-flow-actions](postman-flow-actions.png)
 
 The screenshot is useful because it shows the **actual visual location** of the concepts.
 
