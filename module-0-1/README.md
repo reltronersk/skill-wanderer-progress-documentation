@@ -259,16 +259,7 @@ The selected request contains several pieces of HTTP information.
 
 ## 5.1 Start With the User Action
 
-```mermaid
-flowchart LR
-    A[User opens or uses a website]
-    B[Browser makes HTTP requests]
-    C[Chrome DevTools records Network activity]
-    D[Developer selects one request]
-    E[Request and response details become visible]
-
-    A --> B --> C --> D --> E
-```
+![chrome-devtools-user-action](chrome-devtools-user-action.png)
 
 DevTools is not the API. It is a place where we can **observe the browser's HTTP communication**.
 
