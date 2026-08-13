@@ -207,7 +207,7 @@ Think of the investigation like this:
 
 ```mermaid
 flowchart TD
-    A[Perform an action on the website]
+    A[Perform an action on website]
     B[Look at Network activity]
     C[Find the request related to the action]
     D[Open the request]
