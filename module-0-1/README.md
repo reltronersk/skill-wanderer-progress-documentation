@@ -494,7 +494,7 @@ The purpose is:
 
 The following screenshot shows an actual Postman request:
 
-![Postman GET request returning 404 Not Found](postman-404-response-example-for-github.png)
+![Postman GET request returning 404 Not Found](postman-404-response-example.png)
 
 Read the screenshot as a sequence.
 
