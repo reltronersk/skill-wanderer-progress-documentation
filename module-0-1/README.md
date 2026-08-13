@@ -240,6 +240,625 @@ The purpose of DevTools is therefore simple:
 
 ---
 
+
+# 5. Practical: See an HTTP Request in Chrome DevTools
+
+Now let us look at a **real Chrome DevTools Network result**.
+
+The purpose is not to memorize the DevTools interface. The purpose is to answer:
+
+> **Where can I actually see the HTTP and RESTful API concepts that I already know from theory?**
+
+![Real Chrome DevTools Network request](chrome-devtools-network-real-example.png)
+
+The screenshot shows a browser page on the left and the **Network** panel on the right.
+
+The selected request contains several pieces of HTTP information.
+
+---
+
+## 5.1 Start With the User Action
+
+```mermaid
+flowchart LR
+    A[User opens or uses a website]
+    --> B[Browser makes HTTP requests]
+    --> C[Chrome DevTools records Network activity]
+    --> D[Developer selects one request]
+    --> E[Request and response details become visible]
+```
+
+DevTools is not the API. It is a place where we can **observe the browser's HTTP communication**.
+
+---
+
+## 5.2 Find the Request
+
+The Network panel can contain many requests:
+
+```text
+HTML
+CSS
+JavaScript
+Images
+Fonts
+Favicon
+Fetch/XHR
+```
+
+Therefore:
+
+> **Not every item in the Network panel is a RESTful API request.**
+
+For API investigation, you will often start with:
+
+```text
+Fetch/XHR
+```
+
+because applications commonly use these requests to communicate with APIs.
+
+---
+
+## 5.3 Read the Selected Request
+
+The screenshot shows:
+
+```text
+Request URL:
+https://httpbin.org/
+
+Request Method:
+GET
+
+Status Code:
+503 Service Unavailable
+```
+
+Connect those fields to the theory:
+
+```mermaid
+flowchart TB
+    A[Selected Network Request]
+
+    A --> B[Request URL]
+    B --> B1["https://httpbin.org/"]
+
+    A --> C[Request Method]
+    C --> C1[GET]
+
+    A --> D[Response Status]
+    D --> D1["503 Service Unavailable"]
+```
+
+So:
+
+- **Request URL** = where the request was sent.
+- **Request Method** = which HTTP method was used.
+- **Status Code** = what result the server returned.
+
+---
+
+## 5.4 Turn the Screenshot Into Request → Server → Response
+
+```mermaid
+sequenceDiagram
+    participant B as Browser
+    participant S as httpbin.org
+
+    B->>S: GET https://httpbin.org/
+    S-->>B: 503 Service Unavailable
+    S-->>B: Response Headers
+    S-->>B: HTML Response Body
+```
+
+The screenshot therefore represents:
+
+```text
+REQUEST
+    ↓
+GET https://httpbin.org/
+    ↓
+SERVER
+    ↓
+RESPONSE
+    ↓
+503 Service Unavailable
+    ↓
+Headers + Body
+```
+
+This is the key visual connection to HTTP theory.
+
+---
+
+## 5.5 Where Is the HTTP Method?
+
+In the **General** section, the screenshot shows:
+
+```text
+Request Method
+GET
+```
+
+Visual model:
+
+```mermaid
+flowchart LR
+    A["DevTools: Request Method"] --> B["GET"]
+    B --> C["HTTP Method"]
+    C --> D["REST/API theory"]
+```
+
+When you see:
+
+```text
+Request Method: GET
+```
+
+you can say:
+
+> The client used the HTTP `GET` method.
+
+---
+
+## 5.6 Where Is the URL / Endpoint?
+
+The screenshot shows:
+
+```text
+Request URL
+https://httpbin.org/
+```
+
+For a typical API request, you might instead see:
+
+```text
+https://example.com/api/courses
+```
+
+Visualize it as:
+
+```mermaid
+flowchart TB
+    A["https://example.com/api/courses"]
+
+    A --> B["https://"]
+    A --> C["example.com"]
+    A --> D["/api/courses"]
+    D --> E["API path / endpoint"]
+```
+
+### Important distinction
+
+The screenshot's request is:
+
+```text
+GET https://httpbin.org/
+```
+
+This is a real HTTP request, but the screenshot alone does **not** prove that this particular request is a RESTful resource endpoint.
+
+It is still useful because it lets you see the actual HTTP structure.
+
+When investigating a REST API, look for the request that accesses an application resource, often under paths such as:
+
+```text
+/api/...
+```
+
+or under:
+
+```text
+Fetch/XHR
+```
+
+---
+
+## 5.7 Where Is the Status Code?
+
+The screenshot shows:
+
+```text
+Status Code
+503 Service Unavailable
+```
+
+This belongs to the **response**.
+
+```mermaid
+flowchart LR
+    A[Browser sends request]
+    --> B[Server]
+    --> C[HTTP Response]
+    --> D["503 Service Unavailable"]
+```
+
+The important point is:
+
+> The status code is part of the HTTP response returned by the server.
+
+---
+
+## 5.8 What Are Response Headers?
+
+The screenshot shows:
+
+```text
+Response Headers
+```
+
+with values such as:
+
+```text
+Content-Length
+Content-Type
+Date
+Server
+```
+
+Think of the response as:
+
+```mermaid
+flowchart TB
+    R[HTTP Response]
+
+    R --> S[Status]
+    R --> H[Response Headers]
+    R --> B[Response Body]
+
+    H --> H1[Content-Length]
+    H --> H2[Content-Type]
+    H --> H3[Date]
+    H --> H4[Server]
+```
+
+Do not memorize these headers yet.
+
+The important distinction is:
+
+```text
+Response Headers
+    ↓
+additional information returned by the server
+```
+
+---
+
+## 5.9 What Are Request Headers?
+
+The screenshot also shows:
+
+```text
+Request Headers
+```
+
+Examples include:
+
+```text
+:authority
+:method
+:path
+:scheme
+Accept
+Accept-Encoding
+Accept-Language
+```
+
+Visual model:
+
+```mermaid
+flowchart TB
+    R[HTTP Request]
+
+    R --> M[Method]
+    R --> U[URL / Path]
+    R --> H[Request Headers]
+
+    H --> H1[Accept]
+    H --> H2[Accept-Encoding]
+    H --> H3[Accept-Language]
+```
+
+The distinction is:
+
+```text
+Request Headers
+    ↓
+sent by the client
+
+Response Headers
+    ↓
+returned by the server
+```
+
+---
+
+## 5.10 What About the Response Body?
+
+The screenshot shows:
+
+```text
+503 Service Temporarily Unavailable
+```
+
+and the response has:
+
+```text
+Content-Type: text/html
+```
+
+That means this particular response is HTML rather than JSON.
+
+This is useful for beginners:
+
+> **Not every HTTP response is JSON.**
+
+REST APIs commonly return JSON, but HTTP can carry many kinds of response bodies.
+
+```mermaid
+flowchart TB
+    R[HTTP Response]
+
+    R --> J[JSON]
+    R --> H[HTML]
+    R --> T[Plain Text]
+    R --> F[File / Binary Data]
+    R --> E[Empty Body]
+```
+
+---
+
+## 5.11 Convert the Screenshot Into One Mental Model
+
+```mermaid
+flowchart TB
+    A[Browser]
+
+    B[REQUEST]
+    B --> B1["Method: GET"]
+    B --> B2["URL: https://httpbin.org/"]
+    B --> B3[Request Headers]
+
+    C[httpbin.org]
+
+    D[RESPONSE]
+    D --> D1["Status: 503 Service Unavailable"]
+    D --> D2[Response Headers]
+    D --> D3["Body: HTML"]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> A
+```
+
+The mental model to keep is:
+
+```text
+REQUEST
+├── Method
+├── URL
+└── Request Headers
+
+RESPONSE
+├── Status
+├── Response Headers
+└── Response Body
+```
+
+---
+
+## 5.12 How This Connects to a RESTful API
+
+Now imagine the same HTTP structure for a course API:
+
+```mermaid
+flowchart TB
+    A[Browser]
+
+    B[REQUEST]
+    B --> B1[GET]
+    B --> B2["https://example.com/api/courses"]
+    B --> B3[Request Headers]
+
+    C[Course API]
+
+    D[RESPONSE]
+    D --> D1["200 OK"]
+    D --> D2[Response Headers]
+    D --> D3[JSON Course Data]
+
+    A --> B
+    B --> C
+    C --> D
+    D --> A
+```
+
+The structure is the same.
+
+Only the actual URL, status, headers, and body change.
+
+This is the bridge:
+
+```text
+Chrome DevTools
+      ↓
+Real HTTP communication
+      ↓
+Method + URL + Headers + Status + Body
+      ↓
+RESTful API concepts
+```
+
+---
+
+## 5.13 Practical Task: Find an API Request
+
+Try this yourself in Chrome.
+
+### Step 1 — Open a website
+
+Open a web application that uses an API.
+
+### Step 2 — Open DevTools
+
+Use:
+
+```text
+Right click → Inspect
+```
+
+Then open:
+
+```text
+Network
+```
+
+### Step 3 — Perform an action
+
+For example:
+
+```text
+Open a course
+Click "Load Lessons"
+Search for something
+Open a profile
+```
+
+### Step 4 — Watch the Network panel
+
+Try:
+
+```text
+Fetch/XHR
+```
+
+to focus on application/API requests.
+
+### Step 5 — Select a request
+
+Find the request related to the action you just performed.
+
+### Step 6 — Read the request
+
+Find:
+
+```text
+Request URL
+Request Method
+Request Headers
+```
+
+### Step 7 — Read the response
+
+Find:
+
+```text
+Status Code
+Response Headers
+Response
+```
+
+### Step 8 — Build the mental model
+
+```text
+REQUEST
+
+Method:
+________________
+
+URL:
+________________
+
+Request Headers:
+________________
+
+
+RESPONSE
+
+Status:
+________________
+
+Response Headers:
+________________
+
+Response Body:
+________________
+```
+
+The goal is not to memorize the DevTools interface.
+
+The goal is to **find the REST/HTTP information inside the interface**.
+
+---
+
+## 5.14 What You Should Be Able to Point At
+
+After completing the exercise, you should be able to point at the screen and say:
+
+```text
+"This is the HTTP method."
+
+"This is the request URL."
+
+"These are request headers."
+
+"This is the response status."
+
+"These are response headers."
+
+"This is the response body."
+```
+
+That is the practical skill this lesson is building.
+
+---
+
+## 5.15 One Important Observation
+
+The screenshot also teaches another important lesson:
+
+```text
+Network panel
+    ↓
+contains many requests
+```
+
+Some are:
+
+```text
+CSS
+JavaScript
+Font
+Image
+Favicon
+HTML
+Fetch/XHR
+```
+
+Therefore:
+
+> **Do not identify an API merely because you see something in the Network panel.**
+
+For API-focused investigation, start by checking:
+
+```text
+Fetch/XHR
+```
+
+Then inspect:
+
+```text
+Method
+URL
+Status
+Response
+```
+
+This prevents you from confusing ordinary web resources with API communication.
+
+
 # 5. What Does `GET /api/courses 200 OK` Actually Mean?
 
 A beginner may encounter shorthand like:
