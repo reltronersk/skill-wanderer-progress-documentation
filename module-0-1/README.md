@@ -262,9 +262,13 @@ The selected request contains several pieces of HTTP information.
 ```mermaid
 flowchart LR
     A[User opens or uses a website]
+
     --> B[Browser makes HTTP requests]
+
     --> C[Chrome DevTools records Network activity]
+
     --> D[Developer selects one request]
+
     --> E[Request and response details become visible]
 ```
 
