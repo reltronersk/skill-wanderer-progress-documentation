@@ -268,7 +268,6 @@ flowchart LR
     E[Request and response details become visible]
 
     A --> B --> C --> D --> E
-end
 ```
 
 DevTools is not the API. It is a place where we can **observe the browser's HTTP communication**.
