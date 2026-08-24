@@ -65,7 +65,7 @@ flowchart TB
     A --> D["Body<br/>JSON / Data"]
 ```
 
-For example:
+For example in Body JSON:
 
 ```json
 {
