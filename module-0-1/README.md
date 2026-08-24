@@ -20,7 +20,7 @@ HTTP Response
 
 ---
 
-![lesson011.png](/module-0-1/lesson011.png)
+![lesson011](/module-0-1/lesson011.png)
 
 ## 1. The Shape of an HTTP Request
 
@@ -54,6 +54,8 @@ Where?
 ```
 
 ---
+
+![lesson012]](/module-0-1/lesson012.png)
 
 ## 2. The Shape of an HTTP Response
 
@@ -185,6 +187,8 @@ RESPONSE
 This is what you will learn to recognize in the next lessons.
 
 ---
+
+![lesson016](/module-0-1/lesson016.png)
 
 ## 6. One Example
 
