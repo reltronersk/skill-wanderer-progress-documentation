@@ -31,7 +31,7 @@ flowchart TB
     A["HTTP Request"]
     A --> B["Method<br/>GET"]
     A --> C["URL / Endpoint<br/>/api/courses"]
-    A --> D["Headers<br/>Optional"]
+    A --> D["Headers"]
     A --> E["Body<br/>Optional"]
 ```
 
