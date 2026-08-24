@@ -32,7 +32,7 @@ flowchart TB
     A --> B["Method<br/>GET"]
     A --> C["URL / Endpoint<br/>/api/courses"]
     A --> D["Headers"]
-    A --> E["Body<br/>(Optional)"]
+    A --> E["Body"]
 ```
 
 For example:
