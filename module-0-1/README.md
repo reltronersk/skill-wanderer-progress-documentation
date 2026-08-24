@@ -55,7 +55,7 @@ Where?
 
 ---
 
-![lesson012]](/module-0-1/lesson012.png)
+![lesson012](/module-0-1/lesson012.png)
 
 ## 2. The Shape of an HTTP Response
 
