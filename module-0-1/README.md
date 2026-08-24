@@ -20,6 +20,8 @@ HTTP Response
 
 ---
 
+![lesson011.png](/lesson011.png)
+
 ## 1. The Shape of an HTTP Request
 
 A request contains information that tells the server what the client wants.
