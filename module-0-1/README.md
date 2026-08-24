@@ -1,447 +1,248 @@
-# Lesson 0.1 --- Understand the Visible Shape of HTTP
+# Lesson 0.1 — Understand the Visible Shape of HTTP
 
-> **Module 0 --- Discovering RESTful APIs Through Testing**
+> **Module 0 — Discovering RESTful APIs Through Testing**
 
-## Lesson Overview
+## Lesson Goal
 
-You may already understand RESTful APIs from theory.
+You already know RESTful API concepts from theory.
 
-You may know terms such as:
+Now connect those concepts to what you will actually see in an API tool.
 
--   HTTP method
--   Endpoint
--   Request
--   Response
--   Status code
--   Headers
--   JSON
+The key idea:
 
-But when these concepts appear in a real API test, they can look very
-different from the diagrams in a textbook.
-
-For example, you may see:
-
-``` text
-GET /api/courses
-200 OK
+```text
+HTTP Request
+      ↓
+API / Server
+      ↓
+HTTP Response
 ```
 
-At first, this can look like one mysterious piece of information.
+---
 
-It is not.
+## 1. The Shape of an HTTP Request
 
-It is a short summary of information that belongs to an HTTP request and
-response.
+A request contains information that tells the server what the client wants.
 
-This lesson helps you connect the theory you already know with the
-**visible shape of HTTP communication**.
-
-------------------------------------------------------------------------
-
-## Learning Objectives
-
-By the end of this lesson, you should be able to:
-
--   Recognize the two sides of HTTP communication: request and response.
--   Identify the method and URL in a request.
--   Identify the status code in a response.
--   Understand that headers and body are separate parts of HTTP
-    communication.
--   Translate a short form such as `GET /api/courses → 200 OK` into its
-    actual structure.
-
-------------------------------------------------------------------------
-
-## 1. REST Theory Meets Real HTTP
-
-A RESTful API communicates through HTTP.
-
-The basic communication looks like this:
-
-``` mermaid
-flowchart LR
-    A["Client"] -->|"HTTP Request"| B["API / Server"]
-    B -->|"HTTP Response"| A
-```
-
-The client could be:
-
--   A web browser
--   A mobile application
--   Postman
--   Another application
-
-The important idea is:
-
-> A client sends a request, and the server returns a response.
-
-------------------------------------------------------------------------
-
-## 2. What Is Inside the Request?
-
-An HTTP request can contain several pieces of information.
-
-``` mermaid
+```mermaid
 flowchart TB
     A["HTTP Request"]
-
-    A --> B["Method"]
-    A --> C["URL"]
-    A --> D["Headers"]
-    A --> E["Body"]
+    A --> B["Method<br/>GET"]
+    A --> C["URL / Endpoint<br/>/api/courses"]
+    A --> D["Headers<br/>Optional"]
+    A --> E["Body<br/>Optional"]
 ```
 
 For example:
 
-``` text
-Method:
-GET
+```text
+GET https://example.com/api/courses
+```
 
-URL:
+Read it as:
+
+```text
+GET
+ ↓
+What action?
+
 https://example.com/api/courses
+ ↓
+Where?
 ```
 
-The method tells the server what kind of operation the client is
-requesting.
+---
 
-The URL tells the client where to send the request.
+## 2. The Shape of an HTTP Response
 
-For this lesson, focus on the simplest case:
+The server sends a response back.
 
-``` text
-GET
-+
-URL
-```
-
-------------------------------------------------------------------------
-
-## 3. What Is Inside the Response?
-
-The server sends an HTTP response back to the client.
-
-``` mermaid
+```mermaid
 flowchart TB
     A["HTTP Response"]
-
-    A --> B["Status Code"]
+    A --> B["Status<br/>200 OK"]
     A --> C["Headers"]
-    A --> D["Body"]
+    A --> D["Body<br/>JSON / Data"]
 ```
 
 For example:
 
-``` text
-Status:
-200 OK
-```
-
-The response may also contain headers and a response body.
-
-A JSON response body could look like:
-
-``` json
+```json
 {
   "title": "RESTful API Mastery",
   "level": "beginner"
 }
 ```
 
-------------------------------------------------------------------------
+The response tells the client:
 
-## 4. The Short Form Can Be Misleading
+```text
+Did it work?
+What information came back?
+```
 
-A beginner may see:
+---
 
-``` text
+## 3. Read This Correctly
+
+You may see a summary like:
+
+```text
 GET /api/courses
 200 OK
 ```
 
-and think:
+Do **not** treat it as one mysterious format.
 
-> "What is this? Is this the API?"
+Break it into:
 
-No.
-
-This is a compact way of describing parts of an HTTP exchange.
-
-Let's expand it.
-
-``` mermaid
+```mermaid
 flowchart TB
-    A["GET /api/courses"] --> B["Request"]
-    B --> C["GET"]
-    B --> D["/api/courses"]
+    A["GET /api/courses"]
+    A --> B["GET"]
+    A --> C["/api/courses"]
 
-    E["200 OK"] --> F["Response"]
-    F --> G["200"]
-    F --> H["OK"]
+    B --> D["HTTP Method"]
+    C --> E["Endpoint"]
+
+    F["200 OK"]
+    F --> G["Response Status"]
 ```
 
-Now we can read it as:
+So:
 
-``` text
+```text
 GET
 ↓
-HTTP Method
+Method
 
 /api/courses
 ↓
-Request Path / Endpoint
+Endpoint
 
 200 OK
 ↓
 Response Status
 ```
 
-------------------------------------------------------------------------
+---
 
-## 5. See the Complete Picture
+## 4. The Complete HTTP Picture
 
-The short form:
-
-``` text
-GET /api/courses
-200 OK
-```
-
-can represent a much larger exchange:
-
-``` mermaid
+```mermaid
 sequenceDiagram
-    participant Client
-    participant API as API / Server
+    participant C as Client
+    participant S as API / Server
 
-    Client->>API: GET /api/courses
-    Note right of API: HTTP Request
-    API-->>Client: 200 OK
-    Note right of API: HTTP Response
+    C->>S: GET /api/courses
+    S-->>C: 200 OK
+    S-->>C: JSON response
 ```
 
-A more detailed mental model is:
+Think of it as:
 
-``` text
-REQUEST
-│
-├── Method
-│   └── GET
-│
-├── URL
-│   └── https://example.com/api/courses
-│
-├── Headers
-│
-└── Body
-    └── Optional
-
-
-            ↓
-
-
-RESPONSE
-│
-├── Status
-│   └── 200 OK
-│
-├── Headers
-│
-└── Body
-    └── JSON data
+```text
+CLIENT
+  │
+  │  Request
+  │  GET + URL
+  ▼
+API / SERVER
+  │
+  │  Response
+  │  Status + Data
+  ▼
+CLIENT
 ```
 
-The exact information shown depends on the request.
+---
 
-A `GET` request, for example, commonly has no request body.
+## 5. What You Will See in Real Tools
 
-------------------------------------------------------------------------
+Chrome DevTools and Postman do not normally show everything as:
 
-## 6. Why Do Tools Show It Differently?
-
-When you use a real HTTP tool, you usually do not see everything as one
-line.
-
-Instead, the tool separates the information.
-
-For example:
-
-``` text
-REQUEST
-
-Method:
-GET
-
-URL:
-https://example.com/api/courses
-
-
-RESPONSE
-
-Status:
-200 OK
-
-Headers:
-...
-
-Body:
-{
-  "title": "RESTful API Mastery",
-  "level": "beginner"
-}
-```
-
-This is easier to inspect because each part has a specific place.
-
-Later, Chrome DevTools and Postman will show these pieces visually.
-
-------------------------------------------------------------------------
-
-## 7. Request → Server → Response
-
-The most important visual model in this lesson is:
-
-``` mermaid
-flowchart LR
-    A["Client"] -->|"1. Request"| B["API / Server"]
-    B -->|"2. Response"| A
-```
-
-The request can contain:
-
-``` text
-Method
-URL
-Headers
-Body
-```
-
-The response can contain:
-
-``` text
-Status
-Headers
-Body
-```
-
-So:
-
-``` text
-Client
-  |
-  | Method + URL + ...
-  v
-API / Server
-  |
-  | Status + Headers + Body
-  v
-Client
-```
-
-------------------------------------------------------------------------
-
-## 8. What Does `200 OK` Actually Mean?
-
-Consider:
-
-``` text
+```text
 GET /api/courses
 200 OK
 ```
 
-The first line describes the request:
+They separate the information:
 
-``` text
-GET
-/api/courses
+```text
+REQUEST
+├── Method: GET
+├── URL: https://example.com/api/courses
+└── Headers / Body
+
+RESPONSE
+├── Status: 200 OK
+├── Headers
+└── Body: JSON
 ```
 
-The second line describes the result:
+This is what you will learn to recognize in the next lessons.
 
-``` text
-200 OK
-```
+---
 
-`200 OK` means the server successfully processed the request.
+## 6. One Example
 
-It does not mean:
+Suppose you see:
 
-> "200 is part of the URL."
-
-It is a **response status**.
-
-------------------------------------------------------------------------
-
-## 9. What About `404 Not Found`?
-
-A different request may produce:
-
-``` text
-GET /api/courses/does-not-exist
+```text
+GET /api/courses/123
 404 Not Found
 ```
 
-The structure is still the same:
+Translate it:
 
-``` mermaid
+```mermaid
 flowchart LR
-    A["Client"] -->|"GET /api/courses/does-not-exist"| B["API / Server"]
-    B -->|"404 Not Found"| A
+    A["Client"]
+    B["GET /api/courses/123"]
+    C["API / Server"]
+    D["404 Not Found"]
+
+    A --> B --> C --> D
 ```
 
-The important difference is the response status.
+Meaning:
 
-``` text
-200 OK
-↓
-Request succeeded
+```text
+GET
+→ Request method
+
+/api/courses/123
+→ Endpoint
 
 404 Not Found
-↓
-Requested resource could not be found
+→ Response status
 ```
 
-A `404` does not mean that there was no response.
+The server **did respond**. The response says that the requested resource was not found.
 
-The server responded with:
+---
 
-> `404 Not Found`
+## Takeaway
 
-------------------------------------------------------------------------
+Remember only this structure:
 
-## 10. From Theory to What You Will See
+```text
+REQUEST
+├── Method
+├── URL
+├── Headers
+└── Body
 
-You already know these concepts:
+        ↓
 
-``` text
-HTTP Method
-Endpoint
-Request
-Response
-Status Code
-Headers
-Body
+API / SERVER
+
+        ↓
+
+RESPONSE
+├── Status
+├── Headers
+└── Body
 ```
 
-Now connect them to what a real tool will show:
-
-``` mermaid
-flowchart TB
-    A["REST API theory"]
-
-    A --> B["HTTP Request"]
-    A --> C["HTTP Response"]
-
-    B --> D["Method"]
-    B --> E["URL / Endpoint"]
-    B --> F["Request Headers"]
-    B --> G["Request Body"]
-
-    C --> H["Status Code"]
-    C --> I["Response Headers"]
-    C --> J["Response Body"]
-```
-
-This is the bridge between **knowing the terms** and **recognizing them
-in a real tool**.
-
----------------------------------------------------------------
+The purpose of the next lessons is to **find these pieces in real Chrome DevTools and Postman interfaces**.
