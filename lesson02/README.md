@@ -251,58 +251,6 @@ You simply observed the request made by the browser.
 
 ---
 
-## 8. Mini Exercise
-
-Open a website that loads data dynamically.
-
-Then:
-
-```text
-1. Open DevTools
-2. Open Network
-3. Perform an action
-4. Look at the new requests
-5. Select a likely API request
-```
-
-Try to find:
-
-```text
-Request Method: ?
-Request URL: ?
-Status Code: ?
-```
-
-Do not worry about understanding every field yet.
-
-That is the purpose of the next lesson.
-
----
-
-## Takeaway
-
-The workflow is:
-
-```text
-Website
-   ↓
-User action
-   ↓
-Browser sends request
-   ↓
-DevTools records it
-   ↓
-Select request
-   ↓
-Inspect API communication
-```
-
-The key idea:
-
-> **Chrome DevTools lets you discover the RESTful API communication happening behind a website.**
-
----
-
 ## Next Lesson
 
 In **Lesson 0.3 — Read the request and response**, you will take the request you found and learn how to read its:
