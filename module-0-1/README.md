@@ -20,7 +20,7 @@ HTTP Response
 
 ---
 
-![lesson011.png](/lesson011.png)
+![lesson011.png](/module-0-1/lesson011.png)
 
 ## 1. The Shape of an HTTP Request
 
