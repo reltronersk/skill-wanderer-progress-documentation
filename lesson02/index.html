@@ -39,7 +39,7 @@
     }
 
     .container {
-      width: min(1000px, calc(100% - 32px));
+      width: min(1050px, calc(100% - 32px));
       margin: 0 auto;
       padding: 40px 0 80px;
     }
@@ -66,6 +66,10 @@
       font-size: 26px;
     }
 
+    h3 {
+      margin-top: 0;
+    }
+
     p {
       color: var(--muted);
     }
@@ -77,7 +81,7 @@
 
     .hero p {
       font-size: 18px;
-      max-width: 720px;
+      max-width: 760px;
     }
 
     .goal {
@@ -109,7 +113,7 @@
       margin-bottom: 8px;
     }
 
-    /* Flow */
+    /* FLOW */
 
     .flow {
       display: flex;
@@ -121,7 +125,7 @@
     }
 
     .flow-box {
-      min-width: 150px;
+      min-width: 145px;
       padding: 18px;
       text-align: center;
       background: var(--card-2);
@@ -130,13 +134,18 @@
       font-weight: 700;
     }
 
+    .flow-box.highlight {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(56,189,248,.12);
+    }
+
     .flow-arrow {
       color: var(--blue);
       font-size: 24px;
       font-weight: 700;
     }
 
-    /* Fake browser */
+    /* BROWSER */
 
     .browser {
       overflow: hidden;
@@ -161,9 +170,17 @@
       border-radius: 50%;
     }
 
-    .dot.red { background: #ef4444; }
-    .dot.yellow { background: #f59e0b; }
-    .dot.green { background: #22c55e; }
+    .dot.red {
+      background: #ef4444;
+    }
+
+    .dot.yellow {
+      background: #f59e0b;
+    }
+
+    .dot.green {
+      background: #22c55e;
+    }
 
     .address {
       flex: 1;
@@ -186,7 +203,7 @@
 
     .website h3 {
       font-size: 28px;
-      margin: 0 0 8px;
+      margin-bottom: 8px;
     }
 
     .website p {
@@ -208,23 +225,110 @@
       background: #0369a1;
     }
 
-    /* DevTools */
+    /* GUI STEPS */
+
+    .gui-step {
+      display: grid;
+      grid-template-columns: 70px 1fr;
+      gap: 18px;
+      margin-top: 24px;
+      padding: 20px;
+      background: var(--card-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: #075985;
+      color: white;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .gui-step h3 {
+      margin-bottom: 6px;
+    }
+
+    .gui-step p {
+      margin-top: 6px;
+    }
+
+    .shortcut {
+      display: inline-block;
+      padding: 5px 9px;
+      background: #020617;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .click-target {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      margin-top: 8px;
+      border-radius: 7px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      font-family: monospace;
+      color: var(--text);
+    }
+
+    .click-target .mouse {
+      color: var(--yellow);
+    }
+
+    /* MOCK DEVTOOLS */
 
     .devtools {
-      margin-top: 0;
+      margin-top: 20px;
       background: #111827;
       border-top: 1px solid #475569;
     }
 
+    .devtools-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      background: #0f172a;
+      border-bottom: 1px solid #334155;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .toolbar-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      background: #334155;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     .devtools-tabs {
       display: flex;
+      gap: 2px;
+      padding: 0 8px;
+      overflow-x: auto;
       border-bottom: 1px solid #334155;
     }
 
     .devtools-tab {
-      padding: 12px 18px;
+      padding: 12px 15px;
       color: #94a3b8;
-      font-size: 13px;
+      font-size: 12px;
+      white-space: nowrap;
     }
 
     .devtools-tab.active {
@@ -232,16 +336,44 @@
       border-bottom: 2px solid var(--blue);
     }
 
+    .devtools-content {
+      min-height: 220px;
+    }
+
+    .network-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-bottom: 1px solid #334155;
+      flex-wrap: wrap;
+    }
+
+    .network-button {
+      padding: 5px 9px;
+      border-radius: 5px;
+      background: #1e293b;
+      border: 1px solid #475569;
+      color: #cbd5e1;
+      font-size: 11px;
+    }
+
+    .network-button.active {
+      background: #075985;
+      color: white;
+      border-color: #0284c7;
+    }
+
     .network-table {
       width: 100%;
       border-collapse: collapse;
       font-family: monospace;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .network-table th,
     .network-table td {
-      padding: 12px 14px;
+      padding: 11px 12px;
       text-align: left;
       border-bottom: 1px solid #1e293b;
     }
@@ -270,9 +402,25 @@
       font-weight: 700;
     }
 
+    /* DEVTOOLS ANNOTATION */
+
+    .annotation {
+      margin-top: 16px;
+      padding: 15px;
+      border-radius: 9px;
+      background: #0c2033;
+      border: 1px solid #075985;
+    }
+
+    .annotation strong {
+      color: var(--blue);
+    }
+
+    /* DETAILS */
+
     .request-details {
       display: none;
-      margin: 20px;
+      margin: 18px;
       padding: 20px;
       background: #0b1220;
       border: 1px solid #334155;
@@ -300,7 +448,7 @@
       word-break: break-all;
     }
 
-    /* Discovery */
+    /* DISCOVERY */
 
     .discovery {
       display: none;
@@ -330,7 +478,7 @@
       overflow-x: auto;
     }
 
-    /* Takeaway */
+    /* TAKEAWAY */
 
     .takeaway {
       display: grid;
@@ -354,17 +502,22 @@
     }
 
     @media (max-width: 700px) {
+
       section {
         padding: 20px;
       }
 
+      .gui-step {
+        grid-template-columns: 1fr;
+      }
+
       .network-table {
-        font-size: 11px;
+        font-size: 10px;
       }
 
       .network-table th,
       .network-table td {
-        padding: 9px;
+        padding: 8px;
       }
 
       .detail-grid {
@@ -376,256 +529,312 @@
 
 <body>
 
-  <main class="container">
+<main class="container">
 
-    <!-- HERO -->
+  <!-- HERO -->
 
-    <header class="hero">
-      <span class="lesson-badge">LESSON 0.2</span>
+  <header class="hero">
 
-      <h1>Find API Communication in a Browser</h1>
+    <span class="lesson-badge">
+      LESSON 0.2
+    </span>
 
-      <p>
-        Discover where HTTP communication happens behind a real website.
-      </p>
+    <h1>
+      Find API Communication in a Browser
+    </h1>
 
-      <div class="goal">
-        <strong>Lesson goal:</strong><br />
-        Find the API request made by a website using Chrome DevTools.
+    <p>
+      Discover where HTTP communication happens behind a real website.
+    </p>
+
+    <div class="goal">
+
+      <strong>Lesson goal:</strong><br />
+
+      Find the API request made by a website using
+      Chrome DevTools.
+
+    </div>
+
+  </header>
+
+
+  <!-- 01 -->
+
+  <section>
+
+    <div class="section-label">
+      01 — Remember
+    </div>
+
+    <h2>
+      HTTP Is Communication
+    </h2>
+
+    <p>
+      In Lesson 0.1, you learned the visible shape of HTTP:
+    </p>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        Request
       </div>
-    </header>
 
-
-    <!-- SECTION 1 -->
-
-    <section>
-      <div class="section-label">01 — Remember</div>
-
-      <h2>HTTP Is Communication</h2>
-
-      <p>
-        In Lesson 0.1, you learned that HTTP communication has a simple shape:
-      </p>
-
-      <div class="flow">
-        <div class="flow-box">Request</div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-box">API / Server</div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-box">Response</div>
+      <div class="flow-arrow">
+        →
       </div>
 
-      <p>
-        Now we will find this communication inside a website.
-      </p>
-    </section>
+      <div class="flow-box">
+        API / Server
+      </div>
+
+      <div class="flow-arrow">
+        →
+      </div>
+
+      <div class="flow-box">
+        Response
+      </div>
+
+    </div>
+
+    <p>
+      Now we will find this communication inside a website.
+    </p>
+
+  </section>
 
 
-    <!-- SECTION 2 -->
+  <!-- 02 -->
 
-    <section>
-      <div class="section-label">02 — Start</div>
+  <section>
 
-      <h2>Start With a Website</h2>
+    <div class="section-label">
+      02 — Start
+    </div>
 
-      <p>
-        Imagine that you open a learning website.
-      </p>
+    <h2>
+      Start With a Website
+    </h2>
 
-      <div class="browser">
+    <p>
+      Imagine that you open a learning website.
+    </p>
 
-        <div class="browser-top">
-          <span class="dot red"></span>
-          <span class="dot yellow"></span>
-          <span class="dot green"></span>
+    <div class="browser">
 
-          <div class="address">
-            https://learning.example.com/course
-          </div>
+      <div class="browser-top">
+
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+
+        <div class="address">
+          https://learning.example.com/course
         </div>
 
-        <div class="website">
-
-          <h3>REST API MASTERY</h3>
-
-          <p>Learn REST APIs through hands-on practice.</p>
-
-          <button
-            class="lesson-button"
-            id="viewLessonsButton">
-            VIEW LESSONS
-          </button>
-
-        </div>
-
       </div>
 
-      <p>
-        You can see the website.
-        But the API communication is normally hidden behind this interface.
-      </p>
-    </section>
+      <div class="website">
 
-
-    <!-- SECTION 3 -->
-
-    <section>
-      <div class="section-label">03 — Observe</div>
-
-      <h2>Open Chrome DevTools</h2>
-
-      <p>
-        Chrome DevTools can show the network communication made by the browser.
-      </p>
-
-      <div class="flow">
-        <div class="flow-box">Website</div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-box">Browser</div>
-        <div class="flow-arrow">→</div>
-        <div class="flow-box">Network</div>
-      </div>
-
-      <p>
-        The important tool for this lesson is the
-        <strong>Network</strong> panel.
-      </p>
-    </section>
-
-
-    <!-- SECTION 4 -->
-
-    <section>
-      <div class="section-label">04 — Try It</div>
-
-      <h2>Use the Website</h2>
-
-      <p>
-        Click the button below.
-        Imagine that this represents a user action on a real website.
-      </p>
-
-      <button
-        class="lesson-button"
-        id="simulateButton">
-        Click "View Lessons"
-      </button>
-
-      <div id="actionMessage" style="display:none; margin-top:18px;">
-        <strong style="color:var(--green);">
-          ✓ User action detected
-        </strong>
+        <h3>
+          REST API MASTERY
+        </h3>
 
         <p>
-          The browser now needs lesson data.
-          A network request appears below.
+          Learn REST APIs through hands-on practice.
         </p>
+
+        <button
+          class="lesson-button"
+          id="viewLessonsButton">
+
+          VIEW LESSONS
+
+        </button>
+
       </div>
-    </section>
+
+    </div>
+
+    <p>
+      You can see the website.
+      But the API communication is normally hidden behind this interface.
+    </p>
+
+  </section>
 
 
-    <!-- SECTION 5 -->
+  <!-- 03 — NEW DETAILED GUI -->
 
-    <section>
-      <div class="section-label">05 — Find</div>
+  <section>
 
-      <h2>Find the New Request</h2>
+    <div class="section-label">
+      03 — Observe
+    </div>
 
-      <p>
-        In a real browser, Chrome DevTools would now show a new network request.
-      </p>
+    <h2>
+      Open Chrome DevTools
+    </h2>
 
-      <div class="browser">
+    <p>
+      Now we will use the actual Chrome browser interface.
+      You do not need to understand all of DevTools.
+    </p>
 
-        <div class="devtools">
+    <div class="goal">
 
-          <div class="devtools-tabs">
-            <div class="devtools-tab">Elements</div>
-            <div class="devtools-tab">Console</div>
-            <div class="devtools-tab">Sources</div>
-            <div class="devtools-tab active">Network</div>
-          </div>
+      <strong>
+        For this lesson, we only need one place:
+        the <strong>Network</strong> panel.
+      </strong>
 
-          <table class="network-table">
+    </div>
 
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Status</th>
-              </tr>
-            </thead>
 
-            <tbody>
+    <!-- STEP 1 -->
 
-              <tr>
-                <td>index.html</td>
-                <td>document</td>
-                <td class="status-ok">200</td>
-              </tr>
+    <div class="gui-step">
 
-              <tr>
-                <td>app.js</td>
-                <td>script</td>
-                <td class="status-ok">200</td>
-              </tr>
+      <div class="step-number">
+        1
+      </div>
 
-              <tr>
-                <td>styles.css</td>
-                <td>stylesheet</td>
-                <td class="status-ok">200</td>
-              </tr>
+      <div>
 
-              <tr
-                class="request-row"
-                id="lessonsRequest">
+        <h3>
+          Open the website in Google Chrome
+        </h3>
 
-                <td class="name">
-                  lessons
-                </td>
+        <p>
+          First, open the website that you want to investigate.
+        </p>
 
-                <td>fetch</td>
+        <div class="click-target">
+          <span class="mouse">🖱</span>
+          Website page
+        </div>
 
-                <td class="status-ok">
-                  200
-                </td>
+        <p>
+          Keep this page open.
+          We will watch what happens when the browser communicates with a server.
+        </p>
 
-              </tr>
+      </div>
 
-            </tbody>
+    </div>
 
-          </table>
 
-          <div
-            class="request-details"
-            id="requestDetails">
+    <!-- STEP 2 -->
 
-            <div class="detail-grid">
+    <div class="gui-step">
 
-              <div class="detail-label">
-                Request Method
+      <div class="step-number">
+        2
+      </div>
+
+      <div>
+
+        <h3>
+          Open Chrome DevTools
+        </h3>
+
+        <p>
+          There are several ways to open DevTools.
+          For this lesson, the easiest is:
+        </p>
+
+        <div class="click-target">
+          <span class="mouse">🖱</span>
+          Right-click the webpage
+          → Inspect
+        </div>
+
+        <p>
+          You can also use the keyboard shortcut:
+        </p>
+
+        <span class="shortcut">
+          Ctrl + Shift + I
+        </span>
+
+        <p>
+          DevTools will appear attached to the browser window.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- STEP 3 -->
+
+    <div class="gui-step">
+
+      <div class="step-number">
+        3
+      </div>
+
+      <div>
+
+        <h3>
+          Look at the DevTools tabs
+        </h3>
+
+        <p>
+          DevTools contains several panels.
+          You may see tabs such as:
+        </p>
+
+        <div class="browser">
+
+          <div class="devtools">
+
+            <div class="devtools-toolbar">
+
+              <span class="toolbar-icon">
+                ◀
+              </span>
+
+              <span class="toolbar-icon">
+                ▶
+              </span>
+
+              <span class="toolbar-icon">
+                ↻
+              </span>
+
+              <span>
+                Chrome DevTools
+              </span>
+
+            </div>
+
+            <div class="devtools-tabs">
+
+              <div class="devtools-tab">
+                Elements
               </div>
 
-              <div class="detail-value">
-                GET
+              <div class="devtools-tab">
+                Console
               </div>
 
-
-              <div class="detail-label">
-                Request URL
+              <div class="devtools-tab">
+                Sources
               </div>
 
-              <div class="detail-value">
-                https://example.com/api/lessons
+              <div class="devtools-tab active">
+                Network
               </div>
 
-
-              <div class="detail-label">
-                Status Code
+              <div class="devtools-tab">
+                Performance
               </div>
 
-              <div class="detail-value">
-                200 OK
+              <div class="devtools-tab">
+                Application
               </div>
 
             </div>
@@ -634,277 +843,870 @@
 
         </div>
 
+        <p>
+          Do not worry about the other tabs.
+        </p>
+
+        <div class="annotation">
+
+          <strong>
+            👉 Look for:
+          </strong>
+
+          <br />
+
+          <strong>Network</strong>
+
+        </div>
+
       </div>
 
-      <p style="margin-top:20px;">
-        <strong style="color:var(--yellow);">
-          Try it:
-        </strong>
-        Click the <strong>lessons</strong> request above.
-      </p>
+    </div>
 
-      <div
-        class="discovery"
-        id="discovery">
 
-        <div class="discovery-title">
-          ✓ You found the API communication
+    <!-- STEP 4 -->
+
+    <div class="gui-step">
+
+      <div class="step-number">
+        4
+      </div>
+
+      <div>
+
+        <h3>
+          Click Network
+        </h3>
+
+        <p>
+          Click the <strong>Network</strong> tab.
+        </p>
+
+        <div class="click-target">
+
+          <span class="mouse">
+            🖱
+          </span>
+
+          Network
+
         </div>
 
         <p>
-          The website action caused the browser to request data from an API.
+          The Network panel records network activity from the page.
         </p>
 
-        <div class="discovery-code">
+      </div>
+
+    </div>
+
+
+    <!-- STEP 5 -->
+
+    <div class="gui-step">
+
+      <div class="step-number">
+        5
+      </div>
+
+      <div>
+
+        <h3>
+          Now use the website
+        </h3>
+
+        <p>
+          Keep the Network panel open.
+          Then perform an action on the website.
+        </p>
+
+        <div class="flow">
+
+          <div class="flow-box">
+            Website
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-box highlight">
+            User Action
+          </div>
+
+          <div class="flow-arrow">
+            →
+          </div>
+
+          <div class="flow-box">
+            Network Request
+          </div>
+
+        </div>
+
+        <p>
+          For example, click a button that loads lessons,
+          products, comments, or other data.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <!-- STEP 6 -->
+
+    <div class="gui-step">
+
+      <div class="step-number">
+        6
+      </div>
+
+      <div>
+
+        <h3>
+          Watch the request appear
+        </h3>
+
+        <p>
+          After the action, new rows may appear in the Network panel.
+        </p>
+
+        <div class="browser">
+
+          <div class="devtools">
+
+            <div class="devtools-tabs">
+
+              <div class="devtools-tab">
+                Elements
+              </div>
+
+              <div class="devtools-tab">
+                Console
+              </div>
+
+              <div class="devtools-tab active">
+                Network
+              </div>
+
+            </div>
+
+            <div class="network-toolbar">
+
+              <div class="network-button active">
+                All
+              </div>
+
+              <div class="network-button">
+                Fetch/XHR
+              </div>
+
+              <div class="network-button">
+                Doc
+              </div>
+
+              <div class="network-button">
+                JS
+              </div>
+
+              <div class="network-button">
+                Img
+              </div>
+
+            </div>
+
+            <table class="network-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Name
+                  </th>
+
+                  <th>
+                    Type
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody>
+
+                <tr>
+
+                  <td>
+                    index.html
+                  </td>
+
+                  <td>
+                    document
+                  </td>
+
+                  <td class="status-ok">
+                    200
+                  </td>
+
+                </tr>
+
+                <tr>
+
+                  <td>
+                    app.js
+                  </td>
+
+                  <td>
+                    script
+                  </td>
+
+                  <td class="status-ok">
+                    200
+                  </td>
+
+                </tr>
+
+                <tr
+                  class="request-row"
+                  id="lessonsRequest">
+
+                  <td class="name">
+                    lessons
+                  </td>
+
+                  <td>
+                    fetch
+                  </td>
+
+                  <td class="status-ok">
+                    200
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+        <div class="annotation">
+
+          <strong>
+            👉 What are we looking for?
+          </strong>
+
+          <br /><br />
+
+          A request related to the action we just performed.
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- BIG VISUAL -->
+
+    <div style="margin-top:32px">
+
+      <h3>
+        The whole GUI workflow
+      </h3>
+
+      <div class="flow">
+
+        <div class="flow-box">
+          🌐 Website
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          🖱 User Action
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box highlight">
+          🛠 DevTools
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box highlight">
+          Network
+        </div>
+
+      </div>
+
+      <div class="flow">
+
+        <div class="flow-box">
+          Network
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          Request
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          API
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="goal">
+
+      <strong>
+        You are not learning DevTools for its own sake.
+      </strong>
+
+      <br /><br />
+
+      You are using DevTools as a window to see
+      HTTP communication that normally stays behind the website.
+
+    </div>
+
+  </section>
+
+
+  <!-- 04 -->
+
+  <section>
+
+    <div class="section-label">
+      04 — Try It
+    </div>
+
+    <h2>
+      Simulate the Website Action
+    </h2>
+
+    <p>
+      In a real website, you would perform an action while the
+      Network panel is open.
+    </p>
+
+    <button
+      class="lesson-button"
+      id="simulateButton">
+
+      Click "View Lessons"
+
+    </button>
+
+    <div
+      id="actionMessage"
+      style="display:none; margin-top:18px;">
+
+      <strong style="color:var(--green);">
+        ✓ User action detected
+      </strong>
+
+      <p>
+        The browser now needs lesson data.
+        A network request has appeared below.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- 05 -->
+
+  <section>
+
+    <div class="section-label">
+      05 — Find
+    </div>
+
+    <h2>
+      Find the New Request
+    </h2>
+
+    <p>
+      Look at the simulated Network panel.
+      The request related to our action is:
+    </p>
+
+    <div class="browser">
+
+      <div class="devtools">
+
+        <div class="devtools-tabs">
+
+          <div class="devtools-tab">
+            Elements
+          </div>
+
+          <div class="devtools-tab">
+            Console
+          </div>
+
+          <div class="devtools-tab">
+            Sources
+          </div>
+
+          <div class="devtools-tab active">
+            Network
+          </div>
+
+        </div>
+
+        <table class="network-table">
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Name
+              </th>
+
+              <th>
+                Type
+              </th>
+
+              <th>
+                Status
+              </th>
+
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            <tr>
+
+              <td>
+                index.html
+              </td>
+
+              <td>
+                document
+              </td>
+
+              <td class="status-ok">
+                200
+              </td>
+
+            </tr>
+
+            <tr>
+
+              <td>
+                app.js
+              </td>
+
+              <td>
+                script
+              </td>
+
+              <td class="status-ok">
+                200
+              </td>
+
+            </tr>
+
+            <tr
+              class="request-row"
+              id="lessonsRequest2">
+
+              <td class="name">
+                lessons
+              </td>
+
+              <td>
+                fetch
+              </td>
+
+              <td class="status-ok">
+                200
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+        <div
+          class="request-details"
+          id="requestDetails">
+
+          <div class="detail-grid">
+
+            <div class="detail-label">
+              Request Method
+            </div>
+
+            <div class="detail-value">
+              GET
+            </div>
+
+            <div class="detail-label">
+              Request URL
+            </div>
+
+            <div class="detail-value">
+              https://example.com/api/lessons
+            </div>
+
+            <div class="detail-label">
+              Status Code
+            </div>
+
+            <div class="detail-value">
+              200 OK
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <p style="margin-top:20px;">
+
+      <strong style="color:var(--yellow);">
+        Try it:
+      </strong>
+
+      Click the
+      <strong>lessons</strong>
+      request above.
+
+    </p>
+
+    <div
+      class="discovery"
+      id="discovery">
+
+      <div class="discovery-title">
+        ✓ You found the API communication
+      </div>
+
+      <p>
+        The website action caused the browser to request
+        data from an API.
+      </p>
+
+      <div class="discovery-code">
 GET /api/lessons
 200 OK
-        </div>
-
       </div>
 
-    </section>
+    </div>
+
+  </section>
 
 
-    <!-- SECTION 6 -->
+  <!-- 06 -->
 
-    <section>
-      <div class="section-label">06 — Understand</div>
+  <section>
 
-      <h2>What Did We Actually Find?</h2>
+    <div class="section-label">
+      06 — Understand
+    </div>
 
-      <div class="flow">
+    <h2>
+      What Did We Actually Find?
+    </h2>
 
-        <div class="flow-box">
-          User action
-        </div>
+    <div class="flow">
 
-        <div class="flow-arrow">
-          →
-        </div>
-
-        <div class="flow-box">
-          Browser
-        </div>
-
-        <div class="flow-arrow">
-          →
-        </div>
-
-        <div class="flow-box">
-          API request
-        </div>
-
+      <div class="flow-box">
+        User Action
       </div>
 
-      <p>
-        The important discovery is not the DevTools interface.
-      </p>
+      <div class="flow-arrow">
+        →
+      </div>
 
-      <p>
-        The important discovery is:
-      </p>
+      <div class="flow-box">
+        Browser
+      </div>
 
-      <div class="goal">
+      <div class="flow-arrow">
+        →
+      </div>
+
+      <div class="flow-box">
+        API Request
+      </div>
+
+    </div>
+
+    <p>
+      The important discovery is not the DevTools interface.
+    </p>
+
+    <div class="goal">
+
+      <strong>
+        A website action can cause the browser
+        to communicate with an API.
+      </strong>
+
+    </div>
+
+  </section>
+
+
+  <!-- 07 -->
+
+  <section>
+
+    <div class="section-label">
+      07 — Mental Picture
+    </div>
+
+    <h2>
+      See the Hidden Communication
+    </h2>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        User
+      </div>
+
+      <div class="flow-arrow">
+        →
+      </div>
+
+      <div class="flow-box">
+        Website
+      </div>
+
+      <div class="flow-arrow">
+        →
+      </div>
+
+      <div class="flow-box">
+        Browser
+      </div>
+
+      <div class="flow-arrow">
+        →
+      </div>
+
+      <div class="flow-box highlight">
+        API
+      </div>
+
+    </div>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        Response
+      </div>
+
+      <div class="flow-arrow">
+        ←
+      </div>
+
+      <div class="flow-box highlight">
+        API
+      </div>
+
+      <div class="flow-arrow">
+        ←
+      </div>
+
+      <div class="flow-box">
+        Browser
+      </div>
+
+    </div>
+
+    <p>
+      DevTools gives you a window into this communication.
+    </p>
+
+  </section>
+
+
+  <!-- TAKEAWAY -->
+
+  <section>
+
+    <div class="section-label">
+      Takeaway
+    </div>
+
+    <h2>
+      Remember These 3 Things
+    </h2>
+
+    <div class="takeaway">
+
+      <div class="takeaway-item">
+
         <strong>
-          A website action can cause the browser to communicate with an API.
+          1. Open DevTools
         </strong>
-      </div>
 
-    </section>
+        <br />
 
-
-    <!-- SECTION 7 -->
-
-    <section>
-      <div class="section-label">07 — Mental Picture</div>
-
-      <h2>See the Hidden Communication</h2>
-
-      <div class="flow">
-
-        <div class="flow-box">
-          User
-        </div>
-
-        <div class="flow-arrow">
-          →
-        </div>
-
-        <div class="flow-box">
-          Website
-        </div>
-
-        <div class="flow-arrow">
-          →
-        </div>
-
-        <div class="flow-box">
-          Browser
-        </div>
-
-        <div class="flow-arrow">
-          →
-        </div>
-
-        <div class="flow-box">
-          API
-        </div>
+        Right-click the page → Inspect.
 
       </div>
 
-      <div class="flow">
+      <div class="takeaway-item">
 
-        <div class="flow-box">
-          Response
-        </div>
+        <strong>
+          2. Open Network
+        </strong>
 
-        <div class="flow-arrow">
-          ←
-        </div>
+        <br />
 
-        <div class="flow-box">
-          API
-        </div>
-
-        <div class="flow-arrow">
-          ←
-        </div>
-
-        <div class="flow-box">
-          Browser
-        </div>
+        Network shows the browser's network activity.
 
       </div>
 
-      <p>
-        DevTools gives you a way to see the communication that normally stays
-        behind the website interface.
-      </p>
+      <div class="takeaway-item">
 
-    </section>
+        <strong>
+          3. Perform an action
+        </strong>
 
+        <br />
 
-    <!-- TAKEAWAY -->
-
-    <section>
-      <div class="section-label">Takeaway</div>
-
-      <h2>Remember These 3 Things</h2>
-
-      <div class="takeaway">
-
-        <div class="takeaway-item">
-          <strong>1. Website action</strong><br />
-          A user does something on a website.
-        </div>
-
-        <div class="takeaway-item">
-          <strong>2. Network request</strong><br />
-          The browser may communicate with an API.
-        </div>
-
-        <div class="takeaway-item">
-          <strong>3. DevTools</strong><br />
-          Network lets you find and inspect that communication.
-        </div>
+        Watch for the request caused by that action.
 
       </div>
 
-    </section>
+    </div>
+
+  </section>
 
 
-    <!-- NEXT -->
+  <!-- NEXT -->
 
-    <section class="next">
+  <section class="next">
 
-      <div class="section-label">
-        Next
+    <div class="section-label">
+      Next
+    </div>
+
+    <h2>
+      Lesson 0.3 — Read Request and Response Details
+    </h2>
+
+    <p>
+      You have now learned how to find the request.
+      Next, you will learn how to read what is inside it.
+    </p>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        Find Request
       </div>
 
-      <h2>
-        Lesson 0.3 — Read Request and Response Details
-      </h2>
-
-      <p>
-        You have now found an API request.
-        Next, you will learn how to read what is inside it.
-      </p>
-
-      <div class="flow">
-
-        <div class="flow-box">
-          Find request
-        </div>
-
-        <div class="flow-arrow">
-          →
-        </div>
-
-        <div class="flow-box">
-          Read request
-        </div>
-
-        <div class="flow-arrow">
-          →
-        </div>
-
-        <div class="flow-box">
-          Read response
-        </div>
-
+      <div class="flow-arrow">
+        →
       </div>
 
-    </section>
+      <div class="flow-box">
+        Read Request
+      </div>
 
-  </main>
+      <div class="flow-arrow">
+        →
+      </div>
 
+      <div class="flow-box">
+        Read Response
+      </div>
 
-  <script>
+    </div>
 
-    const simulateButton =
-      document.getElementById("simulateButton");
+  </section>
 
-    const actionMessage =
-      document.getElementById("actionMessage");
-
-    const lessonsRequest =
-      document.getElementById("lessonsRequest");
-
-    const requestDetails =
-      document.getElementById("requestDetails");
-
-    const discovery =
-      document.getElementById("discovery");
+</main>
 
 
-    simulateButton.addEventListener("click", () => {
+<script>
 
-      actionMessage.style.display = "block";
+  const simulateButton =
+    document.getElementById("simulateButton");
 
-      lessonsRequest.classList.add("found");
+  const actionMessage =
+    document.getElementById("actionMessage");
 
-      lessonsRequest.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
+  const lessonsRequest2 =
+    document.getElementById("lessonsRequest2");
 
+  const requestDetails =
+    document.getElementById("requestDetails");
+
+  const discovery =
+    document.getElementById("discovery");
+
+
+  simulateButton.addEventListener("click", () => {
+
+    actionMessage.style.display = "block";
+
+    lessonsRequest2.classList.add("found");
+
+    lessonsRequest2.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
     });
 
+  });
 
-    lessonsRequest.addEventListener("click", () => {
 
-      requestDetails.classList.add("visible");
+  lessonsRequest2.addEventListener("click", () => {
 
-      discovery.classList.add("visible");
+    requestDetails.classList.add("visible");
 
-      requestDetails.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
+    discovery.classList.add("visible");
 
+    requestDetails.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
     });
 
-  </script>
+  });
+
+</script>
 
 </body>
 </html>
