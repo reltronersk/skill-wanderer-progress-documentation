@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Lesson 0.1 — Visible Shape of HTTP</title>
+
+  <style>
+    :root {
+      --bg: #0b1120;
+      --panel: #151f32;
+      --panel-2: #1d293d;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #38bdf8;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --red: #f87171;
+      --purple: #a78bfa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      line-height: 1.5;
+    }
+
+    .container {
+      width: min(1050px, calc(100% - 32px));
+      margin: auto;
+      padding: 42px 0 80px;
+    }
+
+    /* HERO */
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid #0369a1;
+      border-radius: 999px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+    }
+
+    h1 {
+      margin: 16px 0 10px;
+      font-size: clamp(36px, 6vw, 58px);
+      line-height: 1.05;
+    }
+
+    h2 {
+      margin: 0 0 12px;
+      font-size: 28px;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    .hero {
+      padding-bottom: 34px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-subtitle {
+      font-size: 19px;
+      max-width: 760px;
+    }
+
+    .goal {
+      margin-top: 24px;
+      padding: 18px 20px;
+      background: #0c2033;
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+    }
+
+    .goal strong {
+      color: var(--text);
+    }
+
+    /* SECTIONS */
+
+    section {
+      margin-top: 34px;
+      padding: 28px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .label {
+      margin-bottom: 7px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    /* FLOW */
+
+    .flow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 28px 0;
+    }
+
+    .flow-box {
+      min-width: 150px;
+      padding: 18px;
+      text-align: center;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-weight: 800;
+    }
+
+    .flow-box.request {
+      border-color: #0369a1;
+    }
+
+    .flow-box.server {
+      border-color: #7c3aed;
+    }
+
+    .flow-box.response {
+      border-color: #15803d;
+    }
+
+    .arrow {
+      color: var(--blue);
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    /* HTTP TERMINAL */
+
+    .terminal {
+      overflow: hidden;
+      margin-top: 22px;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 14px;
+      background: #111827;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot.red {
+      background: #ef4444;
+    }
+
+    .dot.yellow {
+      background: #f59e0b;
+    }
+
+    .dot.green {
+      background: #22c55e;
+    }
+
+    .terminal-title {
+      margin-left: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .terminal-body {
+      padding: 24px;
+      overflow-x: auto;
+      font-family: "JetBrains Mono", Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .method {
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .endpoint {
+      color: var(--yellow);
+    }
+
+    .status {
+      color: var(--green);
+      font-weight: 800;
+    }
+
+    .header-name {
+      color: var(--purple);
+    }
+
+    .body-value {
+      color: #cbd5e1;
+    }
+
+    /* INTERACTIVE PARTS */
+
+    .interactive-request {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .part {
+      padding: 17px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .part:hover {
+      transform: translateY(-2px);
+      border-color: var(--blue);
+    }
+
+    .part.active {
+      border-color: var(--blue);
+      background: #10243a;
+    }
+
+    .part-number {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .part-title {
+      margin-top: 5px;
+      font-weight: 800;
+    }
+
+    .explanation {
+      display: none;
+      margin-top: 16px;
+      padding: 18px;
+      background: #0c2033;
+      border-radius: 10px;
+      border: 1px solid #075985;
+    }
+
+    .explanation.visible {
+      display: block;
+    }
+
+    /* RESPONSE */
+
+    .response-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 22px;
+    }
+
+    .response-card {
+      padding: 22px;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    .status-big {
+      margin: 14px 0;
+      font-family: monospace;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    /* EXAMPLE */
+
+    .example {
+      padding: 22px;
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: monospace;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    .decoder {
+      display: grid;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .decode-row {
+      display: grid;
+      grid-template-columns: 190px 1fr;
+      gap: 12px;
+      padding: 14px;
+      background: var(--panel-2);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .decode-key {
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    /* MENTAL MODEL */
+
+    .mental-model {
+      display: grid;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .mental-row {
+      padding: 17px;
+      text-align: center;
+      background: var(--panel-2);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-weight: 800;
+    }
+
+    .mental-row small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-weight: 400;
+    }
+
+    /* CHECK */
+
+    .check-box {
+      margin-top: 20px;
+      padding: 20px;
+      background: #102116;
+      border: 1px solid #166534;
+      border-radius: 10px;
+    }
+
+    .check-button {
+      margin-top: 12px;
+      padding: 11px 17px;
+      border: 0;
+      border-radius: 8px;
+      background: #16a34a;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .check-result {
+      display: none;
+      margin-top: 15px;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .check-result.visible {
+      display: block;
+    }
+
+    /* NEXT */
+
+    .next {
+      background: #0c2033;
+      border-color: #075985;
+    }
+
+    @media (max-width: 750px) {
+
+      .interactive-request {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .response-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .decode-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 500px) {
+
+      .interactive-request {
+        grid-template-columns: 1fr;
+      }
+
+      section {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<main class="container">
+
+  <!-- HERO -->
+
+  <header class="hero">
+
+    <span class="badge">
+      LESSON 0.1
+    </span>
+
+    <h1>
+      Visible Shape of HTTP
+    </h1>
+
+    <p class="hero-subtitle">
+      Learn to recognize the basic shape of an HTTP request and response
+      before working with browser tools.
+    </p>
+
+    <div class="goal">
+
+      <strong>Lesson goal:</strong><br />
+
+      When you see something like
+      <strong>GET /api/courses 200 OK</strong>,
+      you should know what the visible pieces mean.
+
+    </div>
+
+  </header>
+
+
+  <!-- 01 -->
+
+  <section>
+
+    <div class="label">
+      01 — The Big Picture
+    </div>
+
+    <h2>
+      HTTP Is a Conversation
+    </h2>
+
+    <p>
+      A client sends a request.
+      A server sends a response.
+    </p>
+
+    <div class="flow">
+
+      <div class="flow-box request">
+        REQUEST
+        <small>Client → Server</small>
+      </div>
+
+      <div class="arrow">
+        →
+      </div>
+
+      <div class="flow-box server">
+        API / SERVER
+        <small>Processes request</small>
+      </div>
+
+      <div class="arrow">
+        →
+      </div>
+
+      <div class="flow-box response">
+        RESPONSE
+        <small>Server → Client</small>
+      </div>
+
+    </div>
+
+    <div class="goal">
+
+      <strong>
+        Think: Ask → Server → Answer
+      </strong>
+
+    </div>
+
+  </section>
+
+
+  <!-- 02 REQUEST -->
+
+  <section>
+
+    <div class="label">
+      02 — Request
+    </div>
+
+    <h2>
+      The Shape of an HTTP Request
+    </h2>
+
+    <p>
+      A request tells the server what the client wants to do.
+    </p>
+
+    <div class="terminal">
+
+      <div class="terminal-header">
+
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+
+        <span class="terminal-title">
+          HTTP Request
+        </span>
+
+      </div>
+
+      <div class="terminal-body">
+
+        <div>
+          <span class="method">GET</span>
+          <span class="endpoint"> /api/courses/123</span>
+        </div>
+
+        <div>
+          <span class="header-name">
+            Accept:
+          </span>
+          application/json
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <p>
+      For now, focus on the first line.
+    </p>
+
+
+    <div class="interactive-request">
+
+      <div
+        class="part"
+        data-part="method">
+
+        <div class="part-number">
+          PART 01
+        </div>
+
+        <div class="part-title">
+          Method
+        </div>
+
+      </div>
+
+
+      <div
+        class="part"
+        data-part="endpoint">
+
+        <div class="part-number">
+          PART 02
+        </div>
+
+        <div class="part-title">
+          Endpoint
+        </div>
+
+      </div>
+
+
+      <div
+        class="part"
+        data-part="headers">
+
+        <div class="part-number">
+          PART 03
+        </div>
+
+        <div class="part-title">
+          Headers
+        </div>
+
+      </div>
+
+
+      <div
+        class="part"
+        data-part="body">
+
+        <div class="part-number">
+          PART 04
+        </div>
+
+        <div class="part-title">
+          Body
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="explanation"
+      id="method">
+
+      <strong>Method</strong>
+
+      <p>
+        Describes the action the client wants to perform.
+      </p>
+
+      <code>
+        GET
+      </code>
+
+      <p>
+        In this example:
+        "I want to retrieve something."
+      </p>
+
+    </div>
+
+
+    <div
+      class="explanation"
+      id="endpoint">
+
+      <strong>Endpoint</strong>
+
+      <p>
+        Identifies where the request is going.
+      </p>
+
+      <code>
+        /api/courses/123
+      </code>
+
+      <p>
+        Think:
+        "Which resource am I asking for?"
+      </p>
+
+    </div>
+
+
+    <div
+      class="explanation"
+      id="headers">
+
+      <strong>Headers</strong>
+
+      <p>
+        Carry additional information about the request.
+      </p>
+
+      <code>
+        Accept: application/json
+      </code>
+
+      <p>
+        You do not need to memorize headers yet.
+      </p>
+
+    </div>
+
+
+    <div
+      class="explanation"
+      id="body">
+
+      <strong>Body</strong>
+
+      <p>
+        Carries data sent with the request when needed.
+      </p>
+
+      <code>
+        JSON / form data / other content
+      </code>
+
+      <p>
+        Some requests have no body.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- 03 RESPONSE -->
+
+  <section>
+
+    <div class="label">
+      03 — Response
+    </div>
+
+    <h2>
+      The Shape of an HTTP Response
+    </h2>
+
+    <p>
+      The server answers the request with a response.
+    </p>
+
+    <div class="terminal">
+
+      <div class="terminal-header">
+
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+
+        <span class="terminal-title">
+          HTTP Response
+        </span>
+
+      </div>
+
+      <div class="terminal-body">
+
+        <div>
+          HTTP/1.1
+          <span class="status">
+            200 OK
+          </span>
+        </div>
+
+        <div>
+          <span class="header-name">
+            Content-Type:
+          </span>
+          application/json
+        </div>
+
+        <br />
+
+        <div class="body-value">
+          {
+        </div>
+
+        <div class="body-value">
+          &nbsp;&nbsp;"id": 123,
+        </div>
+
+        <div class="body-value">
+          &nbsp;&nbsp;"title": "REST API Mastery"
+        </div>
+
+        <div class="body-value">
+          }
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="response-grid">
+
+      <div class="response-card">
+
+        <h3>
+          Status
+        </h3>
+
+        <div class="status-big">
+          200 OK
+        </div>
+
+        <p>
+          Tells you the result of the request.
+        </p>
+
+      </div>
+
+
+      <div class="response-card">
+
+        <h3>
+          Response Body
+        </h3>
+
+        <p>
+          Contains the data returned by the server.
+        </p>
+
+        <code>
+          {"id":123,"title":"REST API Mastery"}
+        </code>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- 04 -->
+
+  <section>
+
+    <div class="label">
+      04 — Connect Them
+    </div>
+
+    <h2>
+      Request → Response
+    </h2>
+
+    <p>
+      The two pieces belong together.
+    </p>
+
+    <div class="flow">
+
+      <div class="flow-box request">
+
+        GET
+        <small>/api/courses/123</small>
+
+      </div>
+
+      <div class="arrow">
+        →
+      </div>
+
+      <div class="flow-box server">
+
+        API
+
+      </div>
+
+      <div class="arrow">
+        →
+      </div>
+
+      <div class="flow-box response">
+
+        200 OK
+        <small>course data</small>
+
+      </div>
+
+    </div>
+
+    <div class="goal">
+
+      <strong>
+        Request = what the client asks.
+      </strong>
+
+      <br />
+
+      <strong>
+        Response = what the server answers.
+      </strong>
+
+    </div>
+
+  </section>
+
+
+  <!-- 05 ONE EXAMPLE -->
+
+  <section>
+
+    <div class="label">
+      05 — One Example
+    </div>
+
+    <h2>
+      Read This Correctly
+    </h2>
+
+    <p>
+      Suppose you see:
+    </p>
+
+    <div class="example">
+
+      <span class="method">
+        GET
+      </span>
+
+      <span class="endpoint">
+        /api/courses/123
+      </span>
+
+      <br />
+
+      <span class="status">
+        404 Not Found
+      </span>
+
+    </div>
+
+
+    <div class="decoder">
+
+      <div class="decode-row">
+
+        <div class="decode-key">
+          GET
+        </div>
+
+        <div>
+          Request method
+        </div>
+
+      </div>
+
+
+      <div class="decode-row">
+
+        <div class="decode-key">
+          /api/courses/123
+        </div>
+
+        <div>
+          Endpoint
+        </div>
+
+      </div>
+
+
+      <div class="decode-row">
+
+        <div class="decode-key">
+          404 Not Found
+        </div>
+
+        <div>
+          Response status
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="goal">
+
+      <strong>
+        Important:
+      </strong>
+
+      The server did respond.
+
+      <br /><br />
+
+      <strong>
+        404
+      </strong>
+      means the requested resource was not found.
+
+    </div>
+
+  </section>
+
+
+  <!-- 06 STATUS -->
+
+  <section>
+
+    <div class="label">
+      06 — Status
+    </div>
+
+    <h2>
+      Status Is the Server's Answer
+    </h2>
+
+    <div class="response-grid">
+
+      <div class="response-card">
+
+        <div class="status-big">
+          200
+        </div>
+
+        <p>
+          The request succeeded.
+        </p>
+
+      </div>
+
+
+      <div class="response-card">
+
+        <div
+          class="status-big"
+          style="color:var(--yellow);">
+
+          404
+
+        </div>
+
+        <p>
+          The requested resource was not found.
+        </p>
+
+      </div>
+
+    </div>
+
+    <p>
+      For this lesson, you only need to recognize the idea:
+    </p>
+
+    <div class="goal">
+
+      <strong>
+        Status = result of the request
+      </strong>
+
+    </div>
+
+  </section>
+
+
+  <!-- 07 MENTAL MODEL -->
+
+  <section>
+
+    <div class="label">
+      07 — Mental Model
+    </div>
+
+    <h2>
+      The Shape You Should Remember
+    </h2>
+
+    <div class="mental-model">
+
+      <div class="mental-row">
+
+        REQUEST
+
+        <small>
+          Method + URL + optional details
+        </small>
+
+      </div>
+
+      <div class="arrow" style="text-align:center;">
+        ↓
+      </div>
+
+      <div class="mental-row">
+
+        SERVER / API
+
+        <small>
+          Receives and processes the request
+        </small>
+
+      </div>
+
+      <div class="arrow" style="text-align:center;">
+        ↓
+      </div>
+
+      <div class="mental-row">
+
+        RESPONSE
+
+        <small>
+          Status + optional data
+        </small>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- 08 CHECK -->
+
+  <section>
+
+    <div class="label">
+      08 — Quick Check
+    </div>
+
+    <h2>
+      Can You Read This?
+    </h2>
+
+    <div class="example">
+
+      GET /api/lessons/42
+
+      <br />
+
+      200 OK
+
+    </div>
+
+    <div class="check-box">
+
+      <strong>
+        What is the request method?
+      </strong>
+
+      <br /><br />
+
+      <button
+        class="check-button"
+        id="checkMethod">
+
+        GET
+
+      </button>
+
+      <button
+        class="check-button"
+        id="checkWrong"
+        style="background:#475569;">
+
+        POST
+
+      </button>
+
+      <div
+        class="check-result"
+        id="checkResult">
+
+        ✓ Correct.
+        GET is the request method.
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- 09 TAKEAWAY -->
+
+  <section>
+
+    <div class="label">
+      Takeaway
+    </div>
+
+    <h2>
+      Three Things to See
+    </h2>
+
+    <div class="decoder">
+
+      <div class="decode-row">
+
+        <div class="decode-key">
+          REQUEST
+        </div>
+
+        <div>
+          What does the client want?
+        </div>
+
+      </div>
+
+
+      <div class="decode-row">
+
+        <div class="decode-key">
+          ENDPOINT
+        </div>
+
+        <div>
+          Where is the request going?
+        </div>
+
+      </div>
+
+
+      <div class="decode-row">
+
+        <div class="decode-key">
+          STATUS
+        </div>
+
+        <div>
+          What happened?
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="goal">
+
+      <strong>
+        If you can visually recognize these,
+        you already have the foundation for the next lesson.
+      </strong>
+
+    </div>
+
+  </section>
+
+
+  <!-- NEXT -->
+
+  <section class="next">
+
+    <div class="label">
+      Next Lesson
+    </div>
+
+    <h2>
+      Lesson 0.2 — Find API Communication in a Browser
+    </h2>
+
+    <p>
+      You now know what an HTTP request and response look like.
+      Next, you will use Chrome DevTools to find this communication
+      happening behind a real website.
+    </p>
+
+    <div class="flow">
+
+      <div class="flow-box">
+        Understand HTTP
+      </div>
+
+      <div class="arrow">
+        →
+      </div>
+
+      <div class="flow-box">
+        Open DevTools
+      </div>
+
+      <div class="arrow">
+        →
+      </div>
+
+      <div class="flow-box">
+        Find Request
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script>
+
+  /* REQUEST PART INTERACTION */
+
+  const parts =
+    document.querySelectorAll(".part");
+
+  const explanations =
+    document.querySelectorAll(".explanation");
+
+  parts.forEach(part => {
+
+    part.addEventListener("click", () => {
+
+      const target =
+        part.dataset.part;
+
+      parts.forEach(item =>
+        item.classList.remove("active")
+      );
+
+      explanations.forEach(item =>
+        item.classList.remove("visible")
+      );
+
+      part.classList.add("active");
+
+      const explanation =
+        document.getElementById(target);
+
+      if (explanation) {
+        explanation.classList.add("visible");
+      }
+
+    });
+
+  });
+
+
+  /* QUICK CHECK */
+
+  const checkMethod =
+    document.getElementById("checkMethod");
+
+  const checkWrong =
+    document.getElementById("checkWrong");
+
+  const checkResult =
+    document.getElementById("checkResult");
+
+
+  checkMethod.addEventListener("click", () => {
+
+    checkResult.textContent =
+      "✓ Correct. GET is the request method.";
+
+    checkResult.style.color =
+      "var(--green)";
+
+    checkResult.classList.add("visible");
+
+  });
+
+
+  checkWrong.addEventListener("click", () => {
+
+    checkResult.textContent =
+      "✕ Not this time. GET is the request method.";
+
+    checkResult.style.color =
+      "var(--red)";
+
+    checkResult.classList.add("visible");
+
+  });
+
+</script>
+
+</body>
+</html>
