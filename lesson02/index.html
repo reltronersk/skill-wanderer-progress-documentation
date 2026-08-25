@@ -4,971 +4,907 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Lesson 0.2 — Find API Communication in a Browser</title>
+
   <style>
     :root {
-      --bg-dark: #090d16;
-      --bg-card: #131b2e;
-      --bg-devtools: #18181b;
-      --bg-devtools-header: #0f1117;
-      --accent-blue: #38bdf8;
-      --accent-blue-dark: #0284c7;
-      --accent-green: #4ade80;
-      --accent-yellow: #facc15;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #1e293b;
-      --border-bright: #334155;
-      --font-mono: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', Consolas, monospace;
-      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --bg: #0b1120;
+      --card: #172033;
+      --card-2: #1d293d;
+      --border: #334155;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --blue: #38bdf8;
+      --green: #4ade80;
+      --yellow: #facc15;
+      --red: #f87171;
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: var(--font-sans);
-      line-height: 1.4;
-      padding: 16px;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      line-height: 1.5;
+    }
+
+    .container {
+      width: min(1000px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 80px;
+    }
+
+    .lesson-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border: 1px solid #0369a1;
+      border-radius: 999px;
+      color: var(--blue);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: clamp(32px, 5vw, 52px);
+      line-height: 1.05;
+      margin: 0 0 12px;
+    }
+
+    h2 {
+      margin-top: 0;
+      font-size: 26px;
+    }
+
+    p {
+      color: var(--muted);
+    }
+
+    .hero {
+      padding-bottom: 36px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero p {
+      font-size: 18px;
+      max-width: 720px;
+    }
+
+    .goal {
+      margin-top: 24px;
+      padding: 18px 20px;
+      background: #10243a;
+      border-left: 4px solid var(--blue);
+      border-radius: 8px;
+    }
+
+    .goal strong {
+      color: var(--text);
+    }
+
+    section {
+      margin-top: 36px;
+      padding: 28px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+    }
+
+    .section-label {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    /* Flow */
+
+    .flow {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-    }
-
-    .workspace {
-      max-width: 980px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    /* COMPACT HEADER & PROGRESS */
-    .top-bar {
-      display: flex;
+      justify-content: center;
+      gap: 12px;
       flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 10px 16px;
-      gap: 12px;
+      margin: 28px 0;
     }
 
-    .lesson-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .badge-num {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--accent-blue);
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      padding: 2px 8px;
+    .flow-box {
+      min-width: 150px;
+      padding: 18px;
+      text-align: center;
+      background: var(--card-2);
+      border: 1px solid var(--border);
       border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-
-    .progress-stepper {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
-    }
-
-    .step-dot {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      color: var(--text-muted);
-      opacity: 0.5;
-      transition: all 0.2s;
-    }
-
-    .step-dot.active {
-      opacity: 1;
-      color: var(--accent-blue);
       font-weight: 700;
     }
 
-    .step-dot.completed {
-      opacity: 0.9;
-      color: var(--accent-green);
+    .flow-arrow {
+      color: var(--blue);
+      font-size: 24px;
+      font-weight: 700;
     }
 
-    .step-dot .circle {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: currentColor;
-    }
+    /* Fake browser */
 
-    .step-arrow {
-      color: var(--border-bright);
-      font-size: 0.7rem;
-    }
-
-    /* DYNAMIC INSTRUCTION BANNER */
-    .instruction-card {
-      background: linear-gradient(90deg, rgba(56, 189, 248, 0.1), rgba(2, 132, 199, 0.05));
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 8px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-
-    .instruction-icon {
-      font-size: 1.2rem;
-      color: var(--accent-yellow);
-      animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-3px); }
-    }
-
-    .instruction-text {
-      font-size: 0.9rem;
-      color: #fff;
-      font-weight: 500;
-    }
-
-    /* BROWSER CONTAINER SIMULATION */
-    .browser-frame {
-      border: 1px solid var(--border-bright);
-      border-radius: 10px;
+    .browser {
       overflow: hidden;
-      background: #000;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.6);
-      display: flex;
-      flex-direction: column;
+      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #080c14;
     }
 
-    /* BROWSER TOP BAR */
-    .browser-toolbar {
-      background: #1e293b;
-      padding: 8px 12px;
+    .browser-top {
       display: flex;
       align-items: center;
-      gap: 10px;
-      border-bottom: 1px solid var(--border-color);
+      gap: 7px;
+      padding: 12px 16px;
+      background: #111827;
+      border-bottom: 1px solid var(--border);
     }
 
-    .window-controls {
-      display: flex;
-      gap: 6px;
-    }
-
-    .control-dot {
+    .dot {
       width: 10px;
       height: 10px;
       border-radius: 50%;
     }
 
-    .close { background: #ef4444; }
-    .min { background: #eab308; }
-    .max { background: #22c55e; }
+    .dot.red { background: #ef4444; }
+    .dot.yellow { background: #f59e0b; }
+    .dot.green { background: #22c55e; }
 
-    .nav-buttons {
-      display: flex;
-      gap: 8px;
-      color: var(--text-muted);
-      font-size: 0.85rem;
-    }
-
-    .address-bar {
-      background: #0f172a;
-      color: var(--text-muted);
-      border: 1px solid var(--border-bright);
-      border-radius: 4px;
-      padding: 4px 10px;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      flex-grow: 1;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .address-bar .lock {
-      color: var(--accent-green);
-      font-size: 0.7rem;
-    }
-
-    /* WEBSITE VIEWPORT (SIMULATED APP) */
-    .website-viewport {
-      background: #ffffff;
-      color: #0f172a;
-      padding: 32px 20px;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      position: relative;
-      transition: all 0.3s ease;
-    }
-
-    .website-viewport h2 {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 6px;
-      letter-spacing: -0.02em;
-    }
-
-    .website-viewport p {
-      color: #64748b;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-    }
-
-    .btn-lessons {
-      background: var(--accent-blue-dark);
-      color: #ffffff;
-      border: none;
-      padding: 10px 22px;
-      border-radius: 6px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
-      transition: all 0.2s;
-    }
-
-    .btn-lessons:hover {
-      background: var(--accent-blue);
-      transform: translateY(-1px);
-    }
-
-    .btn-lessons.pulse-highlight {
-      animation: pulse-button 1.5s infinite;
-    }
-
-    @keyframes pulse-button {
-      0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
-    }
-
-    /* RENDERED LESSONS LIST IN VIEWPORT */
-    .rendered-lessons {
-      display: none;
-      gap: 12px;
-      margin-top: 10px;
-      width: 100%;
-      max-width: 450px;
-      animation: fadeIn 0.4s ease;
-    }
-
-    .rendered-card {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #1e293b;
+    .address {
       flex: 1;
+      margin-left: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #94a3b8;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .website {
+      min-height: 280px;
+      padding: 45px 20px;
       text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      background: #f8fafc;
+      color: #0f172a;
     }
 
-    /* DEVTOOLS PANEL SIMULATION */
-    .devtools-panel {
-      background: var(--bg-devtools);
-      border-top: 2px solid var(--border-bright);
-      color: #a1a1aa;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      min-height: 220px;
+    .website h3 {
+      font-size: 28px;
+      margin: 0 0 8px;
     }
 
-    .devtools-header {
-      background: var(--bg-devtools-header);
+    .website p {
+      color: #64748b;
+    }
+
+    .lesson-button {
+      border: 0;
+      padding: 13px 24px;
+      border-radius: 8px;
+      background: #0284c7;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 14px;
+    }
+
+    .lesson-button:hover {
+      background: #0369a1;
+    }
+
+    /* DevTools */
+
+    .devtools {
+      margin-top: 0;
+      background: #111827;
+      border-top: 1px solid #475569;
+    }
+
+    .devtools-tabs {
       display: flex;
-      border-bottom: 1px solid var(--border-color);
+      border-bottom: 1px solid #334155;
     }
 
     .devtools-tab {
-      padding: 8px 14px;
-      color: var(--text-muted);
-      cursor: pointer;
-      border-right: 1px solid var(--border-color);
-      user-select: none;
+      padding: 12px 18px;
+      color: #94a3b8;
+      font-size: 13px;
     }
 
     .devtools-tab.active {
-      background: var(--bg-devtools);
-      color: var(--accent-blue);
-      border-bottom: 2px solid var(--accent-blue);
-      font-weight: bold;
-    }
-
-    .devtools-tab.glow-tab {
-      animation: tab-glow 1.5s infinite alternate;
-    }
-
-    @keyframes tab-glow {
-      from { color: var(--text-muted); }
-      to { color: var(--accent-yellow); background: rgba(250, 204, 21, 0.1); }
-    }
-
-    .devtools-body {
-      display: flex;
-      flex-grow: 1;
-      position: relative;
-    }
-
-    /* NETWORK TABLE */
-    .network-table-container {
-      flex-grow: 1;
-      overflow-x: auto;
+      color: var(--blue);
+      border-bottom: 2px solid var(--blue);
     }
 
     .network-table {
       width: 100%;
       border-collapse: collapse;
+      font-family: monospace;
+      font-size: 13px;
+    }
+
+    .network-table th,
+    .network-table td {
+      padding: 12px 14px;
       text-align: left;
+      border-bottom: 1px solid #1e293b;
     }
 
     .network-table th {
-      background: var(--bg-devtools-header);
-      padding: 6px 10px;
-      color: var(--text-muted);
-      font-weight: 600;
-      border-bottom: 1px solid var(--border-color);
+      color: #94a3b8;
+      font-weight: 500;
     }
 
-    .network-table td {
-      padding: 6px 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.03);
-    }
-
-    .net-row {
-      cursor: default;
-      transition: background 0.15s;
-    }
-
-    .net-row.clickable {
+    .request-row {
       cursor: pointer;
     }
 
-    .net-row.clickable:hover {
-      background: rgba(255,255,255,0.05);
+    .request-row:hover,
+    .request-row.found {
+      background: #3a3413;
     }
 
-    .net-row.selected {
-      background: rgba(56, 189, 248, 0.18) !important;
-      color: #fff;
+    .request-row .name {
+      color: var(--yellow);
+      font-weight: 700;
     }
 
-    .net-row.highlight-new {
-      animation: highlight-row 1.5s infinite alternate;
-      color: var(--accent-yellow) !important;
-      font-weight: bold;
+    .status-ok {
+      color: var(--green);
+      font-weight: 700;
     }
 
-    @keyframes highlight-row {
-      from { background: rgba(250, 204, 21, 0.05); }
-      to { background: rgba(250, 204, 21, 0.25); }
-    }
-
-    .badge-fetch {
-      color: var(--accent-green);
-      font-weight: bold;
-    }
-
-    .badge-new-tag {
-      background: var(--accent-yellow);
-      color: #000;
-      font-size: 0.65rem;
-      padding: 1px 4px;
-      border-radius: 3px;
-      font-weight: bold;
-      margin-left: 6px;
-    }
-
-    /* REQUEST DETAILS SIDE-PANE */
-    .details-pane {
-      width: 45%;
-      background: var(--bg-devtools-header);
-      border-left: 1px solid var(--border-bright);
-      padding: 12px;
+    .request-details {
       display: none;
-      flex-direction: column;
+      margin: 20px;
+      padding: 20px;
+      background: #0b1220;
+      border: 1px solid #334155;
+      border-radius: 10px;
+    }
+
+    .request-details.visible {
+      display: block;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 140px 1fr;
       gap: 10px;
-      animation: slideIn 0.2s ease;
+      font-family: monospace;
+      font-size: 13px;
     }
 
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(8px); }
-      to { opacity: 1; transform: translateX(0); }
+    .detail-label {
+      color: #94a3b8;
     }
 
-    .details-pane.active {
-      display: flex;
-    }
-
-    .pane-title {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      border-bottom: 1px solid var(--border-color);
-      padding-bottom: 4px;
-      font-weight: bold;
-    }
-
-    .kv-group {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .kv-label {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-    }
-
-    .kv-value {
-      color: #fff;
-      font-size: 0.78rem;
+    .detail-value {
+      color: var(--text);
       word-break: break-all;
     }
 
-    .val-method { color: var(--accent-blue); font-weight: bold; }
-    .val-url { color: var(--accent-green); }
-    .val-status { color: var(--accent-yellow); font-weight: bold; }
+    /* Discovery */
 
-    /* VISUAL MAPPING & DIAGRAM AREA */
-    .mapping-section {
+    .discovery {
       display: none;
-      background: var(--bg-card);
-      border: 1px solid var(--border-bright);
-      border-radius: 8px;
-      padding: 16px;
-      flex-direction: column;
-      gap: 16px;
-      animation: fadeIn 0.4s ease;
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #166534;
+      background: #0d2117;
+      border-radius: 10px;
     }
 
-    .mapping-section.active {
-      display: flex;
-    }
-
-    .diagram-flow {
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      background: #090d16;
-      border: 1px dashed var(--border-bright);
-      border-radius: 6px;
-      padding: 14px;
-      text-align: center;
-    }
-
-    .flow-card {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    .flow-arrow-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      font-size: 0.7rem;
-      color: var(--text-muted);
-    }
-
-    .flow-arrow-container .arrow {
-      color: var(--accent-blue);
-      font-size: 1rem;
-    }
-
-    .mapping-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    @media (max-width: 600px) {
-      .mapping-cards { grid-template-columns: 1fr; }
-    }
-
-    .map-card {
-      background: #0f172a;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 10px;
-      text-align: center;
-    }
-
-    .map-card .val {
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    .map-card .label {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* MINI CHALLENGE AREA */
-    .challenge-section {
-      display: none;
-      background: var(--bg-card);
-      border: 1px solid var(--border-bright);
-      border-radius: 8px;
-      padding: 16px;
-      animation: fadeIn 0.4s ease;
-    }
-
-    .challenge-section.active {
+    .discovery.visible {
       display: block;
     }
 
-    .challenge-title {
-      font-size: 0.9rem;
-      font-weight: 700;
-      color: #fff;
+    .discovery-title {
+      color: var(--green);
+      font-weight: 800;
       margin-bottom: 10px;
     }
 
-    .challenge-opts {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .btn-opt {
-      background: #0f172a;
-      border: 1px solid var(--border-bright);
-      color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-opt:hover {
-      border-color: var(--accent-blue);
-      background: rgba(56, 189, 248, 0.1);
-    }
-
-    .challenge-fb {
-      font-size: 0.85rem;
-      padding: 8px 12px;
-      border-radius: 4px;
-      display: none;
-    }
-
-    .challenge-fb.correct {
-      display: block;
-      background: rgba(74, 222, 128, 0.15);
-      border: 1px solid var(--accent-green);
-      color: var(--accent-green);
-    }
-
-    .challenge-fb.incorrect {
-      display: block;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid #ef4444;
-      color: #ef4444;
-    }
-
-    /* FINAL TAKEAWAY SUMMARY */
-    .summary-box {
-      display: none;
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(2, 132, 199, 0.05));
-      border: 1px solid var(--accent-blue);
-      border-radius: 8px;
+    .discovery-code {
       padding: 16px;
-      text-align: center;
-      animation: fadeIn 0.4s ease;
+      background: #020617;
+      border-radius: 8px;
+      font-family: monospace;
+      color: var(--text);
+      overflow-x: auto;
     }
 
-    .summary-box.active {
-      display: block;
+    /* Takeaway */
+
+    .takeaway {
+      display: grid;
+      gap: 12px;
     }
 
-    .summary-box h3 {
-      color: var(--accent-blue);
-      font-size: 1.05rem;
-      margin-bottom: 6px;
+    .takeaway-item {
+      padding: 16px;
+      background: var(--card-2);
+      border-radius: 10px;
+      border: 1px solid var(--border);
     }
 
-    .summary-box p {
-      font-size: 0.88rem;
-      color: var(--text-main);
+    .takeaway-item strong {
+      color: var(--blue);
     }
 
-    /* RESET BUTTON */
-    .reset-bar {
-      display: flex;
-      justify-content: flex-end;
+    .next {
+      border-color: #075985;
+      background: #0c2033;
     }
 
-    .btn-reset {
-      background: transparent;
-      border: 1px solid var(--border-bright);
-      color: var(--text-muted);
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    @media (max-width: 700px) {
+      section {
+        padding: 20px;
+      }
 
-    .btn-reset:hover {
-      color: #fff;
-      border-color: var(--text-muted);
-    }
+      .network-table {
+        font-size: 11px;
+      }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
+      .network-table th,
+      .network-table td {
+        padding: 9px;
+      }
+
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
 
-  <div class="workspace">
+  <main class="container">
 
-    <!-- TOP HEADER & PROGRESS -->
-    <div class="top-bar">
-      <div class="lesson-title">
-        <span class="badge-num">Lesson 0.2</span>
-        <span>Find API Communication in a Browser</span>
+    <!-- HERO -->
+
+    <header class="hero">
+      <span class="lesson-badge">LESSON 0.2</span>
+
+      <h1>Find API Communication in a Browser</h1>
+
+      <p>
+        Discover where HTTP communication happens behind a real website.
+      </p>
+
+      <div class="goal">
+        <strong>Lesson goal:</strong><br />
+        Find the API request made by a website using Chrome DevTools.
+      </div>
+    </header>
+
+
+    <!-- SECTION 1 -->
+
+    <section>
+      <div class="section-label">01 — Remember</div>
+
+      <h2>HTTP Is Communication</h2>
+
+      <p>
+        In Lesson 0.1, you learned that HTTP communication has a simple shape:
+      </p>
+
+      <div class="flow">
+        <div class="flow-box">Request</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">API / Server</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Response</div>
       </div>
 
-      <div class="progress-stepper">
-        <div class="step-dot active" id="dot-1"><div class="circle"></div> Website</div>
-        <div class="step-arrow">➔</div>
-        <div class="step-dot" id="dot-2"><div class="circle"></div> Action</div>
-        <div class="step-arrow">➔</div>
-        <div class="step-dot" id="dot-3"><div class="circle"></div> Network</div>
-        <div class="step-arrow">➔</div>
-        <div class="step-dot" id="dot-4"><div class="circle"></div> Find Request</div>
-        <div class="step-arrow">➔</div>
-        <div class="step-dot" id="dot-5"><div class="circle"></div> Inspect</div>
-      </div>
-    </div>
+      <p>
+        Now we will find this communication inside a website.
+      </p>
+    </section>
 
-    <!-- DYNAMIC INSTRUCTION BANNER -->
-    <div class="instruction-card">
-      <div class="instruction-icon">👉</div>
-      <div class="instruction-text" id="instruction-msg">
-        Click <strong>"VIEW LESSONS"</strong> on the website below to perform an action.
-      </div>
-    </div>
 
-    <!-- MAIN INTERACTIVE BROWSER + DEVTOOLS -->
-    <div class="browser-frame">
-      
-      <!-- BROWSER NAVBAR -->
-      <div class="browser-toolbar">
-        <div class="window-controls">
-          <div class="control-dot close"></div>
-          <div class="control-dot min"></div>
-          <div class="control-dot max"></div>
-        </div>
-        <div class="nav-buttons">
-          <span>‹</span> <span>›</span> <span>↻</span>
-        </div>
-        <div class="address-bar">
-          <span class="lock">🔒</span> https://learning.example.com/course
-        </div>
-      </div>
+    <!-- SECTION 2 -->
 
-      <!-- WEBSITE VIEWPORT -->
-      <div class="website-viewport">
-        <h2>REST API MASTERY</h2>
-        <p>Learn REST APIs through hands-on practice.</p>
-        <button class="btn-lessons pulse-highlight" id="btn-view-lessons" onclick="handleViewLessons()">VIEW LESSONS</button>
-        
-        <div class="rendered-lessons" id="rendered-lessons">
-          <div class="rendered-card">Lesson 0.1: HTTP Shape</div>
-          <div class="rendered-card">Lesson 0.2: Find API</div>
-          <div class="rendered-card">Lesson 0.3: Read Details</div>
-        </div>
-      </div>
+    <section>
+      <div class="section-label">02 — Start</div>
 
-      <!-- DEVTOOLS PANEL -->
-      <div class="devtools-panel">
-        <div class="devtools-header">
-          <div class="devtools-tab">Elements</div>
-          <div class="devtools-tab">Console</div>
-          <div class="devtools-tab">Sources</div>
-          <div class="devtools-tab active" id="tab-network" onclick="handleTabClick()">Network</div>
-        </div>
+      <h2>Start With a Website</h2>
 
-        <div class="devtools-body">
-          <div class="network-table-container">
-            <table class="network-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="network-rows">
-                <!-- Initial Static Assets -->
-                <tr class="net-row">
-                  <td>index.html</td>
-                  <td>document</td>
-                  <td>200</td>
-                </tr>
-                <tr class="net-row">
-                  <td>app.js</td>
-                  <td>script</td>
-                  <td>200</td>
-                </tr>
-                <tr class="net-row">
-                  <td>styles.css</td>
-                  <td>stylesheet</td>
-                  <td>200</td>
-                </tr>
-                <tr class="net-row">
-                  <td>logo.svg</td>
-                  <td>image</td>
-                  <td>200</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      <p>
+        Imagine that you open a learning website.
+      </p>
 
-          <!-- REQUEST DETAILS PANE -->
-          <div class="details-pane" id="details-pane">
-            <div class="pane-title">Headers</div>
-            <div class="kv-group">
-              <div class="kv-label">Request URL</div>
-              <div class="kv-value val-url">https://learning.example.com/api/lessons</div>
-            </div>
-            <div class="kv-group">
-              <div class="kv-label">Request Method</div>
-              <div class="kv-value val-method">GET</div>
-            </div>
-            <div class="kv-group">
-              <div class="kv-label">Status Code</div>
-              <div class="kv-value val-status">200 OK</div>
-            </div>
+      <div class="browser">
+
+        <div class="browser-top">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+
+          <div class="address">
+            https://learning.example.com/course
           </div>
         </div>
+
+        <div class="website">
+
+          <h3>REST API MASTERY</h3>
+
+          <p>Learn REST APIs through hands-on practice.</p>
+
+          <button
+            class="lesson-button"
+            id="viewLessonsButton">
+            VIEW LESSONS
+          </button>
+
+        </div>
+
       </div>
 
-    </div>
+      <p>
+        You can see the website.
+        But the API communication is normally hidden behind this interface.
+      </p>
+    </section>
 
-    <!-- MAPPING TO LESSON 0.1 -->
-    <div class="mapping-section" id="mapping-section">
-      <div class="diagram-flow">
-        <div class="flow-card">BROWSER</div>
-        <div class="flow-arrow-container">
-          <span>HTTP Request</span>
-          <span class="arrow">➔</span>
-        </div>
-        <div class="flow-card" style="color: var(--accent-blue);">API / SERVER</div>
-        <div class="flow-arrow-container">
-          <span>HTTP Response</span>
-          <span class="arrow">➔</span>
-        </div>
-        <div class="flow-card">BROWSER</div>
+
+    <!-- SECTION 3 -->
+
+    <section>
+      <div class="section-label">03 — Observe</div>
+
+      <h2>Open Chrome DevTools</h2>
+
+      <p>
+        Chrome DevTools can show the network communication made by the browser.
+      </p>
+
+      <div class="flow">
+        <div class="flow-box">Website</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Browser</div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box">Network</div>
       </div>
 
-      <div class="mapping-cards">
-        <div class="map-card">
-          <div class="val val-method">GET</div>
-          <div class="label">Request Method</div>
-        </div>
-        <div class="map-card">
-          <div class="val val-url">/api/lessons</div>
-          <div class="label">Endpoint</div>
-        </div>
-        <div class="map-card">
-          <div class="val val-status">200 OK</div>
-          <div class="label">Response Status</div>
-        </div>
+      <p>
+        The important tool for this lesson is the
+        <strong>Network</strong> panel.
+      </p>
+    </section>
+
+
+    <!-- SECTION 4 -->
+
+    <section>
+      <div class="section-label">04 — Try It</div>
+
+      <h2>Use the Website</h2>
+
+      <p>
+        Click the button below.
+        Imagine that this represents a user action on a real website.
+      </p>
+
+      <button
+        class="lesson-button"
+        id="simulateButton">
+        Click "View Lessons"
+      </button>
+
+      <div id="actionMessage" style="display:none; margin-top:18px;">
+        <strong style="color:var(--green);">
+          ✓ User action detected
+        </strong>
+
+        <p>
+          The browser now needs lesson data.
+          A network request appears below.
+        </p>
       </div>
-    </div>
+    </section>
 
-    <!-- MINI PRACTICE CHALLENGE -->
-    <div class="challenge-section" id="challenge-section">
-      <div class="challenge-title">Mini Practice: Which request is most likely retrieving application data from an API?</div>
-      <div class="challenge-opts">
-        <button class="btn-opt" onclick="checkChallenge('index.html')">index.html</button>
-        <button class="btn-opt" onclick="checkChallenge('app.js')">app.js</button>
-        <button class="btn-opt" onclick="checkChallenge('styles.css')">styles.css</button>
-        <button class="btn-opt" onclick="checkChallenge('lessons')">lessons</button>
-        <button class="btn-opt" onclick="checkChallenge('logo.svg')">logo.svg</button>
+
+    <!-- SECTION 5 -->
+
+    <section>
+      <div class="section-label">05 — Find</div>
+
+      <h2>Find the New Request</h2>
+
+      <p>
+        In a real browser, Chrome DevTools would now show a new network request.
+      </p>
+
+      <div class="browser">
+
+        <div class="devtools">
+
+          <div class="devtools-tabs">
+            <div class="devtools-tab">Elements</div>
+            <div class="devtools-tab">Console</div>
+            <div class="devtools-tab">Sources</div>
+            <div class="devtools-tab active">Network</div>
+          </div>
+
+          <table class="network-table">
+
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              <tr>
+                <td>index.html</td>
+                <td>document</td>
+                <td class="status-ok">200</td>
+              </tr>
+
+              <tr>
+                <td>app.js</td>
+                <td>script</td>
+                <td class="status-ok">200</td>
+              </tr>
+
+              <tr>
+                <td>styles.css</td>
+                <td>stylesheet</td>
+                <td class="status-ok">200</td>
+              </tr>
+
+              <tr
+                class="request-row"
+                id="lessonsRequest">
+
+                <td class="name">
+                  lessons
+                </td>
+
+                <td>fetch</td>
+
+                <td class="status-ok">
+                  200
+                </td>
+
+              </tr>
+
+            </tbody>
+
+          </table>
+
+          <div
+            class="request-details"
+            id="requestDetails">
+
+            <div class="detail-grid">
+
+              <div class="detail-label">
+                Request Method
+              </div>
+
+              <div class="detail-value">
+                GET
+              </div>
+
+
+              <div class="detail-label">
+                Request URL
+              </div>
+
+              <div class="detail-value">
+                https://example.com/api/lessons
+              </div>
+
+
+              <div class="detail-label">
+                Status Code
+              </div>
+
+              <div class="detail-value">
+                200 OK
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
-      <div class="challenge-fb" id="challenge-fb"></div>
-    </div>
 
-    <!-- SUMMARY -->
-    <div class="summary-box" id="summary-box">
-      <h3>🎉 You found the API communication!</h3>
-      <p>Chrome DevTools Network exposes the exact HTTP requests and responses happening behind a web application interface.</p>
-    </div>
+      <p style="margin-top:20px;">
+        <strong style="color:var(--yellow);">
+          Try it:
+        </strong>
+        Click the <strong>lessons</strong> request above.
+      </p>
 
-    <!-- RESET CONTROL -->
-    <div class="reset-bar">
-      <button class="btn-reset" onclick="resetDemo()">↻ Reset Interactive Demo</button>
-    </div>
+      <div
+        class="discovery"
+        id="discovery">
 
-  </div>
+        <div class="discovery-title">
+          ✓ You found the API communication
+        </div>
+
+        <p>
+          The website action caused the browser to request data from an API.
+        </p>
+
+        <div class="discovery-code">
+GET /api/lessons
+200 OK
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SECTION 6 -->
+
+    <section>
+      <div class="section-label">06 — Understand</div>
+
+      <h2>What Did We Actually Find?</h2>
+
+      <div class="flow">
+
+        <div class="flow-box">
+          User action
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          Browser
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          API request
+        </div>
+
+      </div>
+
+      <p>
+        The important discovery is not the DevTools interface.
+      </p>
+
+      <p>
+        The important discovery is:
+      </p>
+
+      <div class="goal">
+        <strong>
+          A website action can cause the browser to communicate with an API.
+        </strong>
+      </div>
+
+    </section>
+
+
+    <!-- SECTION 7 -->
+
+    <section>
+      <div class="section-label">07 — Mental Picture</div>
+
+      <h2>See the Hidden Communication</h2>
+
+      <div class="flow">
+
+        <div class="flow-box">
+          User
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          Website
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          Browser
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          API
+        </div>
+
+      </div>
+
+      <div class="flow">
+
+        <div class="flow-box">
+          Response
+        </div>
+
+        <div class="flow-arrow">
+          ←
+        </div>
+
+        <div class="flow-box">
+          API
+        </div>
+
+        <div class="flow-arrow">
+          ←
+        </div>
+
+        <div class="flow-box">
+          Browser
+        </div>
+
+      </div>
+
+      <p>
+        DevTools gives you a way to see the communication that normally stays
+        behind the website interface.
+      </p>
+
+    </section>
+
+
+    <!-- TAKEAWAY -->
+
+    <section>
+      <div class="section-label">Takeaway</div>
+
+      <h2>Remember These 3 Things</h2>
+
+      <div class="takeaway">
+
+        <div class="takeaway-item">
+          <strong>1. Website action</strong><br />
+          A user does something on a website.
+        </div>
+
+        <div class="takeaway-item">
+          <strong>2. Network request</strong><br />
+          The browser may communicate with an API.
+        </div>
+
+        <div class="takeaway-item">
+          <strong>3. DevTools</strong><br />
+          Network lets you find and inspect that communication.
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- NEXT -->
+
+    <section class="next">
+
+      <div class="section-label">
+        Next
+      </div>
+
+      <h2>
+        Lesson 0.3 — Read Request and Response Details
+      </h2>
+
+      <p>
+        You have now found an API request.
+        Next, you will learn how to read what is inside it.
+      </p>
+
+      <div class="flow">
+
+        <div class="flow-box">
+          Find request
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          Read request
+        </div>
+
+        <div class="flow-arrow">
+          →
+        </div>
+
+        <div class="flow-box">
+          Read response
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
 
   <script>
-    let step = 1;
 
-    function setStep(newStep) {
-      step = newStep;
-      
-      // Update Stepper dots
-      for (let i = 1; i <= 5; i++) {
-        const dot = document.getElementById(`dot-${i}`);
-        if (!dot) continue;
-        dot.classList.remove('active', 'completed');
-        if (i < step) dot.classList.add('completed');
-        if (i === step) dot.classList.add('active');
-      }
+    const simulateButton =
+      document.getElementById("simulateButton");
 
-      // Instruction message update
-      const msg = document.getElementById('instruction-msg');
-      if (step === 1) {
-        msg.innerHTML = 'Click <strong>"VIEW LESSONS"</strong> on the website above to perform an action.';
-      } else if (step === 2) {
-        msg.innerHTML = 'Action triggered! Now look at the <strong>DevTools Network panel</strong> below.';
-      } else if (step === 3) {
-        msg.innerHTML = 'A new request appeared! Find and click the <strong style="color:var(--accent-yellow);">lessons</strong> request in Network.';
-      } else if (step === 4) {
-        msg.innerHTML = 'Great! Inspect the Request details (Method, URL, Status Code) in the side pane.';
-      } else if (step === 5) {
-        msg.innerHTML = 'Observe how DevTools details connect directly to the HTTP theory from Lesson 0.1!';
-      }
-    }
+    const actionMessage =
+      document.getElementById("actionMessage");
 
-    function handleViewLessons() {
-      if (step > 1) return;
+    const lessonsRequest =
+      document.getElementById("lessonsRequest");
 
-      // 1. Remove highlight from button
-      const btn = document.getElementById('btn-view-lessons');
-      btn.classList.remove('pulse-highlight');
+    const requestDetails =
+      document.getElementById("requestDetails");
 
-      // 2. Render content on website
-      document.getElementById('rendered-lessons').style.display = 'flex';
+    const discovery =
+      document.getElementById("discovery");
 
-      // 3. Append 'lessons' request to network table
-      const tbody = document.getElementById('network-rows');
-      const newRow = document.createElement('tr');
-      newRow.className = 'net-row highlight-new clickable';
-      newRow.id = 'lessons-req-row';
-      newRow.onclick = handleSelectLessonsRequest;
-      newRow.innerHTML = `
-        <td>lessons <span class="badge-new-tag">NEW</span></td>
-        <td><span class="badge-fetch">fetch</span></td>
-        <td>200</td>
-      `;
-      tbody.appendChild(newRow);
 
-      setStep(2);
+    simulateButton.addEventListener("click", () => {
 
-      setTimeout(() => {
-        setStep(3);
-      }, 1200);
-    }
+      actionMessage.style.display = "block";
 
-    function handleTabClick() {
-      if (step === 2) {
-        setStep(3);
-      }
-    }
+      lessonsRequest.classList.add("found");
 
-    function handleSelectLessonsRequest() {
-      if (step < 2) return;
+      lessonsRequest.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
 
-      const row = document.getElementById('lessons-req-row');
-      if (row) {
-        row.classList.remove('highlight-new');
-        row.classList.add('selected');
-      }
+    });
 
-      // Show details pane
-      document.getElementById('details-pane').classList.add('active');
 
-      setStep(4);
+    lessonsRequest.addEventListener("click", () => {
 
-      // Transition to step 5 (Mapping & Quiz) after brief delay
-      setTimeout(() => {
-        setStep(5);
-        document.getElementById('mapping-section').classList.add('active');
-        document.getElementById('challenge-section').classList.add('active');
-      }, 1000);
-    }
+      requestDetails.classList.add("visible");
 
-    function checkChallenge(selected) {
-      const fb = document.getElementById('challenge-fb');
-      if (selected === 'lessons') {
-        fb.textContent = "✓ Correct! 'lessons' (type: fetch) is retrieving dynamic data from the API.";
-        fb.className = "challenge-fb correct";
-        document.getElementById('summary-box').classList.add('active');
-      } else {
-        fb.textContent = `✕ '${selected}' is a static browser asset. Look for the 'fetch' request that retrieves data.`;
-        fb.className = "challenge-fb incorrect";
-      }
-    }
+      discovery.classList.add("visible");
 
-    function resetDemo() {
-      step = 1;
-      
-      // Reset Website UI
-      document.getElementById('rendered-lessons').style.display = 'none';
-      const btn = document.getElementById('btn-view-lessons');
-      btn.classList.add('pulse-highlight');
+      requestDetails.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
 
-      // Reset DevTools UI
-      const row = document.getElementById('lessons-req-row');
-      if (row) row.remove();
+    });
 
-      document.getElementById('details-pane').classList.remove('active');
-      document.getElementById('mapping-section').classList.remove('active');
-      document.getElementById('challenge-section').classList.remove('active');
-      document.getElementById('summary-box').classList.remove('active');
-
-      const fb = document.getElementById('challenge-fb');
-      fb.className = 'challenge-fb';
-      fb.style.display = 'none';
-
-      setStep(1);
-    }
   </script>
+
 </body>
 </html>
