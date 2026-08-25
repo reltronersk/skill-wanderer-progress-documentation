@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lesson 0.2 — Find API Communication in a Browser</title>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: #131b2e;
+      --bg-devtools: #18181b;
+      --bg-devtools-header: #0f1117;
+      --accent-blue: #38bdf8;
+      --accent-blue-dark: #0284c7;
+      --accent-green: #4ade80;
+      --accent-yellow: #facc15;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #1e293b;
+      --border-bright: #334155;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Roboto Mono', Consolas, monospace;
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.4;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .workspace {
+      max-width: 980px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* COMPACT HEADER & PROGRESS */
+    .top-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 16px;
+      gap: 12px;
+    }
+
+    .lesson-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-num {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-blue);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .progress-stepper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+    }
+
+    .step-dot {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-muted);
+      opacity: 0.5;
+      transition: all 0.2s;
+    }
+
+    .step-dot.active {
+      opacity: 1;
+      color: var(--accent-blue);
+      font-weight: 700;
+    }
+
+    .step-dot.completed {
+      opacity: 0.9;
+      color: var(--accent-green);
+    }
+
+    .step-dot .circle {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .step-arrow {
+      color: var(--border-bright);
+      font-size: 0.7rem;
+    }
+
+    /* DYNAMIC INSTRUCTION BANNER */
+    .instruction-card {
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.1), rgba(2, 132, 199, 0.05));
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .instruction-icon {
+      font-size: 1.2rem;
+      color: var(--accent-yellow);
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .instruction-text {
+      font-size: 0.9rem;
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* BROWSER CONTAINER SIMULATION */
+    .browser-frame {
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* BROWSER TOP BAR */
+    .browser-toolbar {
+      background: #1e293b;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    .control-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .close { background: #ef4444; }
+    .min { background: #eab308; }
+    .max { background: #22c55e; }
+
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .address-bar {
+      background: #0f172a;
+      color: var(--text-muted);
+      border: 1px solid var(--border-bright);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .address-bar .lock {
+      color: var(--accent-green);
+      font-size: 0.7rem;
+    }
+
+    /* WEBSITE VIEWPORT (SIMULATED APP) */
+    .website-viewport {
+      background: #ffffff;
+      color: #0f172a;
+      padding: 32px 20px;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .website-viewport h2 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .website-viewport p {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .btn-lessons {
+      background: var(--accent-blue-dark);
+      color: #ffffff;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+      transition: all 0.2s;
+    }
+
+    .btn-lessons:hover {
+      background: var(--accent-blue);
+      transform: translateY(-1px);
+    }
+
+    .btn-lessons.pulse-highlight {
+      animation: pulse-button 1.5s infinite;
+    }
+
+    @keyframes pulse-button {
+      0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    }
+
+    /* RENDERED LESSONS LIST IN VIEWPORT */
+    .rendered-lessons {
+      display: none;
+      gap: 12px;
+      margin-top: 10px;
+      width: 100%;
+      max-width: 450px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .rendered-card {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1e293b;
+      flex: 1;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* DEVTOOLS PANEL SIMULATION */
+    .devtools-panel {
+      background: var(--bg-devtools);
+      border-top: 2px solid var(--border-bright);
+      color: #a1a1aa;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      min-height: 220px;
+    }
+
+    .devtools-header {
+      background: var(--bg-devtools-header);
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .devtools-tab {
+      padding: 8px 14px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-right: 1px solid var(--border-color);
+      user-select: none;
+    }
+
+    .devtools-tab.active {
+      background: var(--bg-devtools);
+      color: var(--accent-blue);
+      border-bottom: 2px solid var(--accent-blue);
+      font-weight: bold;
+    }
+
+    .devtools-tab.glow-tab {
+      animation: tab-glow 1.5s infinite alternate;
+    }
+
+    @keyframes tab-glow {
+      from { color: var(--text-muted); }
+      to { color: var(--accent-yellow); background: rgba(250, 204, 21, 0.1); }
+    }
+
+    .devtools-body {
+      display: flex;
+      flex-grow: 1;
+      position: relative;
+    }
+
+    /* NETWORK TABLE */
+    .network-table-container {
+      flex-grow: 1;
+      overflow-x: auto;
+    }
+
+    .network-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .network-table th {
+      background: var(--bg-devtools-header);
+      padding: 6px 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .network-table td {
+      padding: 6px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    .net-row {
+      cursor: default;
+      transition: background 0.15s;
+    }
+
+    .net-row.clickable {
+      cursor: pointer;
+    }
+
+    .net-row.clickable:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .net-row.selected {
+      background: rgba(56, 189, 248, 0.18) !important;
+      color: #fff;
+    }
+
+    .net-row.highlight-new {
+      animation: highlight-row 1.5s infinite alternate;
+      color: var(--accent-yellow) !important;
+      font-weight: bold;
+    }
+
+    @keyframes highlight-row {
+      from { background: rgba(250, 204, 21, 0.05); }
+      to { background: rgba(250, 204, 21, 0.25); }
+    }
+
+    .badge-fetch {
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    .badge-new-tag {
+      background: var(--accent-yellow);
+      color: #000;
+      font-size: 0.65rem;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-weight: bold;
+      margin-left: 6px;
+    }
+
+    /* REQUEST DETAILS SIDE-PANE */
+    .details-pane {
+      width: 45%;
+      background: var(--bg-devtools-header);
+      border-left: 1px solid var(--border-bright);
+      padding: 12px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      animation: slideIn 0.2s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(8px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .details-pane.active {
+      display: flex;
+    }
+
+    .pane-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .kv-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .kv-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .kv-value {
+      color: #fff;
+      font-size: 0.78rem;
+      word-break: break-all;
+    }
+
+    .val-method { color: var(--accent-blue); font-weight: bold; }
+    .val-url { color: var(--accent-green); }
+    .val-status { color: var(--accent-yellow); font-weight: bold; }
+
+    /* VISUAL MAPPING & DIAGRAM AREA */
+    .mapping-section {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      padding: 16px;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .mapping-section.active {
+      display: flex;
+    }
+
+    .diagram-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      background: #090d16;
+      border: 1px dashed var(--border-bright);
+      border-radius: 6px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .flow-card {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .flow-arrow-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .flow-arrow-container .arrow {
+      color: var(--accent-blue);
+      font-size: 1rem;
+    }
+
+    .mapping-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .mapping-cards { grid-template-columns: 1fr; }
+    }
+
+    .map-card {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .map-card .val {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .map-card .label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* MINI CHALLENGE AREA */
+    .challenge-section {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      padding: 16px;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .challenge-section.active {
+      display: block;
+    }
+
+    .challenge-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .challenge-opts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .btn-opt {
+      background: #0f172a;
+      border: 1px solid var(--border-bright);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-opt:hover {
+      border-color: var(--accent-blue);
+      background: rgba(56, 189, 248, 0.1);
+    }
+
+    .challenge-fb {
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .challenge-fb.correct {
+      display: block;
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .challenge-fb.incorrect {
+      display: block;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #ef4444;
+    }
+
+    /* FINAL TAKEAWAY SUMMARY */
+    .summary-box {
+      display: none;
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(2, 132, 199, 0.05));
+      border: 1px solid var(--accent-blue);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .summary-box.active {
+      display: block;
+    }
+
+    .summary-box h3 {
+      color: var(--accent-blue);
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+    }
+
+    .summary-box p {
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    /* RESET BUTTON */
+    .reset-bar {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-reset {
+      background: transparent;
+      border: 1px solid var(--border-bright);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      color: #fff;
+      border-color: var(--text-muted);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="workspace">
+
+    <!-- TOP HEADER & PROGRESS -->
+    <div class="top-bar">
+      <div class="lesson-title">
+        <span class="badge-num">Lesson 0.2</span>
+        <span>Find API Communication in a Browser</span>
+      </div>
+
+      <div class="progress-stepper">
+        <div class="step-dot active" id="dot-1"><div class="circle"></div> Website</div>
+        <div class="step-arrow">➔</div>
+        <div class="step-dot" id="dot-2"><div class="circle"></div> Action</div>
+        <div class="step-arrow">➔</div>
+        <div class="step-dot" id="dot-3"><div class="circle"></div> Network</div>
+        <div class="step-arrow">➔</div>
+        <div class="step-dot" id="dot-4"><div class="circle"></div> Find Request</div>
+        <div class="step-arrow">➔</div>
+        <div class="step-dot" id="dot-5"><div class="circle"></div> Inspect</div>
+      </div>
+    </div>
+
+    <!-- DYNAMIC INSTRUCTION BANNER -->
+    <div class="instruction-card">
+      <div class="instruction-icon">👉</div>
+      <div class="instruction-text" id="instruction-msg">
+        Click <strong>"VIEW LESSONS"</strong> on the website below to perform an action.
+      </div>
+    </div>
+
+    <!-- MAIN INTERACTIVE BROWSER + DEVTOOLS -->
+    <div class="browser-frame">
+      
+      <!-- BROWSER NAVBAR -->
+      <div class="browser-toolbar">
+        <div class="window-controls">
+          <div class="control-dot close"></div>
+          <div class="control-dot min"></div>
+          <div class="control-dot max"></div>
+        </div>
+        <div class="nav-buttons">
+          <span>‹</span> <span>›</span> <span>↻</span>
+        </div>
+        <div class="address-bar">
+          <span class="lock">🔒</span> https://learning.example.com/course
+        </div>
+      </div>
+
+      <!-- WEBSITE VIEWPORT -->
+      <div class="website-viewport">
+        <h2>REST API MASTERY</h2>
+        <p>Learn REST APIs through hands-on practice.</p>
+        <button class="btn-lessons pulse-highlight" id="btn-view-lessons" onclick="handleViewLessons()">VIEW LESSONS</button>
+        
+        <div class="rendered-lessons" id="rendered-lessons">
+          <div class="rendered-card">Lesson 0.1: HTTP Shape</div>
+          <div class="rendered-card">Lesson 0.2: Find API</div>
+          <div class="rendered-card">Lesson 0.3: Read Details</div>
+        </div>
+      </div>
+
+      <!-- DEVTOOLS PANEL -->
+      <div class="devtools-panel">
+        <div class="devtools-header">
+          <div class="devtools-tab">Elements</div>
+          <div class="devtools-tab">Console</div>
+          <div class="devtools-tab">Sources</div>
+          <div class="devtools-tab active" id="tab-network" onclick="handleTabClick()">Network</div>
+        </div>
+
+        <div class="devtools-body">
+          <div class="network-table-container">
+            <table class="network-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="network-rows">
+                <!-- Initial Static Assets -->
+                <tr class="net-row">
+                  <td>index.html</td>
+                  <td>document</td>
+                  <td>200</td>
+                </tr>
+                <tr class="net-row">
+                  <td>app.js</td>
+                  <td>script</td>
+                  <td>200</td>
+                </tr>
+                <tr class="net-row">
+                  <td>styles.css</td>
+                  <td>stylesheet</td>
+                  <td>200</td>
+                </tr>
+                <tr class="net-row">
+                  <td>logo.svg</td>
+                  <td>image</td>
+                  <td>200</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- REQUEST DETAILS PANE -->
+          <div class="details-pane" id="details-pane">
+            <div class="pane-title">Headers</div>
+            <div class="kv-group">
+              <div class="kv-label">Request URL</div>
+              <div class="kv-value val-url">https://learning.example.com/api/lessons</div>
+            </div>
+            <div class="kv-group">
+              <div class="kv-label">Request Method</div>
+              <div class="kv-value val-method">GET</div>
+            </div>
+            <div class="kv-group">
+              <div class="kv-label">Status Code</div>
+              <div class="kv-value val-status">200 OK</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- MAPPING TO LESSON 0.1 -->
+    <div class="mapping-section" id="mapping-section">
+      <div class="diagram-flow">
+        <div class="flow-card">BROWSER</div>
+        <div class="flow-arrow-container">
+          <span>HTTP Request</span>
+          <span class="arrow">➔</span>
+        </div>
+        <div class="flow-card" style="color: var(--accent-blue);">API / SERVER</div>
+        <div class="flow-arrow-container">
+          <span>HTTP Response</span>
+          <span class="arrow">➔</span>
+        </div>
+        <div class="flow-card">BROWSER</div>
+      </div>
+
+      <div class="mapping-cards">
+        <div class="map-card">
+          <div class="val val-method">GET</div>
+          <div class="label">Request Method</div>
+        </div>
+        <div class="map-card">
+          <div class="val val-url">/api/lessons</div>
+          <div class="label">Endpoint</div>
+        </div>
+        <div class="map-card">
+          <div class="val val-status">200 OK</div>
+          <div class="label">Response Status</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MINI PRACTICE CHALLENGE -->
+    <div class="challenge-section" id="challenge-section">
+      <div class="challenge-title">Mini Practice: Which request is most likely retrieving application data from an API?</div>
+      <div class="challenge-opts">
+        <button class="btn-opt" onclick="checkChallenge('index.html')">index.html</button>
+        <button class="btn-opt" onclick="checkChallenge('app.js')">app.js</button>
+        <button class="btn-opt" onclick="checkChallenge('styles.css')">styles.css</button>
+        <button class="btn-opt" onclick="checkChallenge('lessons')">lessons</button>
+        <button class="btn-opt" onclick="checkChallenge('logo.svg')">logo.svg</button>
+      </div>
+      <div class="challenge-fb" id="challenge-fb"></div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-box" id="summary-box">
+      <h3>🎉 You found the API communication!</h3>
+      <p>Chrome DevTools Network exposes the exact HTTP requests and responses happening behind a web application interface.</p>
+    </div>
+
+    <!-- RESET CONTROL -->
+    <div class="reset-bar">
+      <button class="btn-reset" onclick="resetDemo()">↻ Reset Interactive Demo</button>
+    </div>
+
+  </div>
+
+  <script>
+    let step = 1;
+
+    function setStep(newStep) {
+      step = newStep;
+      
+      // Update Stepper dots
+      for (let i = 1; i <= 5; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (!dot) continue;
+        dot.classList.remove('active', 'completed');
+        if (i < step) dot.classList.add('completed');
+        if (i === step) dot.classList.add('active');
+      }
+
+      // Instruction message update
+      const msg = document.getElementById('instruction-msg');
+      if (step === 1) {
+        msg.innerHTML = 'Click <strong>"VIEW LESSONS"</strong> on the website above to perform an action.';
+      } else if (step === 2) {
+        msg.innerHTML = 'Action triggered! Now look at the <strong>DevTools Network panel</strong> below.';
+      } else if (step === 3) {
+        msg.innerHTML = 'A new request appeared! Find and click the <strong style="color:var(--accent-yellow);">lessons</strong> request in Network.';
+      } else if (step === 4) {
+        msg.innerHTML = 'Great! Inspect the Request details (Method, URL, Status Code) in the side pane.';
+      } else if (step === 5) {
+        msg.innerHTML = 'Observe how DevTools details connect directly to the HTTP theory from Lesson 0.1!';
+      }
+    }
+
+    function handleViewLessons() {
+      if (step > 1) return;
+
+      // 1. Remove highlight from button
+      const btn = document.getElementById('btn-view-lessons');
+      btn.classList.remove('pulse-highlight');
+
+      // 2. Render content on website
+      document.getElementById('rendered-lessons').style.display = 'flex';
+
+      // 3. Append 'lessons' request to network table
+      const tbody = document.getElementById('network-rows');
+      const newRow = document.createElement('tr');
+      newRow.className = 'net-row highlight-new clickable';
+      newRow.id = 'lessons-req-row';
+      newRow.onclick = handleSelectLessonsRequest;
+      newRow.innerHTML = `
+        <td>lessons <span class="badge-new-tag">NEW</span></td>
+        <td><span class="badge-fetch">fetch</span></td>
+        <td>200</td>
+      `;
+      tbody.appendChild(newRow);
+
+      setStep(2);
+
+      setTimeout(() => {
+        setStep(3);
+      }, 1200);
+    }
+
+    function handleTabClick() {
+      if (step === 2) {
+        setStep(3);
+      }
+    }
+
+    function handleSelectLessonsRequest() {
+      if (step < 2) return;
+
+      const row = document.getElementById('lessons-req-row');
+      if (row) {
+        row.classList.remove('highlight-new');
+        row.classList.add('selected');
+      }
+
+      // Show details pane
+      document.getElementById('details-pane').classList.add('active');
+
+      setStep(4);
+
+      // Transition to step 5 (Mapping & Quiz) after brief delay
+      setTimeout(() => {
+        setStep(5);
+        document.getElementById('mapping-section').classList.add('active');
+        document.getElementById('challenge-section').classList.add('active');
+      }, 1000);
+    }
+
+    function checkChallenge(selected) {
+      const fb = document.getElementById('challenge-fb');
+      if (selected === 'lessons') {
+        fb.textContent = "✓ Correct! 'lessons' (type: fetch) is retrieving dynamic data from the API.";
+        fb.className = "challenge-fb correct";
+        document.getElementById('summary-box').classList.add('active');
+      } else {
+        fb.textContent = `✕ '${selected}' is a static browser asset. Look for the 'fetch' request that retrieves data.`;
+        fb.className = "challenge-fb incorrect";
+      }
+    }
+
+    function resetDemo() {
+      step = 1;
+      
+      // Reset Website UI
+      document.getElementById('rendered-lessons').style.display = 'none';
+      const btn = document.getElementById('btn-view-lessons');
+      btn.classList.add('pulse-highlight');
+
+      // Reset DevTools UI
+      const row = document.getElementById('lessons-req-row');
+      if (row) row.remove();
+
+      document.getElementById('details-pane').classList.remove('active');
+      document.getElementById('mapping-section').classList.remove('active');
+      document.getElementById('challenge-section').classList.remove('active');
+      document.getElementById('summary-box').classList.remove('active');
+
+      const fb = document.getElementById('challenge-fb');
+      fb.className = 'challenge-fb';
+      fb.style.display = 'none';
+
+      setStep(1);
+    }
+  </script>
+</body>
+</html>
