@@ -4,7 +4,7 @@
 
 In this assignment, you will use **Postman** to inspect a real API interaction.
 
-You will send a request, observe the response, and explain what happened.
+You will send requests, observe responses, and explain what happened.
 
 You are not building an API.
 
@@ -12,20 +12,74 @@ You are learning to **use and read an existing API**.
 
 ---
 
-## Objective
+## Requirements — Device & Tools
 
-By completing this assignment, you should be able to:
+Before starting, make sure you have:
 
-- Send a simple API request with Postman.
-- Identify the client and API.
-- Identify what the request is asking for.
-- Inspect the API response.
-- Read basic JSON data.
-- Explain the relationship between a request and its response.
+### Device
+
+A computer or laptop with:
+
+- Windows
+- macOS
+- or Linux
+
+A mobile device is **not recommended** for this assignment because the exercises use the Postman desktop application.
+
+### Required Tool
+
+Install and open:
+
+**Postman**
+
+You will use Postman as the API client.
+
+### Internet Connection
+
+You need an active internet connection because the assignment communicates with a public API.
+
+### Practice API
+
+This assignment uses:
+
+```text
+JSONPlaceholder
+
+https://jsonplaceholder.typicode.com/
+````
+
+No API key or account is required for this exercise.
+
+### Important
+
+You do **not** need:
+
+* A local server
+* A database
+* A code editor
+* Node.js
+* Python
+* A backend project
+
+The assignment can be completed entirely with **Postman** and an internet connection.
 
 ---
 
-## 01 — Open Postman
+# Objective
+
+By completing this assignment, you should be able to:
+
+* Send a simple API request with Postman.
+* Identify the client and API.
+* Identify what the request is asking for.
+* Inspect the API response.
+* Read basic JSON data.
+* Compare different API requests.
+* Explain the relationship between a request and its response.
+
+---
+
+# 01 — Open Postman
 
 Open Postman on your computer.
 
@@ -50,13 +104,13 @@ Postman will act as the **client**.
 │   Postman  │
 │   Client   │
 └────────────┘
-````
+```
 
 ---
 
-## 02 — Create a Request
+# 02 — Create the First Request
 
-Create a new HTTP request in Postman.
+Create a new request in Postman.
 
 Set the method to:
 
@@ -70,10 +124,11 @@ Set the request URL to:
 https://jsonplaceholder.typicode.com/posts/1
 ```
 
-Your request should look conceptually like:
+Your request should look like:
 
 ```text
-Method: GET
+Method:
+GET
 
 URL:
 https://jsonplaceholder.typicode.com/posts/1
@@ -85,7 +140,7 @@ Then click:
 
 ---
 
-## 03 — Observe the Response
+# 03 — Observe the Response
 
 After sending the request, look at the response section in Postman.
 
@@ -100,15 +155,17 @@ You should receive JSON similar to:
 }
 ```
 
+Your exact response may contain more text in the `title` and `body` fields.
+
 Do not worry about understanding every field yet.
 
 Focus on identifying the returned data.
 
 ---
 
-## 04 — Read the Interaction
+# 04 — Read the Interaction
 
-Now connect the request and response:
+Connect the request and response:
 
 ```text
 REQUEST
@@ -132,29 +189,29 @@ RESPONSE
 }
 ```
 
-Ask yourself:
+Ask:
 
 > What did the client request?
 
-Answer:
+The answer should be related to:
 
 ```text
-The client requested post 1.
+Post #1
 ```
 
 Then ask:
 
 > What did the API return?
 
-Answer:
+The answer should be related to:
 
 ```text
-The API returned data representing post 1.
+Data representing post #1
 ```
 
 ---
 
-## 05 — Identify the Components
+# 05 — Identify the Components
 
 Inspect the interaction and identify:
 
@@ -162,7 +219,7 @@ Inspect the interaction and identify:
 | --------------- | ----------- |
 | Client          | ?           |
 | API             | ?           |
-| Method          | ?           |
+| HTTP method     | ?           |
 | Resource        | ?           |
 | Resource ID     | ?           |
 | Response format | ?           |
@@ -171,9 +228,9 @@ Use what you can observe from the request and response.
 
 ---
 
-## 06 — Inspect the JSON
+# 06 — Inspect the JSON
 
-Look at the response again:
+Look at the response:
 
 ```json
 {
@@ -188,8 +245,11 @@ Identify:
 
 ```text
 userId → ?
+
 id     → ?
+
 title  → ?
+
 body   → ?
 ```
 
@@ -199,11 +259,11 @@ Then answer:
 
 > Which field contains the title?
 
-> Which field contains the main body/content?
+> Which field contains the main content?
 
 ---
 
-## 07 — Try a Second Request
+# 07 — Try a Second Request
 
 Create another request:
 
@@ -211,7 +271,9 @@ Create another request:
 GET https://jsonplaceholder.typicode.com/posts?userId=1
 ```
 
-Click **Send**.
+Click:
+
+**Send**
 
 This time, the API returns multiple posts.
 
@@ -227,100 +289,384 @@ One specific post
 Posts associated with user 1
 ```
 
-Compare the two responses.
+Compare the two interactions.
 
-### Request 1
+### First Request
 
 ```text
 GET /posts/1
 ```
 
-What did you receive?
+Expected concept:
 
 ```text
-?
+One specific resource
 ```
 
-### Request 2
+### Second Request
 
 ```text
 GET /posts?userId=1
 ```
 
-What did you receive?
+Expected concept:
 
 ```text
-?
+A collection of posts filtered by user
 ```
 
 ---
 
-## 08 — Write Your Observation
+# 08 — Compare the Responses
 
-Complete the following:
+Look at both responses in Postman.
 
-### Interaction 1
+Consider:
 
-> Postman acted as the __________.
+```text
+First Request
+      ↓
+One JSON object
 
-> The API was __________.
+Second Request
+      ↓
+Multiple JSON objects
+```
 
-> I sent a __________ request.
+Observe how the structure of the response changes depending on what the client requested.
 
-> The requested resource was __________.
+Do not simply copy the response.
 
-> The API returned __________.
-
-### Interaction 2
-
-> The second request was different because __________.
-
-> The response contained __________.
+Try to explain **why** the responses are different.
 
 ---
 
-## 09 — Final Check
+# 09 — Build the Interaction Model
 
-Before completing the assignment, make sure you can explain this:
+Now represent the first interaction:
+
+```text
+┌────────────┐
+│  Postman   │
+│   Client   │
+└─────┬──────┘
+      │
+      │ GET /posts/1
+      ▼
+┌────────────────┐
+│ JSONPlaceholder│
+│      API       │
+└───────┬────────┘
+        │
+        │ Returns post #1
+        ▼
+┌────────────┐
+│  Postman   │
+│   Client   │
+└────────────┘
+```
+
+Then represent the second interaction:
+
+```text
+┌────────────┐
+│  Postman   │
+│   Client   │
+└─────┬──────┘
+      │
+      │ GET /posts?userId=1
+      ▼
+┌────────────────┐
+│ JSONPlaceholder│
+│      API       │
+└───────┬────────┘
+        │
+        │ Returns matching posts
+        ▼
+┌────────────┐
+│  Postman   │
+│   Client   │
+└────────────┘
+```
+
+---
+
+# 10 — Form Your Own Explanation
+
+Try to explain the interaction without looking at the lesson.
+
+Use this pattern:
+
+```text
+Client
+  ↓
+Request
+  ↓
+API
+  ↓
+Processing
+  ↓
+Response
+  ↓
+Client
+```
+
+Your explanation should answer:
+
+> What did the client ask for?
+
+> How did the request identify the target data?
+
+> What did the API return?
+
+> How was the second request different?
+
+---
+
+# Assignment Submission
+
+Submit your answers to the questions below.
+
+Your submission should be based on **your own observation in Postman**.
+
+Do not simply copy the lesson text.
+
+---
+
+## Part A — Environment
+
+### 1. What device did you use?
+
+Example:
+
+```text
+Windows laptop
+```
+
+Your answer:
+
+```text
+________________________________
+```
+
+### 2. What tool did you use as the API client?
+
+```text
+________________________________
+```
+
+### 3. Was an API key required for this assignment?
+
+```text
+________________________________
+```
+
+---
+
+## Part B — First API Interaction
+
+For this request:
+
+```text
+GET https://jsonplaceholder.typicode.com/posts/1
+```
+
+### 4. What is the client?
+
+```text
+________________________________
+```
+
+### 5. What API did the client communicate with?
+
+```text
+________________________________
+```
+
+### 6. What HTTP method did you use?
+
+```text
+________________________________
+```
+
+### 7. What resource was requested?
+
+```text
+________________________________
+```
+
+### 8. What identifies the specific resource?
+
+```text
+________________________________
+```
+
+### 9. What format was used for the response data?
+
+```text
+________________________________
+```
+
+---
+
+## Part C — Reading the Response
+
+Look at the response returned by Postman.
+
+### 10. What is the value of `userId`?
+
+```text
+________________________________
+```
+
+### 11. What is the value of `id`?
+
+```text
+________________________________
+```
+
+### 12. What does the `title` field contain?
+
+```text
+________________________________
+```
+
+### 13. What does the `body` field contain?
+
+```text
+________________________________
+```
+
+### 14. In your own words, what does the response represent?
+
+```text
+________________________________
+
+________________________________
+```
+
+---
+
+## Part D — Second API Interaction
+
+For this request:
+
+```text
+GET https://jsonplaceholder.typicode.com/posts?userId=1
+```
+
+### 15. What is different about this request compared with `/posts/1`?
+
+```text
+________________________________
+
+________________________________
+```
+
+### 16. Does the response represent one post or multiple posts?
+
+```text
+________________________________
+```
+
+### 17. Why do you think the API returned that type of result?
+
+```text
+________________________________
+
+________________________________
+```
+
+---
+
+## Part E — Request → Response Reasoning
+
+### 18. Complete the interaction:
 
 ```text
 Postman
-   │
-   │ GET /posts/1
-   ▼
+   ↓
+________________________
+   ↓
 JSONPlaceholder API
-   │
-   │ JSON response
-   ▼
+   ↓
+________________________
+   ↓
 Postman
 ```
 
-In your own words:
+### 19. Explain what happened during the first API interaction.
 
-> **What did the client ask for, and what did the API return?**
+Write **2–4 sentences**.
 
-If you can clearly explain that interaction, you have completed the core objective of this assignment.
+```text
+________________________________
+
+________________________________
+
+________________________________
+```
+
+### 20. Explain the difference between these two requests:
+
+```text
+GET /posts/1
+
+GET /posts?userId=1
+```
+
+Write **2–4 sentences**.
+
+```text
+________________________________
+
+________________________________
+
+________________________________
+```
 
 ---
 
-## Expected Outcome
+# Submission Checklist
 
-You should finish with a basic ability to:
+Before submitting, make sure you have:
+
+* [ ] Opened Postman.
+* [ ] Sent the first request.
+* [ ] Observed the response.
+* [ ] Identified the request components.
+* [ ] Read the returned JSON.
+* [ ] Sent the second request.
+* [ ] Compared both responses.
+* [ ] Answered all 20 questions.
+* [ ] Written the explanations in your own words.
+
+---
+
+## What This Assignment Evaluates
+
+Your submission should demonstrate that you can:
 
 ```text
-Send Request
-     ↓
-Observe Response
-     ↓
-Read JSON
-     ↓
-Connect Request ↔ Response
-     ↓
-Explain What Happened
+USE
+Postman
+  ↓
+OBSERVE
+API interaction
+  ↓
+IDENTIFY
+Request + Response
+  ↓
+INTERPRET
+Returned data
+  ↓
+EXPLAIN
+What happened
 ```
 
-This is the foundation for working with APIs in later modules.
+The goal is **not** to memorize the URL.
 
-> **Your goal is not to memorize the request. Your goal is to understand the interaction.**
+The goal is to demonstrate that you understand the interaction between a client and an API.
 
+> **A good API user can explain what was requested, what was returned, and why the response makes sense.**
 
