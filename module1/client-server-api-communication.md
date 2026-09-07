@@ -195,24 +195,51 @@ It communicates through the API.
 The restaurant analogy from the previous lesson can be extended to client-server communication:
 
 ```text
-Customer
-   │
-   │ Order
-   ▼
-Waiter
-   │
-   │ Request
-   ▼
-Kitchen
-   │
-   │ Result
-   ▼
-Waiter
-   │
-   │ Response
-   ▼
-Customer
+┌──────────────┐
+│   Customer   │
+│              │
+│ "I want a    │
+│   burger."   │
+└──────┬───────┘
+       │
+       │ Order
+       ▼
+┌──────────────┐
+│    Waiter    │
+│              │
+│     API      │
+└──────┬───────┘
+       │
+       │ Request
+       ▼
+┌──────────────┐
+│    Kitchen   │
+│              │
+│   Backend    │
+└──────┬───────┘
+       │
+       │ Result
+       ▼
+┌──────────────┐
+│    Waiter    │
+│              │
+│     API      │
+└──────┬───────┘
+       │
+       │ Response
+       ▼
+┌──────────────┐
+│   Customer   │
+└──────────────┘
 ```
+The customer does not walk into the kitchen and prepare the food.
+
+Instead:
+
+1. The **customer** places an order.
+2. The **waiter** takes the order to the kitchen.
+3. The **kitchen** processes the order.
+4. The **waiter** brings the result back.
 
 Mapping it to software:
 
