@@ -161,6 +161,4 @@ API
 └── Uses defined rules for requests and responses
 ```
 
-The waiter analogy captures the core idea:
-
 > **The API acts as an interface between the client and the system, just as a waiter acts as an interface between a customer and a restaurant kitchen.**
