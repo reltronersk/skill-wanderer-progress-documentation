@@ -29,6 +29,9 @@ The basic idea is:
          ▼
 ┌──────────────────┐
 │   Client App     │
+│                  │
+│ Web / Mobile /   │
+│ Desktop / Tool   │
 └──────────────────┘
 ````
 
