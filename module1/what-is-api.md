@@ -1,4 +1,3 @@
-````md
 # What Is an API?
 
 An **API (Application Programming Interface)** is a defined interface that allows software systems to communicate and interact with each other.
