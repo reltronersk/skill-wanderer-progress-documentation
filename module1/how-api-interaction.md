@@ -598,32 +598,3 @@ A more realistic view is:
 
 **Reading a Simple API Interaction**
 
-````
-
-### Kenapa versi ini lebih representative
-
-Perubahan utamanya adalah contoh sekarang menunjukkan **bentuk API interaction yang benar-benar akan learner lihat di Postman**:
-
-```text
-REQUEST
-GET /posts/1
-Host: jsonplaceholder.typicode.com
-Accept: application/json
-
-        ↓
-
-SERVER PROCESSING
-
-        ↓
-
-RESPONSE
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{
-  "userId": 1,
-  "id": 1,
-  "title": "...",
-  "body": "..."
-}
-````
