@@ -126,21 +126,69 @@ The exact processing depends on the API and the request.
 
 ## 05 — The Server Sends a Response
 
-After processing the request, the server returns a response.
+After processing the request, the server returns a response to the client.
 
-```text
-Client
-   │
-   │ Request
-   ▼
-Server
-   │
-   │ Response
-   ▼
-Client
+A real API response contains more than just the data.
+
+For example, a client might send:
+
+```http
+GET /posts/1 HTTP/1.1
+Host: jsonplaceholder.typicode.com
+Accept: application/json
 ```
 
-The response may contain:
+The server processes the request and sends something like:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "id": 1,
+  "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+  "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
+}
+```
+
+There are several important parts here:
+
+```text
+HTTP/1.1 200 OK
+       │
+       └── Status: the request succeeded
+
+Content-Type: application/json
+       │
+       └── Response format
+
+{
+  "userId": 1,
+  "id": 1,
+  ...
+}
+       │
+       └── Actual response data
+```
+
+The response therefore tells the client:
+
+```text
+Did the request work?
+        ↓
+      200 OK
+
+What format is the result?
+        ↓
+   application/json
+
+What data was returned?
+        ↓
+       JSON
+```
+
+A response may contain:
 
 * Requested data
 * A success result
@@ -148,15 +196,7 @@ The response may contain:
 * Metadata
 * Information about what happened
 
-For example:
-
-```json
-{
-  "id": 1,
-  "title": "Example Post",
-  "userId": 1
-}
-```
+The important point is that the **response communicates the result of the request back to the client**.
 
 ---
 
@@ -170,21 +210,22 @@ Putting everything together:
 └────┬─────┘
      │
      │ 1. Request
-     │    "Get post #1"
+     │
+     │ GET /posts/1
      ▼
 ┌──────────┐
 │   API    │
 └────┬─────┘
      │
-     │ 2. Forward / handle
+     │ 2. Handle request
      ▼
 ┌──────────┐
 │  Server  │
 └────┬─────┘
      │
-     │ 3. Process
+     │ 3. Find post #1
      │
-     │ 4. Response
+     │ 4. Prepare response
      ▼
 ┌──────────┐
 │  Client  │
@@ -221,42 +262,120 @@ Client updates interface
 
 ## 07 — Example: Getting a Post
 
-Imagine a client wants post `1`.
+Let's look at the complete interaction more closely.
 
-```text
-Client
-   │
-   │ GET /posts/1
-   ▼
-API
-   │
-   ▼
-Server
-   │
-   │ Find post #1
-   ▼
-Database / Data
-   │
-   ▼
-Server
-   │
-   │ JSON response
-   ▼
-Client
+Imagine a client wants to retrieve **post #1** from JSONPlaceholder.
+
+The client sends:
+
+```http
+GET /posts/1 HTTP/1.1
+Host: jsonplaceholder.typicode.com
+Accept: application/json
 ```
 
-The client receives data such as:
+Think of this as:
 
-```json
+```text
+GET
+ │
+ └── "I want to retrieve something"
+
+ /posts/1
+ │
+ └── "The resource I want is post #1"
+
+ Accept: application/json
+ │
+ └── "I can receive JSON"
+```
+
+The request travels to the API:
+
+```text
+┌──────────────┐
+│    Client    │
+│   Postman    │
+└──────┬───────┘
+       │
+       │ GET /posts/1
+       ▼
+┌──────────────────────────┐
+│ JSONPlaceholder API      │
+│                          │
+│ /posts/1                 │
+└────────────┬─────────────┘
+             │
+             │ Find post #1
+             ▼
+        ┌──────────┐
+        │   Data   │
+        └────┬─────┘
+             │
+             │ Post #1
+             ▼
+┌──────────────────────────┐
+│ JSONPlaceholder API      │
+└────────────┬─────────────┘
+             │
+             │ 200 OK
+             │ JSON response
+             ▼
+┌──────────────┐
+│    Client    │
+│   Postman    │
+└──────────────┘
+```
+
+The server returns:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
 {
+  "userId": 1,
   "id": 1,
-  "title": "Example Post"
+  "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit",
+  "body": "quia et suscipit\nsuscipit recusandae consequuntur expedita et cum\nreprehenderit molestiae ut ut quas totam\nnostrum rerum est autem sunt rem eveniet architecto"
 }
 ```
 
-The client can then use that data.
+The client can then read the JSON:
+
+```text
+Response
+   ↓
+JSON data
+   ↓
+Client reads:
+   ├── userId
+   ├── id
+   ├── title
+   └── body
+```
 
 For example:
+
+```text
+id
+↓
+1
+
+userId
+↓
+1
+
+title
+↓
+"sunt aut facere..."
+
+body
+↓
+"quia et suscipit..."
+```
+
+The client can then use this data in the application:
 
 ```text
 API Response
@@ -265,7 +384,33 @@ Client receives JSON
      ↓
 Application reads the data
      ↓
+Application uses the data
+     ↓
 User sees the result
+```
+
+The important idea is not the specific post.
+
+The important idea is the **interaction pattern**:
+
+```text
+Client
+   │
+   │ GET /posts/1
+   ▼
+API
+   │
+   │ Find resource
+   ▼
+Server / Data
+   │
+   │ Result
+   ▼
+API
+   │
+   │ 200 OK + JSON
+   ▼
+Client
 ```
 
 ---
@@ -289,9 +434,31 @@ CLIENT                         SERVER
 
 The client tells the server what it wants.
 
+Example:
+
+```http
+GET /posts/1 HTTP/1.1
+```
+
 ### Response
 
 The server tells the client what happened.
+
+Example:
+
+```http
+HTTP/1.1 200 OK
+```
+
+followed by the response data:
+
+```json
+{
+  "userId": 1,
+  "id": 1,
+  "title": "sunt aut facere repellat provident occaecati excepturi optio reprehenderit"
+}
+```
 
 This distinction is fundamental when working with APIs.
 
@@ -324,6 +491,23 @@ The client interacts with the **API interface**.
 
 The server decides how to process that interaction internally.
 
+For example, the client only needs to know:
+
+```text
+GET /posts/1
+```
+
+It does not need to know:
+
+```text
+How is the data stored?
+Which database is used?
+Which programming language is used?
+Which internal function finds the post?
+```
+
+The server handles those details internally.
+
 This separation allows clients and servers to evolve independently.
 
 ---
@@ -343,7 +527,7 @@ Request
 
 WHERE?
   ↓
-API
+API / Endpoint
 
 HOW?
   ↓
@@ -363,6 +547,37 @@ Client ◄─────────── API / Server
         RESPONSE
 ```
 
+A more realistic view is:
+
+```text
+┌──────────┐
+│  Client  │
+└────┬─────┘
+     │
+     │ HTTP Request
+     │ GET /posts/1
+     ▼
+┌──────────────┐
+│     API      │
+└────┬─────────┘
+     │
+     │ Process request
+     ▼
+┌──────────────┐
+│    Server    │
+│              │
+│ Find data    │
+│ Process      │
+└────┬─────────┘
+     │
+     │ HTTP Response
+     │ 200 OK + JSON
+     ▼
+┌──────────────┐
+│    Client    │
+└──────────────┘
+```
+
 ---
 
 ## Key Takeaways
@@ -372,7 +587,9 @@ Client ◄─────────── API / Server
 * The API provides the interface for communication.
 * The **server** processes the request.
 * The server returns a **response**.
-* The client consumes the response.
+* A response contains information about the result, often including data and a status code.
+* JSON is a common format for API data.
+* The client does not need to know the server's internal implementation.
 * An API interaction is fundamentally a **request → processing → response** cycle.
 
 > **Think of an API as a communication interface: the client asks, the server processes, and the client receives the result.**
@@ -380,3 +597,33 @@ Client ◄─────────── API / Server
 ### Next Lesson
 
 **Reading a Simple API Interaction**
+
+````
+
+### Kenapa versi ini lebih representative
+
+Perubahan utamanya adalah contoh sekarang menunjukkan **bentuk API interaction yang benar-benar akan learner lihat di Postman**:
+
+```text
+REQUEST
+GET /posts/1
+Host: jsonplaceholder.typicode.com
+Accept: application/json
+
+        ↓
+
+SERVER PROCESSING
+
+        ↓
+
+RESPONSE
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "id": 1,
+  "title": "...",
+  "body": "..."
+}
+````
